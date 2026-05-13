@@ -1,0 +1,9 @@
+{
+  "id": "PQU_CPG_CHAIN_RULE",
+  "subject_id": "CPG_CHAIN_RULE",
+  "status": "Ready",
+  "readiness_score_basis_points": 8600,
+  "blockers": [],
+  "required_refs": ["review:RVR_CPG_CHAIN_RULE", "repro:RPR_CPG_CHAIN_RULE"],
+  "evidence_refs": []
+}

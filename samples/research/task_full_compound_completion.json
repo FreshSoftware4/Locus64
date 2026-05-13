@@ -1,0 +1,12 @@
+{
+  "id": "TASK_FULL_COMPOUND_COMPLETION",
+  "title": "Full compound completion",
+  "target_sector": "Control",
+  "objective_kind": "Integrate",
+  "desired_output": "HandoffPacket",
+  "hard_constraints": ["keep certifier cold", "preserve math-native claims"],
+  "soft_constraints": ["prefer compounding changes", "avoid support-machinery drift"],
+  "promotion_target": "Integrated",
+  "rollback_path": "narrow to previous verified packet/runtime and registry state",
+  "success_metrics": ["warm host consumes report truth", "promotion readiness is queryable", "producer hosts explicit"]
+}

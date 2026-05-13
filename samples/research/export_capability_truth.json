@@ -1,0 +1,19 @@
+{
+  "id": "REM_EXPORT_CAPABILITY_TRUTH",
+  "source_ref": "Chat export stress test",
+  "class": "CapabilityTruthGap",
+  "summary": "capability truth should distinguish declared/help-routable/contract-known/smoke-executed/fully-exercised states",
+  "affected_surfaces": [
+    "capability matrices",
+    "command contracts",
+    "stress harness summaries"
+  ],
+  "expected_fix_chain": [
+    "capability_readiness_truth",
+    "research_registry_visibility"
+  ],
+  "status": "Open",
+  "notes": [
+    "seeded from export findings"
+  ]
+}

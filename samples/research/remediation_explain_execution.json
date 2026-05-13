@@ -1,0 +1,21 @@
+{
+  "id": "RMD_EXPLAIN_EXECUTION",
+  "source_ref": "explain-execution",
+  "class": "RuntimeBug",
+  "summary": "explain-execution should resolve linked execution state or degrade with exact contract truth instead of generic missing-file failure",
+  "affected_surfaces": [
+    "mf-admin",
+    "mf-observe",
+    "execution manifests",
+    "report execution envelopes"
+  ],
+  "expected_fix_chain": [
+    "Phase 1",
+    "Phase 2"
+  ],
+  "status": "Open",
+  "notes": [
+    "surfaced by exported runtime stress test",
+    "must distinguish missing execution record from unsupported artifact class"
+  ]
+}

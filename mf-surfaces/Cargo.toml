@@ -1,0 +1,23 @@
+[package]
+name = "mf-surfaces"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+mf-core = { path = "../mf-core" }
+mf-locus = { path = "../mf-locus" }
+mf-registry = { path = "../mf-registry" }
+mf-runtime = { path = "../mf-runtime" }
+mf-canon = { path = "../mf-canon" }
+mf-atlas = { path = "../mf-atlas" }
+mf-cert = { path = "../mf-cert" }
+mf-qc0 = { path = "../mf-qc0" }
+mf-qm0 = { path = "../mf-qm0" }
+mf-qk0 = { path = "../mf-qk0" }
+mf-qa0 = { path = "../mf-qa0" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+bincode = { workspace = true }

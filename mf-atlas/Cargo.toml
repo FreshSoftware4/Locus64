@@ -1,0 +1,13 @@
+[package]
+name = "mf-atlas"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+[dependencies]
+mf-core = { path = "../mf-core" }
+mf-kernel = { path = "../mf-kernel" }
+mf-registry = { path = "../mf-registry" }
+mf-policy = { path = "../mf-policy" }
+serde = { workspace = true }
+thiserror = { workspace = true }

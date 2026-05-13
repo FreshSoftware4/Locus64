@@ -1,0 +1,14 @@
+{
+  "id": "CLM_CPG_CHAIN_RULE",
+  "title": "Claim packet for chain rule",
+  "statement": "CPG_CHAIN_RULE via selected route with certified verdict",
+  "sector": "Crosscut",
+  "truth_class": "Benchmark",
+  "claim_class": "Host",
+  "assumptions": ["regime:R_TOP", "regime:R_CALC"],
+  "projection_refs": ["RTC_CHAIN_RULE"],
+  "reduction_refs": ["A_TOP_TO_CALC"],
+  "benchmark_refs": [],
+  "blocker_leaves": [],
+  "report_refs": ["RPT_CHAIN_RULE"]
+}

@@ -1,0 +1,8 @@
+{
+  "id": "RPR_CPG_CHAIN_RULE",
+  "claim_packet_id": "CPG_CHAIN_RULE",
+  "derivation_path": ["B_TOP_TO_CALC"],
+  "code_refs": ["RCLASS_CHAIN_RULE", "CERT_CHAIN_RULE"],
+  "benchmark_refs": ["BR_CHAIN_RULE_SMOKE"],
+  "artifact_refs": ["REPORT_CPG_CHAIN_RULE", "PAY_CHAIN1_OBLIGATION_COUNT_REDUCTION_4_TO_2"]
+}

@@ -1,0 +1,8 @@
+{
+  "id": "HST_REDUCTION_CPG_CHAIN_RULE",
+  "kind": "Reduction",
+  "purpose": "reduction host for chain rule family",
+  "owned_objects": ["RDM_CPG_CHAIN_RULE"],
+  "feeds": ["CLM_CPG_CHAIN_RULE", "REG_CPG_CHAIN_RULE"],
+  "notes": ["owns reduction maps and residual-obligation compression"]
+}

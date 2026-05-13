@@ -1,0 +1,18 @@
+{
+  "id": "SIG_OPERATIONAL_TRUTH_HARDENING",
+  "task_ref": "TASK_OPERATIONAL_TRUTH_HARDENING",
+  "structural_type": "OperationalHardening",
+  "sector": "Control",
+  "risk_class": "Medium",
+  "dependency_depth": 3,
+  "likely_failure_modes": [
+    "artifact contract mismatch",
+    "namespace contract mismatch",
+    "help-routable support overstated as real support"
+  ],
+  "expected_distillate": "ValidationBundle",
+  "evidence_gap": [
+    "command-contract coverage",
+    "artifact-class truth"
+  ]
+}

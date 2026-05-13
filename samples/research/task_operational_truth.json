@@ -1,0 +1,21 @@
+{
+  "id": "TASK_OPERATIONAL_TRUTH_HARDENING",
+  "title": "Harden command and artifact truth at the edges",
+  "target_sector": "Control",
+  "objective_kind": "Integrate",
+  "desired_output": "ValidationBundle",
+  "hard_constraints": [
+    "keep certifier cold",
+    "do not regress proof/truth"
+  ],
+  "soft_constraints": [
+    "prefer shared packet/runtime paths",
+    "prefer bundle-level reuse"
+  ],
+  "promotion_target": "Certified",
+  "rollback_path": "revert artifact/command contract surfaces to last stable state",
+  "success_metrics": [
+    "explain-execution resolves or degrades explicitly",
+    "inspection exports and validation bundles are distinct"
+  ]
+}

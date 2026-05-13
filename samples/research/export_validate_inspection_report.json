@@ -1,0 +1,20 @@
+{
+  "id": "REM_EXPORT_VALIDATE_INSPECTION_REPORT",
+  "source_ref": "Chat export stress test",
+  "class": "ArtifactTypingBug",
+  "summary": "inspection exports should remain distinct from validation-complete bundles",
+  "affected_surfaces": [
+    "mf-cli export-report",
+    "mf-cli export-validation-bundle",
+    "mf-cli validate"
+  ],
+  "expected_fix_chain": [
+    "artifact_class_law",
+    "validation_bundle_rollout",
+    "overlay_validation_truth"
+  ],
+  "status": "InProgress",
+  "notes": [
+    "seeded from export findings"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "SIG_FULL_COMPOUND_COMPLETION",
+  "task_ref": "TASK_FULL_COMPOUND_COMPLETION",
+  "structural_type": "RegistryHardening",
+  "sector": "Crosscut",
+  "risk_class": "Medium",
+  "dependency_depth": 4,
+  "likely_failure_modes": ["generic orchestration outruns math payload", "artifact truth incomplete", "producer hosts remain implicit"],
+  "expected_distillate": "HandoffPacket",
+  "evidence_gap": ["compile pass", "command rollout", "tower persistence"]
+}

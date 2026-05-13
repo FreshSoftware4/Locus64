@@ -1,0 +1,19 @@
+{
+  "id": "REM_EXPORT_NAMESPACE_CONTRACT",
+  "source_ref": "Chat export stress test",
+  "class": "RuntimeBug",
+  "summary": "namespace-local execution and observation artifacts need explicit same-namespace truth",
+  "affected_surfaces": [
+    "observe-run",
+    "admin compare/export flows",
+    "execution lookup"
+  ],
+  "expected_fix_chain": [
+    "namespace_scope_truth",
+    "execution_contracts"
+  ],
+  "status": "Open",
+  "notes": [
+    "seeded from export findings"
+  ]
+}

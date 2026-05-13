@@ -1,0 +1,20 @@
+{
+  "id": "REM_EXPORT_EXPLAIN_EXECUTION",
+  "source_ref": "Chat export stress test",
+  "class": "RuntimeBug",
+  "summary": "explain-execution should resolve execution-linked context or degrade with exact contract truth instead of generic missing-file failure",
+  "affected_surfaces": [
+    "mf-admin explain-execution",
+    "execution cache",
+    "report/manifest/lock/observe resolution"
+  ],
+  "expected_fix_chain": [
+    "export_remediation_ledger",
+    "operational_truth_hardening",
+    "execution_resolution_truth"
+  ],
+  "status": "InProgress",
+  "notes": [
+    "seeded from export findings"
+  ]
+}

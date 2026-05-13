@@ -1,0 +1,18 @@
+{
+  "id": "REM_EXPORT_PREDICT_IMPACT_CONTRACT",
+  "source_ref": "Chat export stress test",
+  "class": "CommandContractBug",
+  "summary": "predict-impact needs a live argument contract stronger than help text",
+  "affected_surfaces": [
+    "mf-admin predict-impact",
+    "command contract surfaces"
+  ],
+  "expected_fix_chain": [
+    "command_contract_truth",
+    "capability_readiness_truth"
+  ],
+  "status": "InProgress",
+  "notes": [
+    "seeded from export findings"
+  ]
+}

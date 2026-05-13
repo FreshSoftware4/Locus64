@@ -1,0 +1,12 @@
+[package]
+name = "mf-runtime"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+[dependencies]
+mf-core = { path = "../mf-core" }
+mf-registry = { path = "../mf-registry" }
+serde = { workspace = true }
+thiserror = { workspace = true }
+bincode = { workspace = true }

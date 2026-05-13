@@ -1,0 +1,11 @@
+[package]
+name = "mf-canon"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+[dependencies]
+mf-core = { path = "../mf-core" }
+mf-runtime = { path = "../mf-runtime" }
+mf-registry = { path = "../mf-registry" }
+thiserror = { workspace = true }

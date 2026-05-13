@@ -1,0 +1,1239 @@
+{
+  "version": "seed.v1",
+  "objects": [
+    {
+      "id": "OBJ_CTX_SET",
+      "identity": { "tag": "CTX", "cid": "OBJ_CTX_SET", "codebook": "GEN1", "remap": "none", "lineage": "seed" },
+      "structural": { "head": "carrier", "args": ["set"], "local_sections": ["base"], "morphism_hooks": ["identity"] },
+      "constraint": { "regime": "R_SET", "contracts": ["carrier-total"], "invariants": ["extensional-stable"], "equivalence": "eq-set", "admissibility": "admit-basic" },
+      "evidence": { "evidence_class": "Seed", "traces": ["T_set"], "receipts": ["RC_set"], "maturity": "Validated", "gate_verdict": "Pass" },
+      "alias": { "aliases": ["ctx_set"], "profile_pack": ["STD"], "qm_binding": "reserved", "qa_binding": "ctx_set", "projection_policy": "qa-first" }
+    },
+    {
+      "id": "OBJ_CTX_SET_CANON",
+      "identity": { "tag": "CTX", "cid": "OBJ_CTX_SET_CANON", "codebook": "GEN1", "remap": "canon", "lineage": "seed" },
+      "structural": { "head": "carrier", "args": ["set"], "local_sections": ["base"], "morphism_hooks": ["identity"] },
+      "constraint": { "regime": "R_SET", "contracts": ["carrier-total"], "invariants": ["extensional-stable"], "equivalence": "eq-set", "admissibility": "admit-basic" },
+      "evidence": { "evidence_class": "Seed", "traces": ["T_set"], "receipts": ["RC_set", "RC_canon"], "maturity": "Certified", "gate_verdict": "Pass" },
+      "alias": { "aliases": ["ctx_set_canon"], "profile_pack": ["STD"], "qm_binding": "reserved", "qa_binding": "ctx_set_canon", "projection_policy": "qa-first" }
+    },
+    {
+      "id": "OPR_PROMOTED_OPR_CHAIN1",
+      "identity": { "tag": "OPR", "cid": "OPR_PROMOTED_OPR_CHAIN1", "codebook": "QC0_CORE", "remap": "none", "lineage": "seed-promoted:THS_CHAIN_RULE" },
+      "structural": { "head": "operator", "args": ["THS_CHAIN_RULE", "CPG_CHAIN_RULE"], "local_sections": ["first-order derivative composition"], "morphism_hooks": ["B_TOP_TO_CALC"] },
+      "constraint": { "regime": "R_CALC", "contracts": ["chain-rule", "first-order", "default-promoted"], "invariants": ["jet-compose", "reduction-exact"], "equivalence": "first-order jet equivalence", "admissibility": "default-promoted on the derivative-local witness extraction burden" },
+      "evidence": { "evidence_class": "SeedPromotion", "traces": ["THS_CHAIN_RULE", "CPG_CHAIN_RULE"], "receipts": ["CRT_CHAIN_RULE", "TRL_CHAIN_RULE"], "maturity": "Certified", "gate_verdict": "Pass" },
+      "alias": { "aliases": ["OPR.Chain1"], "profile_pack": ["STD", "chain-rule", "default-promoted"], "qm_binding": "THS·ChainRule", "qa_binding": "OPR.Chain1", "projection_policy": "canonical-authored" }
+    }
+  ],
+  "regimes": [
+    { "id": "R_SET", "ctx_law": "carrier context formation", "cut_law": "subset distinction", "thr_law": "function preservation", "brc_law": "subset localization", "slk_law": "extensional slack", "tol_law": "finite size toll", "knt_law": "obstruction by contradiction", "eq_law": "extensional equality", "adm_law": "basic admissibility", "promoted_ops": ["canon_set", "quotient_set"] },
+    { "id": "R_LOG", "ctx_law": "judgment context", "cut_law": "formula distinction", "thr_law": "derivation preservation", "brc_law": "local theory frame", "slk_law": "proof irrelevance slack", "tol_law": "proof burden toll", "knt_law": "inconsistency witness", "eq_law": "logical equivalence", "adm_law": "derivable admissibility", "promoted_ops": ["normalize_proof"] },
+    { "id": "R_TYP", "ctx_law": "typing context", "cut_law": "type distinction", "thr_law": "typed morphism", "brc_law": "dependent frame", "slk_law": "proof-relevant slack", "tol_law": "term complexity toll", "knt_law": "type mismatch witness", "eq_law": "definitional equality", "adm_law": "well-typed admissibility", "promoted_ops": ["lift_typ"] },
+    { "id": "R_ALG", "ctx_law": "algebra carrier context", "cut_law": "substructure distinction", "thr_law": "homomorphism law", "brc_law": "local algebra frame", "slk_law": "isomorphism slack", "tol_law": "generator toll", "knt_law": "obstruction ideal", "eq_law": "algebraic equivalence", "adm_law": "axiom-preserving admissibility", "promoted_ops": ["lift_alg"] },
+    { "id": "R_TOP", "ctx_law": "space context", "cut_law": "open-set distinction", "thr_law": "continuous thread", "brc_law": "local chart frame", "slk_law": "homotopy slack", "tol_law": "cover complexity toll", "knt_law": "obstruction cocycle", "eq_law": "homeomorphic equivalence", "adm_law": "local-global admissibility", "promoted_ops": ["localize_top"] },
+    { "id": "R_CALC", "ctx_law": "smooth context", "cut_law": "derivative distinction", "thr_law": "smooth map law", "brc_law": "chart localization", "slk_law": "jet slack", "tol_law": "order toll", "knt_law": "non-smooth witness", "eq_law": "jet equivalence", "adm_law": "smooth admissibility", "promoted_ops": ["ref_1", "ref_r", "OPR_PROMOTED_OPR_CHAIN1"] },
+    { "id": "R_PROB", "ctx_law": "sample context", "cut_law": "event distinction", "thr_law": "measure-preserving thread", "brc_law": "sigma-localization", "slk_law": "distribution slack", "tol_law": "entropy toll", "knt_law": "non-measurable witness", "eq_law": "almost-sure equivalence", "adm_law": "measurable admissibility", "promoted_ops": ["measprob_mu", "norm_mu"] },
+    { "id": "R_COMP", "ctx_law": "machine context", "cut_law": "state distinction", "thr_law": "execution thread", "brc_law": "local machine frame", "slk_law": "observational slack", "tol_law": "cost toll", "knt_law": "deadlock witness", "eq_law": "observational equivalence", "adm_law": "safe execution admissibility", "promoted_ops": ["exec", "cert_phi"] },
+    { "id": "R_MECH", "ctx_law": "parse context", "cut_law": "syntax distinction", "thr_law": "canonical transport", "brc_law": "registry localization", "slk_law": "canon slack", "tol_law": "runtime toll", "knt_law": "parse obstruction", "eq_law": "canonical equivalence", "adm_law": "pass-only admissibility", "promoted_ops": ["parse", "canon", "select", "check"] }
+  ],
+  "bridges": [
+    { "id": "B_TYPE_TO_SET", "src": "R_TYP", "tgt": "R_SET", "id_pres": "carrier identity preserved", "eq_pres": "extensional carrier equality", "forget": ["proof relevance"], "enrich": [], "loss": ["proof terms"], "reversibility": "Conservative", "receipts": ["Rig"], "rollback": "requires witness" },
+    { "id": "B_TYPE_TO_ALG", "src": "R_TYP", "tgt": "R_ALG", "id_pres": "typed algebra carrier preserved", "eq_pres": "structure-preserving equality", "forget": [], "enrich": ["algebraic operations"], "loss": [], "reversibility": "Enriching", "receipts": ["Lift^Typ->Alg"], "rollback": "allowed" },
+    { "id": "B_TOP_TO_CALC", "src": "R_TOP", "tgt": "R_CALC", "id_pres": "local chart identity preserved", "eq_pres": "smooth equivalence", "forget": [], "enrich": ["derivative witness"], "loss": [], "reversibility": "Enriching", "receipts": ["Ref_1"], "rollback": "allowed" },
+    { "id": "B_TOP_TO_PROB", "src": "R_TOP", "tgt": "R_PROB", "id_pres": "measurable carrier preserved", "eq_pres": "measure-compatible equivalence", "forget": ["differential payload"], "enrich": ["normalization"], "loss": ["smooth structure"], "reversibility": "LossySupported", "receipts": ["MeasProb_mu"], "rollback": "partial" },
+    { "id": "B_PROB_TO_LOG", "src": "R_PROB", "tgt": "R_LOG", "id_pres": "judgment object preserved", "eq_pres": "probabilistic theorem equivalence", "forget": ["sampling detail"], "enrich": ["logical theorem"], "loss": ["execution trace"], "reversibility": "Conservative", "receipts": ["ProbJudg_phi"], "rollback": "allowed" },
+    { "id": "B_PROB_TO_COMP", "src": "R_PROB", "tgt": "R_COMP", "id_pres": "stateful carrier preserved", "eq_pres": "simulation equivalence", "forget": [], "enrich": ["algorithmic realization"], "loss": [], "reversibility": "Enriching", "receipts": ["Exec"], "rollback": "allowed" },
+    { "id": "B_COMP_TO_LOG", "src": "R_COMP", "tgt": "R_LOG", "id_pres": "witness identity preserved", "eq_pres": "certified property equivalence", "forget": ["runtime detail"], "enrich": ["logical certificate"], "loss": ["cost profile"], "reversibility": "Conservative", "receipts": ["Cert_phi"], "rollback": "allowed" }
+  ],
+  "proof_shapes": [
+    { "id": "PS_TRIANGLE_CERT", "kind": "Triangle", "nodes": ["prob", "comp", "log"], "edges": [{ "from": "prob", "to": "comp", "label": "Exec" }, { "from": "comp", "to": "log", "label": "Cert_phi" }, { "from": "prob", "to": "log", "label": "ProbJudg_phi" }], "equations": ["Cert_phi o Exec = ProbJudg_phi"], "target_equivalence": "logical-certification", "receipts": ["RC_triangle"], "gate": "Pass" },
+    { "id": "PS_SQUARE_TOPO", "kind": "Square", "nodes": ["top", "calc", "prob", "logic"], "edges": [{ "from": "top", "to": "calc", "label": "Ref_1" }, { "from": "top", "to": "prob", "label": "MeasProb_mu" }, { "from": "calc", "to": "logic", "label": "local-proof" }, { "from": "prob", "to": "logic", "label": "ProbJudg_phi" }], "equations": ["local-proof o Ref_1 ~= ProbJudg_phi o MeasProb_mu"], "target_equivalence": "bridge-check", "receipts": ["RC_square"], "gate": "Pass" }
+  ],
+  "atlas_cells": [
+    { "id": "A_TYPE_TO_SET", "source_regime": "R_TYP", "target_regime": "R_SET", "burden_class": "ExtensionalCarrierReasoning", "proof_target": "extensional carrier reasoning", "candidate_paths": [["B_TYPE_TO_SET"]], "normalized_winner": ["B_TYPE_TO_SET"], "winner_state": "SeedWinner", "loss_profile": { "items": ["proof terms"] }, "proof_shapes_checked": ["PS_TRIANGLE_CERT"], "recipe_maturity": "Seeded", "failure_signatures": [{ "code": "TYPE_SET_EXT", "message": "proof relevance queried without extensional witness" }], "side_conditions": ["proof relevance not queried"] },
+    { "id": "A_TYPE_TO_ALG", "source_regime": "R_TYP", "target_regime": "R_ALG", "burden_class": "ProofRelevantAlgebra", "proof_target": "proof relevant algebra", "candidate_paths": [["B_TYPE_TO_ALG"]], "normalized_winner": ["B_TYPE_TO_ALG"], "winner_state": "SeedWinner", "loss_profile": { "items": [] }, "proof_shapes_checked": ["PS_TRIANGLE_CERT"], "recipe_maturity": "Seeded", "failure_signatures": [{ "code": "TYPE_ALG_EXT", "message": "extensional collapse invalidates proof-relevant payload" }], "side_conditions": ["extensionality certified when indirect path is used"] },
+    { "id": "A_TOP_TO_CALC", "source_regime": "R_TOP", "target_regime": "R_CALC", "burden_class": "DerivativeLocalWitnessExtraction", "proof_target": "derivative witness extraction", "candidate_paths": [["B_TOP_TO_CALC"]], "normalized_winner": ["B_TOP_TO_CALC"], "winner_state": "SeedWinner", "loss_profile": { "items": [] }, "proof_shapes_checked": ["PS_SQUARE_TOPO"], "recipe_maturity": "Seeded", "failure_signatures": [{ "code": "TOP_CALC_SMOOTH", "message": "missing smoothability witness" }], "side_conditions": ["smoothability admissible"] },
+    { "id": "A_TOP_TO_PROB", "source_regime": "R_TOP", "target_regime": "R_PROB", "burden_class": "MeasurableNormalizedBranching", "proof_target": "measurable normalized branching law", "candidate_paths": [["B_TOP_TO_PROB"]], "normalized_winner": ["B_TOP_TO_PROB"], "winner_state": "SeedWinner", "loss_profile": { "items": ["smooth structure"] }, "proof_shapes_checked": ["PS_SQUARE_TOPO"], "recipe_maturity": "Seeded", "failure_signatures": [{ "code": "TOP_PROB_MEAS", "message": "missing measurable normalization witness" }], "side_conditions": ["differential payload not required"] },
+    { "id": "A_PROB_TO_LOG", "source_regime": "R_PROB", "target_regime": "R_LOG", "burden_class": "ProbabilisticJudgment", "proof_target": "direct theorem in probabilistic judgment class", "candidate_paths": [["B_PROB_TO_LOG"], ["B_PROB_TO_COMP", "B_COMP_TO_LOG"]], "normalized_winner": ["B_PROB_TO_LOG"], "winner_state": "SeedWinner", "loss_profile": { "items": ["execution trace"] }, "proof_shapes_checked": ["PS_TRIANGLE_CERT"], "recipe_maturity": "Stable", "failure_signatures": [{ "code": "PROB_LOG_CERT", "message": "certification route required for executable witness" }], "side_conditions": ["algorithmic certification not required"] },
+    { "id": "A_PROB_TO_COMP", "source_regime": "R_PROB", "target_regime": "R_COMP", "burden_class": "SimulationExecutableInference", "proof_target": "simulation executable inference", "candidate_paths": [["B_PROB_TO_COMP"]], "normalized_winner": ["B_PROB_TO_COMP"], "winner_state": "SeedWinner", "loss_profile": { "items": [] }, "proof_shapes_checked": ["PS_TRIANGLE_CERT"], "recipe_maturity": "Stable", "failure_signatures": [{ "code": "PROB_COMP_EXEC", "message": "missing executable realization witness" }], "side_conditions": ["simulation witness required"] },
+    { "id": "A_COMP_TO_LOG", "source_regime": "R_COMP", "target_regime": "R_LOG", "burden_class": "CertifiedPropertyWitness", "proof_target": "certified property witness", "candidate_paths": [["B_COMP_TO_LOG"]], "normalized_winner": ["B_COMP_TO_LOG"], "winner_state": "SeedWinner", "loss_profile": { "items": ["cost profile"] }, "proof_shapes_checked": ["PS_TRIANGLE_CERT"], "recipe_maturity": "Stable", "failure_signatures": [{ "code": "COMP_LOG_CERT", "message": "missing logical certification witness" }], "side_conditions": ["property witness available"] }
+  ],
+  "mechanization_packages": [
+    { "id": "MEC_MECH0", "parser": { "id": "PRS_QA0", "supported_surfaces": ["QA-0"] }, "canonicalizer": { "id": "CNZ_SEED", "regime_scope": ["R_SET", "R_LOG", "R_TYP", "R_ALG", "R_TOP", "R_CALC", "R_PROB", "R_COMP", "R_MECH"] }, "registry": { "id": "RGY_SEED", "domains": ["objects", "regimes", "bridges", "proof_shapes", "atlas_cells", "mechanization_packages"] }, "selector": { "id": "SEL_ATLAS", "burden_axes": ["fit", "stability", "compressibility", "transportability", "proof-yield"] }, "checker": { "id": "CHK_COMMUTE", "proof_shapes": ["Square", "Triangle", "Diamond", "Pentagon", "Hexagon"] } }
+  ],
+  "equivalence_classes": [
+    { "id": "EQ_SET_CANON", "regime": "R_SET", "canonical_id": "OBJ_CTX_SET_CANON", "members": ["OBJ_CTX_SET", "OBJ_CTX_SET_CANON"] }
+  ],
+  "theorem_specs": [
+    {
+      "id": "THS_CHAIN_RULE",
+      "statement": "DER(g∘f,x) ≈1 DER(g,f(x))∘DER(f,x)",
+      "hosts": ["R_TOP", "R_CALC"],
+      "bridges": ["B_TOP_TO_CALC"],
+      "operators": ["OPR.Chain1"],
+      "target_equivalence": "first-order jet equivalence",
+      "obligations": ["OblEq", "OblAdm", "OblLoc", "OblRed"],
+      "primary_zone": "PmzStructural",
+      "verdict": "Benchmarked",
+      "proof_shapes": ["PS_SQUARE_TOPO"]
+    },
+    {
+      "id": "THS_CHAIN_RULE_RECIPE",
+      "statement": "reuse Chain₁ as the default first-order derivative-composition recipe on the same local cluster",
+      "hosts": ["R_TOP", "R_CALC"],
+      "bridges": ["B_TOP_TO_CALC"],
+      "operators": ["OPR.Chain1"],
+      "target_equivalence": "first-order jet equivalence",
+      "obligations": ["OblEq", "OblRed"],
+      "primary_zone": "PmzReduction",
+      "verdict": "Benchmarked",
+      "proof_shapes": ["PS_SQUARE_TOPO"]
+    },
+    {
+      "id": "THS_CHAIN_RULE_TRANSPORT",
+      "statement": "reuse Chain₁ to certify chart-local derivative transport on the active first-order cluster",
+      "hosts": ["R_TOP", "R_CALC"],
+      "bridges": ["B_TOP_TO_CALC"],
+      "operators": [],
+      "target_equivalence": "first-order jet equivalence",
+      "obligations": ["OblLoc", "OblEq", "OblRed"],
+      "primary_zone": "PmzStructural",
+      "verdict": "Benchmarked",
+      "proof_shapes": ["PS_SQUARE_TOPO"]
+    },
+    {
+      "id": "THS_BAYES_BRACE",
+      "statement": "normalized measurable bracing preserves conditional branch adequacy on the active top-to-prob route",
+      "hosts": ["R_TOP", "R_PROB"],
+      "bridges": ["B_TOP_TO_PROB"],
+      "operators": ["OPR.BayesBrace1"],
+      "target_equivalence": "measure-compatible conditioning transport",
+      "obligations": ["OblLoc", "OblTol", "OblAde"],
+      "primary_zone": "PmzStructural",
+      "verdict": "Benchmarked",
+      "proof_shapes": ["PS_SQUARE_TOPO"]
+    },
+    {
+      "id": "THS_CH_NORM",
+      "statement": "normalization witnesses in R_TYP survive extensional carrier collapse along the active type-to-set route",
+      "hosts": ["R_TYP", "R_SET"],
+      "bridges": ["B_TYPE_TO_SET"],
+      "operators": ["OPR.CHNorm1"],
+      "target_equivalence": "extensional carrier equality under normalization",
+      "obligations": ["OblAde", "OblRed", "OblEq"],
+      "primary_zone": "PmzStructural",
+      "verdict": "Benchmarked",
+      "proof_shapes": ["PS_TRIANGLE_CERT"]
+    },
+    {
+      "id": "THS_EXEC_INFER",
+      "statement": "normalized probabilistic branching admits executable realization on the active prob-to-comp route",
+      "hosts": ["R_PROB", "R_COMP"],
+      "bridges": ["B_PROB_TO_COMP"],
+      "operators": ["OPR.ExecInfer1"],
+      "target_equivalence": "simulation executable inference",
+      "obligations": ["OblAde", "OblTol", "OblRed"],
+      "primary_zone": "PmzOperational",
+      "verdict": "Benchmarked",
+      "proof_shapes": ["PS_TRIANGLE_CERT"]
+    },
+    {
+      "id": "THS_PROB_JUDG",
+      "statement": "normalized probabilistic judgment transports lawfully into the active logic shell",
+      "hosts": ["R_PROB", "R_LOG"],
+      "bridges": ["B_PROB_TO_LOG"],
+      "operators": ["OPR.ProbJudg1"],
+      "target_equivalence": "probabilistic theorem equivalence",
+      "obligations": ["OblAde", "OblTol"],
+      "primary_zone": "PmzStructural",
+      "verdict": "Benchmarked",
+      "proof_shapes": ["PS_TRIANGLE_CERT"]
+    },
+    {
+      "id": "THS_CERT_PROP",
+      "statement": "certified computational property witnesses transport lawfully into the active logic shell",
+      "hosts": ["R_COMP", "R_LOG"],
+      "bridges": ["B_COMP_TO_LOG"],
+      "operators": ["OPR.CertProp1"],
+      "target_equivalence": "certified property equivalence",
+      "obligations": ["OblRed", "OblObs", "OblTol"],
+      "primary_zone": "PmzOperational",
+      "verdict": "Benchmarked",
+      "proof_shapes": ["PS_TRIANGLE_CERT"]
+    },
+    {
+      "id": "THS_CH_INH",
+      "statement": "proof-relevant inherited algebra structure survives the active type-to-alg route only if typed inhabitance remains exact",
+      "hosts": ["R_TYP", "R_ALG"],
+      "bridges": ["B_TYPE_TO_ALG"],
+      "operators": ["OPR.CHInh1"],
+      "target_equivalence": "structure-preserving algebra equality",
+      "obligations": ["OblAde", "OblAdm", "OblEq"],
+      "primary_zone": "PmzStructural",
+      "verdict": "Benchmarked",
+      "proof_shapes": ["PS_TRIANGLE_CERT"]
+    }
+  ],
+  "obligations": [
+    { "id": "OBL_CHAIN_EQ", "kind": "OblEq", "description": "first-order slack equivalence preserved under composition", "status": "Benchmarked" },
+    { "id": "OBL_CHAIN_ADM", "kind": "OblAdm", "description": "both derivatives admitted in R_CALC", "status": "Benchmarked" },
+    { "id": "OBL_CHAIN_LOC", "kind": "OblLoc", "description": "same brace-localization at x", "status": "Benchmarked" },
+    { "id": "OBL_CHAIN_RED", "kind": "OblRed", "description": "reduction of remainder terms preserves first-order equivalence", "status": "RouteFound" },
+    { "id": "OBL_BAYES_LOC", "kind": "OblLoc", "description": "measurable brace remains locally chart-compatible on the source topological carrier", "status": "Benchmarked" },
+    { "id": "OBL_BAYES_TOL", "kind": "OblTol", "description": "conditioning and normalization toll remain lawful on the active probabilistic carrier", "status": "Benchmarked" },
+    { "id": "OBL_BAYES_ADE", "kind": "OblAde", "description": "pushforward and branch adequacy survive measurable normalization on the selected route", "status": "Benchmarked" },
+    { "id": "OBL_CH_ADE", "kind": "OblAde", "description": "typed witness remains inhabited under the active carrier collapse", "status": "Benchmarked" },
+    { "id": "OBL_CH_RED", "kind": "OblRed", "description": "type normalization corresponds to extensional carrier reduction on the selected route", "status": "Benchmarked" },
+    { "id": "OBL_CH_EQ", "kind": "OblEq", "description": "carrier-level extensional equality survives normalization collapse", "status": "Benchmarked" },
+    { "id": "OBL_EXEC_ADE", "kind": "OblAde", "description": "probabilistic branching remains executable under pushforward realization", "status": "Benchmarked" },
+    { "id": "OBL_EXEC_TOL", "kind": "OblTol", "description": "probabilistic normalization toll remains lawful before executable realization", "status": "Benchmarked" },
+    { "id": "OBL_EXEC_RED", "kind": "OblRed", "description": "executable realization reaches normal form on the selected route", "status": "Benchmarked" },
+    { "id": "OBL_JDG_ADE", "kind": "OblAde", "description": "probabilistic judgment remains adequate under logical transport", "status": "Benchmarked" },
+    { "id": "OBL_JDG_TOL", "kind": "OblTol", "description": "normalization and conditioning toll remain lawful on the judgment route", "status": "Benchmarked" },
+    { "id": "OBL_CERT_RED", "kind": "OblRed", "description": "computational property witness reaches certified normal form", "status": "Benchmarked" },
+    { "id": "OBL_CERT_OBS", "kind": "OblObs", "description": "computational property witness remains observationally stable", "status": "Benchmarked" },
+    { "id": "OBL_CERT_TOL", "kind": "OblTol", "description": "computational cost toll remains lawful under logical certification", "status": "Benchmarked" },
+    { "id": "OBL_CHI_ADE", "kind": "OblAde", "description": "typed inherited witness remains inhabited on the active algebra route", "status": "Benchmarked" },
+    { "id": "OBL_CHI_ADM", "kind": "OblAdm", "description": "algebraic closure and associativity hold on the inherited carrier", "status": "Benchmarked" },
+    { "id": "OBL_CHI_EQ", "kind": "OblEq", "description": "structure-preserving equality survives inherited algebra transport", "status": "Benchmarked" }
+  ],
+  "target_profiles": [
+    {
+      "id": "TGT_CHAIN_RULE",
+      "burden_class": "DerivativeLocalWitnessExtraction",
+      "host_cluster": ["R_TOP", "R_CALC"],
+      "target_equivalence": "first-order jet equivalence",
+      "allowed_bridge_classes": ["Enriching", "Conservative"],
+      "loss_ceiling": 1,
+      "rollback_ceiling": 1,
+      "required_receipt_class": "RC_ths",
+      "required_proof_shape_family": "MixedBattery",
+      "promotion_goal": "PromoteOperator",
+      "primary_zone": "PmzStructural"
+    },
+    {
+      "id": "TGT_CHAIN_RULE_RECIPE",
+      "burden_class": "DerivativeLocalWitnessExtraction",
+      "host_cluster": ["R_TOP", "R_CALC"],
+      "target_equivalence": "first-order jet equivalence",
+      "allowed_bridge_classes": ["Enriching", "Conservative"],
+      "loss_ceiling": 1,
+      "rollback_ceiling": 1,
+      "required_receipt_class": "RC_ths",
+      "required_proof_shape_family": "MixedBattery",
+      "promotion_goal": "PromoteOperator",
+      "primary_zone": "PmzReduction"
+    },
+    {
+      "id": "TGT_CHAIN_RULE_TRANSPORT",
+      "burden_class": "DerivativeLocalWitnessExtraction",
+      "host_cluster": ["R_TOP", "R_CALC"],
+      "target_equivalence": "first-order jet equivalence",
+      "allowed_bridge_classes": ["Enriching", "Conservative"],
+      "loss_ceiling": 1,
+      "rollback_ceiling": 1,
+      "required_receipt_class": "RC_ths",
+      "required_proof_shape_family": "MixedBattery",
+      "promotion_goal": "PromoteRouteClass",
+      "primary_zone": "PmzStructural"
+    },
+    {
+      "id": "TGT_BAYES_BRACE",
+      "burden_class": "MeasurableNormalizedBranching",
+      "host_cluster": ["R_TOP", "R_PROB"],
+      "target_equivalence": "measure-compatible conditioning transport",
+      "allowed_bridge_classes": ["LossySupported", "Conservative"],
+      "loss_ceiling": 1,
+      "rollback_ceiling": 1,
+      "required_receipt_class": "RC_ths",
+      "required_proof_shape_family": "Square",
+      "promotion_goal": "OpenBlocked",
+      "primary_zone": "PmzStructural"
+    },
+    {
+      "id": "TGT_CH_NORM",
+      "burden_class": "ExtensionalCarrierReasoning",
+      "host_cluster": ["R_TYP", "R_SET"],
+      "target_equivalence": "extensional carrier equality under normalization",
+      "allowed_bridge_classes": ["Conservative"],
+      "loss_ceiling": 1,
+      "rollback_ceiling": 1,
+      "required_receipt_class": "RC_ths",
+      "required_proof_shape_family": "Triangle",
+      "promotion_goal": "OpenBlocked",
+      "primary_zone": "PmzStructural"
+    },
+    {
+      "id": "TGT_EXEC_INFER",
+      "burden_class": "SimulationExecutableInference",
+      "host_cluster": ["R_PROB", "R_COMP"],
+      "target_equivalence": "simulation executable inference",
+      "allowed_bridge_classes": ["Enriching"],
+      "loss_ceiling": 0,
+      "rollback_ceiling": 1,
+      "required_receipt_class": "RC_ths",
+      "required_proof_shape_family": "Triangle",
+      "promotion_goal": "OpenBlocked",
+      "primary_zone": "PmzOperational"
+    },
+    {
+      "id": "TGT_PROB_JUDG",
+      "burden_class": "ProbabilisticJudgment",
+      "host_cluster": ["R_PROB", "R_LOG"],
+      "target_equivalence": "probabilistic theorem equivalence",
+      "allowed_bridge_classes": ["Conservative"],
+      "loss_ceiling": 1,
+      "rollback_ceiling": 1,
+      "required_receipt_class": "RC_ths",
+      "required_proof_shape_family": "Triangle",
+      "promotion_goal": "OpenBlocked",
+      "primary_zone": "PmzStructural"
+    },
+    {
+      "id": "TGT_CERT_PROP",
+      "burden_class": "CertifiedPropertyWitness",
+      "host_cluster": ["R_COMP", "R_LOG"],
+      "target_equivalence": "certified property equivalence",
+      "allowed_bridge_classes": ["Conservative"],
+      "loss_ceiling": 1,
+      "rollback_ceiling": 1,
+      "required_receipt_class": "RC_ths",
+      "required_proof_shape_family": "Triangle",
+      "promotion_goal": "OpenBlocked",
+      "primary_zone": "PmzOperational"
+    },
+    {
+      "id": "TGT_CH_INH",
+      "burden_class": "ProofRelevantAlgebra",
+      "host_cluster": ["R_TYP", "R_ALG"],
+      "target_equivalence": "structure-preserving algebra equality",
+      "allowed_bridge_classes": ["Enriching"],
+      "loss_ceiling": 0,
+      "rollback_ceiling": 1,
+      "required_receipt_class": "RC_ths",
+      "required_proof_shape_family": "Triangle",
+      "promotion_goal": "OpenBlocked",
+      "primary_zone": "PmzStructural"
+    }
+  ],
+  "route_ledgers": [
+    {
+      "id": "TRL_CHAIN_RULE",
+      "theorem": "THS_CHAIN_RULE",
+      "paths": [["B_TOP_TO_CALC"]],
+      "budget": { "max_loss": 1, "allow_lossy_supported": false, "require_proof": true },
+      "losses": [],
+      "receipts": ["Ref_1", "Can", "Red"],
+      "normalized_path": ["B_TOP_TO_CALC"]
+    },
+    {
+      "id": "TRL_CHAIN_RULE_RECIPE",
+      "theorem": "THS_CHAIN_RULE_RECIPE",
+      "paths": [["B_TOP_TO_CALC"]],
+      "budget": { "max_loss": 1, "allow_lossy_supported": false, "require_proof": true },
+      "losses": [],
+      "receipts": ["Ref_1", "Can", "Red"],
+      "normalized_path": ["B_TOP_TO_CALC"]
+    },
+    {
+      "id": "TRL_CHAIN_RULE_TRANSPORT",
+      "theorem": "THS_CHAIN_RULE_TRANSPORT",
+      "paths": [["B_TOP_TO_CALC"]],
+      "budget": { "max_loss": 1, "allow_lossy_supported": false, "require_proof": true },
+      "losses": [],
+      "receipts": ["Ref_1", "Can", "Red"],
+      "normalized_path": ["B_TOP_TO_CALC"]
+    },
+    {
+      "id": "TRL_BAYES_BRACE",
+      "theorem": "THS_BAYES_BRACE",
+      "paths": [["B_TOP_TO_PROB"]],
+      "budget": { "max_loss": 1, "allow_lossy_supported": true, "require_proof": true },
+      "losses": ["smooth structure"],
+      "receipts": ["MeasProb_mu", "Norm", "Push"],
+      "normalized_path": ["B_TOP_TO_PROB"]
+    },
+    {
+      "id": "TRL_CH_NORM",
+      "theorem": "THS_CH_NORM",
+      "paths": [["B_TYPE_TO_SET"]],
+      "budget": { "max_loss": 1, "allow_lossy_supported": false, "require_proof": true },
+      "losses": ["proof terms"],
+      "receipts": ["Rig", "Norm"],
+      "normalized_path": ["B_TYPE_TO_SET"]
+    },
+    {
+      "id": "TRL_EXEC_INFER",
+      "theorem": "THS_EXEC_INFER",
+      "paths": [["B_PROB_TO_COMP"]],
+      "budget": { "max_loss": 0, "allow_lossy_supported": false, "require_proof": true },
+      "losses": [],
+      "receipts": ["Exec"],
+      "normalized_path": ["B_PROB_TO_COMP"]
+    },
+    {
+      "id": "TRL_PROB_JUDG",
+      "theorem": "THS_PROB_JUDG",
+      "paths": [["B_PROB_TO_LOG"]],
+      "budget": { "max_loss": 1, "allow_lossy_supported": false, "require_proof": true },
+      "losses": ["execution trace"],
+      "receipts": ["ProbJudg_phi"],
+      "normalized_path": ["B_PROB_TO_LOG"]
+    },
+    {
+      "id": "TRL_CERT_PROP",
+      "theorem": "THS_CERT_PROP",
+      "paths": [["B_COMP_TO_LOG"]],
+      "budget": { "max_loss": 1, "allow_lossy_supported": false, "require_proof": true },
+      "losses": ["cost profile"],
+      "receipts": ["Cert_phi"],
+      "normalized_path": ["B_COMP_TO_LOG"]
+    },
+    {
+      "id": "TRL_CH_INH",
+      "theorem": "THS_CH_INH",
+      "paths": [["B_TYPE_TO_ALG"]],
+      "budget": { "max_loss": 0, "allow_lossy_supported": false, "require_proof": true },
+      "losses": [],
+      "receipts": ["Lift^Typ->Alg"],
+      "normalized_path": ["B_TYPE_TO_ALG"]
+    }
+  ],
+  "certificates": [
+    {
+      "id": "CRT_CHAIN_RULE",
+      "theorem": "THS_CHAIN_RULE",
+      "route_ledger": "TRL_CHAIN_RULE",
+      "proof_shapes": ["PS_SQUARE_TOPO"],
+      "receipts": ["RC_ths", "TR_chain", "BENCH"],
+      "verdict": "Benchmarked"
+    },
+    {
+      "id": "CRT_CHAIN_RULE_RECIPE",
+      "theorem": "THS_CHAIN_RULE_RECIPE",
+      "route_ledger": "TRL_CHAIN_RULE_RECIPE",
+      "proof_shapes": ["PS_SQUARE_TOPO"],
+      "receipts": ["RC_ths", "TR_chain", "RECIPE"],
+      "verdict": "Benchmarked"
+    },
+    {
+      "id": "CRT_CHAIN_RULE_TRANSPORT",
+      "theorem": "THS_CHAIN_RULE_TRANSPORT",
+      "route_ledger": "TRL_CHAIN_RULE_TRANSPORT",
+      "proof_shapes": ["PS_SQUARE_TOPO"],
+      "receipts": ["RC_ths", "TR_chain", "TRANSPORT"],
+      "verdict": "Benchmarked"
+    },
+    {
+      "id": "CRT_BAYES_BRACE",
+      "theorem": "THS_BAYES_BRACE",
+      "route_ledger": "TRL_BAYES_BRACE",
+      "proof_shapes": ["PS_SQUARE_TOPO"],
+      "receipts": ["RC_ths", "TR_bayes", "MEAS"],
+      "verdict": "Benchmarked"
+    },
+    {
+      "id": "CRT_CH_NORM",
+      "theorem": "THS_CH_NORM",
+      "route_ledger": "TRL_CH_NORM",
+      "proof_shapes": ["PS_TRIANGLE_CERT"],
+      "receipts": ["RC_ths", "TR_ch", "NORM"],
+      "verdict": "Benchmarked"
+    },
+    {
+      "id": "CRT_EXEC_INFER",
+      "theorem": "THS_EXEC_INFER",
+      "route_ledger": "TRL_EXEC_INFER",
+      "proof_shapes": ["PS_TRIANGLE_CERT"],
+      "receipts": ["RC_ths", "TR_exec", "EXEC"],
+      "verdict": "Benchmarked"
+    },
+    {
+      "id": "CRT_PROB_JUDG",
+      "theorem": "THS_PROB_JUDG",
+      "route_ledger": "TRL_PROB_JUDG",
+      "proof_shapes": ["PS_TRIANGLE_CERT"],
+      "receipts": ["RC_ths", "TR_prob", "JUDG"],
+      "verdict": "Benchmarked"
+    },
+    {
+      "id": "CRT_CERT_PROP",
+      "theorem": "THS_CERT_PROP",
+      "route_ledger": "TRL_CERT_PROP",
+      "proof_shapes": ["PS_TRIANGLE_CERT"],
+      "receipts": ["RC_ths", "TR_cert", "PROP"],
+      "verdict": "Benchmarked"
+    },
+    {
+      "id": "CRT_CH_INH",
+      "theorem": "THS_CH_INH",
+      "route_ledger": "TRL_CH_INH",
+      "proof_shapes": ["PS_TRIANGLE_CERT"],
+      "receipts": ["RC_ths", "TR_ch", "INH"],
+      "verdict": "Benchmarked"
+    }
+  ],
+  "campaigns": [
+    {
+      "id": "CPG_CHAIN_RULE",
+      "theorem": "THS_CHAIN_RULE",
+      "target_profile": "TGT_CHAIN_RULE",
+      "route_ledger": "TRL_CHAIN_RULE",
+      "obligations": ["OBL_CHAIN_EQ", "OBL_CHAIN_ADM", "OBL_CHAIN_LOC", "OBL_CHAIN_RED"],
+      "certificates": ["CRT_CHAIN_RULE"],
+      "dependencies": [],
+      "campaign_class": "COperator",
+      "verdict": "Benchmarked",
+      "payoff": ["OPR.Chain1", "ATL.RouteClass.Chain"]
+    },
+    {
+      "id": "CPG_CHAIN_RULE_RECIPE",
+      "theorem": "THS_CHAIN_RULE_RECIPE",
+      "target_profile": "TGT_CHAIN_RULE_RECIPE",
+      "route_ledger": "TRL_CHAIN_RULE_RECIPE",
+      "obligations": ["OBL_CHAIN_EQ", "OBL_CHAIN_RED"],
+      "certificates": ["CRT_CHAIN_RULE_RECIPE"],
+      "dependencies": ["CPG_CHAIN_RULE"],
+      "campaign_class": "COperator",
+      "verdict": "Benchmarked",
+      "payoff": ["OPR.Chain1", "Recipe.Chain1"]
+    },
+    {
+      "id": "CPG_CHAIN_RULE_TRANSPORT",
+      "theorem": "THS_CHAIN_RULE_TRANSPORT",
+      "target_profile": "TGT_CHAIN_RULE_TRANSPORT",
+      "route_ledger": "TRL_CHAIN_RULE_TRANSPORT",
+      "obligations": ["OBL_CHAIN_LOC", "OBL_CHAIN_EQ", "OBL_CHAIN_RED"],
+      "certificates": ["CRT_CHAIN_RULE_TRANSPORT"],
+      "dependencies": ["CPG_CHAIN_RULE"],
+      "campaign_class": "CBridge",
+      "verdict": "Benchmarked",
+      "payoff": ["OPR.Chain1", "ATL.RouteClass.ChainTransport"]
+    },
+    {
+      "id": "CPG_BAYES_BRACE",
+      "theorem": "THS_BAYES_BRACE",
+      "target_profile": "TGT_BAYES_BRACE",
+      "route_ledger": "TRL_BAYES_BRACE",
+      "obligations": ["OBL_BAYES_LOC", "OBL_BAYES_TOL", "OBL_BAYES_ADE"],
+      "certificates": ["CRT_BAYES_BRACE"],
+      "dependencies": [],
+      "campaign_class": "CBridge",
+      "verdict": "Benchmarked",
+      "payoff": ["ATL.RouteClass.BayesBrace", "Recipe.BayesBrace"]
+    },
+    {
+      "id": "CPG_CH_NORM",
+      "theorem": "THS_CH_NORM",
+      "target_profile": "TGT_CH_NORM",
+      "route_ledger": "TRL_CH_NORM",
+      "obligations": ["OBL_CH_ADE", "OBL_CH_RED", "OBL_CH_EQ"],
+      "certificates": ["CRT_CH_NORM"],
+      "dependencies": [],
+      "campaign_class": "CBasic",
+      "verdict": "Benchmarked",
+      "payoff": ["ATL.RouteClass.CHNorm", "Recipe.CHNorm"]
+    },
+    {
+      "id": "CPG_EXEC_INFER",
+      "theorem": "THS_EXEC_INFER",
+      "target_profile": "TGT_EXEC_INFER",
+      "route_ledger": "TRL_EXEC_INFER",
+      "obligations": ["OBL_EXEC_ADE", "OBL_EXEC_TOL", "OBL_EXEC_RED"],
+      "certificates": ["CRT_EXEC_INFER"],
+      "dependencies": [],
+      "campaign_class": "CBasic",
+      "verdict": "Benchmarked",
+      "payoff": ["ATL.RouteClass.ExecInfer", "Recipe.ExecInfer"]
+    },
+    {
+      "id": "CPG_PROB_JUDG",
+      "theorem": "THS_PROB_JUDG",
+      "target_profile": "TGT_PROB_JUDG",
+      "route_ledger": "TRL_PROB_JUDG",
+      "obligations": ["OBL_JDG_ADE", "OBL_JDG_TOL"],
+      "certificates": ["CRT_PROB_JUDG"],
+      "dependencies": [],
+      "campaign_class": "CBasic",
+      "verdict": "Benchmarked",
+      "payoff": ["ATL.RouteClass.ProbJudg", "Recipe.ProbJudg"]
+    },
+    {
+      "id": "CPG_CERT_PROP",
+      "theorem": "THS_CERT_PROP",
+      "target_profile": "TGT_CERT_PROP",
+      "route_ledger": "TRL_CERT_PROP",
+      "obligations": ["OBL_CERT_RED", "OBL_CERT_OBS", "OBL_CERT_TOL"],
+      "certificates": ["CRT_CERT_PROP"],
+      "dependencies": [],
+      "campaign_class": "CBasic",
+      "verdict": "Benchmarked",
+      "payoff": ["ATL.RouteClass.CertProp", "Recipe.CertProp"]
+    },
+    {
+      "id": "CPG_CH_INH",
+      "theorem": "THS_CH_INH",
+      "target_profile": "TGT_CH_INH",
+      "route_ledger": "TRL_CH_INH",
+      "obligations": ["OBL_CHI_ADE", "OBL_CHI_ADM", "OBL_CHI_EQ"],
+      "certificates": ["CRT_CH_INH"],
+      "dependencies": [],
+      "campaign_class": "CBasic",
+      "verdict": "Benchmarked",
+      "payoff": ["ATL.RouteClass.CHInh", "Recipe.CHInh"]
+    }
+  ],
+  "campaign_portfolios": [
+    { "id": "CMPA_FLAGSHIP", "campaigns": ["CPG_CHAIN_RULE", "CPG_CHAIN_RULE_RECIPE", "CPG_CHAIN_RULE_TRANSPORT", "CPG_BAYES_BRACE", "CPG_CH_NORM", "CPG_EXEC_INFER", "CPG_PROB_JUDG", "CPG_CERT_PROP", "CPG_CH_INH"], "normalized": true }
+  ],
+  "route_classes": [
+    {
+      "id": "RTC_CHAIN_RULE",
+      "theorem": "THS_CHAIN_RULE",
+      "target_profile": "TGT_CHAIN_RULE",
+      "equivalent_paths": [["B_TOP_TO_CALC"]],
+      "canonical_path": ["B_TOP_TO_CALC"],
+      "verdict": "Benchmarked"
+    },
+    {
+      "id": "RTC_CHAIN_RULE_RECIPE",
+      "theorem": "THS_CHAIN_RULE_RECIPE",
+      "target_profile": "TGT_CHAIN_RULE_RECIPE",
+      "equivalent_paths": [["B_TOP_TO_CALC"]],
+      "canonical_path": ["B_TOP_TO_CALC"],
+      "verdict": "Benchmarked"
+    },
+    {
+      "id": "RTC_CHAIN_RULE_TRANSPORT",
+      "theorem": "THS_CHAIN_RULE_TRANSPORT",
+      "target_profile": "TGT_CHAIN_RULE_TRANSPORT",
+      "equivalent_paths": [["B_TOP_TO_CALC"]],
+      "canonical_path": ["B_TOP_TO_CALC"],
+      "verdict": "Benchmarked"
+    },
+    {
+      "id": "RTC_BAYES_BRACE",
+      "theorem": "THS_BAYES_BRACE",
+      "target_profile": "TGT_BAYES_BRACE",
+      "equivalent_paths": [["B_TOP_TO_PROB"]],
+      "canonical_path": ["B_TOP_TO_PROB"],
+      "verdict": "Benchmarked"
+    },
+    {
+      "id": "RTC_CH_NORM",
+      "theorem": "THS_CH_NORM",
+      "target_profile": "TGT_CH_NORM",
+      "equivalent_paths": [["B_TYPE_TO_SET"]],
+      "canonical_path": ["B_TYPE_TO_SET"],
+      "verdict": "Benchmarked"
+    },
+    {
+      "id": "RTC_EXEC_INFER",
+      "theorem": "THS_EXEC_INFER",
+      "target_profile": "TGT_EXEC_INFER",
+      "equivalent_paths": [["B_PROB_TO_COMP"]],
+      "canonical_path": ["B_PROB_TO_COMP"],
+      "verdict": "Benchmarked"
+    },
+    {
+      "id": "RTC_PROB_JUDG",
+      "theorem": "THS_PROB_JUDG",
+      "target_profile": "TGT_PROB_JUDG",
+      "equivalent_paths": [["B_PROB_TO_LOG"]],
+      "canonical_path": ["B_PROB_TO_LOG"],
+      "verdict": "Benchmarked"
+    },
+    {
+      "id": "RTC_CERT_PROP",
+      "theorem": "THS_CERT_PROP",
+      "target_profile": "TGT_CERT_PROP",
+      "equivalent_paths": [["B_COMP_TO_LOG"]],
+      "canonical_path": ["B_COMP_TO_LOG"],
+      "verdict": "Benchmarked"
+    },
+    {
+      "id": "RTC_CH_INH",
+      "theorem": "THS_CH_INH",
+      "target_profile": "TGT_CH_INH",
+      "equivalent_paths": [["B_TYPE_TO_ALG"]],
+      "canonical_path": ["B_TYPE_TO_ALG"],
+      "verdict": "Benchmarked"
+    }
+  ],
+  "atlas_deficiencies": [
+    {
+      "id": "DGN_CHAIN_RULE_ADEQUACY",
+      "class": "DNoAdequacy",
+      "atlas_cell": "A_TOP_TO_CALC",
+      "theorem": "THS_CHAIN_RULE",
+      "message": "semantic adequacy remains scaffolded rather than discharged"
+    }
+  ],
+  "adequacy_clauses": [
+    {
+      "id": "ADQ_CHAIN_CALC_OBJECT",
+      "kind": "ObjectInterpretation",
+      "regime_ids": ["R_CALC"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_CHAIN_RULE", "THS_CHAIN_RULE_RECIPE", "THS_CHAIN_RULE_TRANSPORT"],
+      "description": "first-order derivative witnesses must be executable as lawful local calculus objects",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_CHAIN_TOP_THREAD",
+      "kind": "ThreadInterpretation",
+      "regime_ids": ["R_TOP"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_CHAIN_RULE", "THS_CHAIN_RULE_RECIPE", "THS_CHAIN_RULE_TRANSPORT"],
+      "description": "topological/local thread transport must remain continuous and overlap-compatible",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_CHAIN_CALC_EQ",
+      "kind": "EquivalenceInterpretation",
+      "regime_ids": ["R_CALC"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_CHAIN_RULE", "THS_CHAIN_RULE_RECIPE", "THS_CHAIN_RULE_TRANSPORT"],
+      "description": "first-order jet equivalence must be executable on the selected burden",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_CHAIN_CALC_TOLL",
+      "kind": "TollInterpretation",
+      "regime_ids": ["R_CALC"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_CHAIN_RULE", "THS_CHAIN_RULE_RECIPE", "THS_CHAIN_RULE_TRANSPORT"],
+      "description": "first-order remainder toll must reduce lawfully on the selected burden",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_CHAIN_TOP_KNOT",
+      "kind": "KnotInterpretation",
+      "regime_ids": ["R_TOP"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_CHAIN_RULE", "THS_CHAIN_RULE_RECIPE", "THS_CHAIN_RULE_TRANSPORT"],
+      "description": "no local obstruction knot may remain on the selected chart-local transport",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_CHAIN_TOP_CALC_BRIDGE",
+      "kind": "BridgeSoundness",
+      "regime_ids": ["R_TOP", "R_CALC"],
+      "bridge_ids": ["B_TOP_TO_CALC"],
+      "theorem_ids": ["THS_CHAIN_RULE", "THS_CHAIN_RULE_RECIPE", "THS_CHAIN_RULE_TRANSPORT"],
+      "description": "the promoted top-to-calc bridge must carry Ref_1 soundness on the selected route",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_BAYES_PROB_OBJECT",
+      "kind": "ObjectInterpretation",
+      "regime_ids": ["R_PROB"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_BAYES_BRACE"],
+      "description": "probabilistic branch objects must remain normalized and pushforward-stable on the active route",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_BAYES_TOP_THREAD",
+      "kind": "ThreadInterpretation",
+      "regime_ids": ["R_TOP"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_BAYES_BRACE"],
+      "description": "topological threading into the probabilistic brace must remain continuous and overlap-compatible",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_BAYES_PROB_EQ",
+      "kind": "EquivalenceInterpretation",
+      "regime_ids": ["R_PROB"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_BAYES_BRACE"],
+      "description": "measure-compatible conditioning transport must remain adequate on the selected burden",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_BAYES_PROB_TOLL",
+      "kind": "TollInterpretation",
+      "regime_ids": ["R_PROB"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_BAYES_BRACE"],
+      "description": "conditioning and normalization toll must reduce lawfully on the selected burden",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_BAYES_TOP_KNOT",
+      "kind": "KnotInterpretation",
+      "regime_ids": ["R_TOP"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_BAYES_BRACE"],
+      "description": "no topological obstruction knot may remain on the measurable brace shell",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_BAYES_TOP_PROB_BRIDGE",
+      "kind": "BridgeSoundness",
+      "regime_ids": ["R_TOP", "R_PROB"],
+      "bridge_ids": ["B_TOP_TO_PROB"],
+      "theorem_ids": ["THS_BAYES_BRACE"],
+      "description": "the top-to-prob bridge must carry measurable normalization soundness on the selected route",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_CH_TYP_OBJECT",
+      "kind": "ObjectInterpretation",
+      "regime_ids": ["R_TYP"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_CH_NORM"],
+      "description": "typed normalization objects must remain inhabited on the active type-to-set route",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_CH_TYP_THREAD",
+      "kind": "ThreadInterpretation",
+      "regime_ids": ["R_TYP"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_CH_NORM"],
+      "description": "typed normalization threads must remain lawful under carrier collapse",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_CH_SET_EQ",
+      "kind": "EquivalenceInterpretation",
+      "regime_ids": ["R_SET"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_CH_NORM"],
+      "description": "extensional carrier equality must remain adequate after normalization collapse",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_CH_TYP_TOLL",
+      "kind": "TollInterpretation",
+      "regime_ids": ["R_TYP"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_CH_NORM"],
+      "description": "normalization toll must reduce lawfully before extensional carrier collapse",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_CH_TYP_KNOT",
+      "kind": "KnotInterpretation",
+      "regime_ids": ["R_TYP"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_CH_NORM"],
+      "description": "no type-level obstruction knot may remain on the active normalization witness",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_CH_TYP_SET_BRIDGE",
+      "kind": "BridgeSoundness",
+      "regime_ids": ["R_TYP", "R_SET"],
+      "bridge_ids": ["B_TYPE_TO_SET"],
+      "theorem_ids": ["THS_CH_NORM"],
+      "description": "the type-to-set bridge must carry Rig soundness on the selected normalization route",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_EXEC_PROB_OBJECT",
+      "kind": "ObjectInterpretation",
+      "regime_ids": ["R_PROB"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_EXEC_INFER"],
+      "description": "probabilistic executable branching objects must remain normalized and pushforward-stable",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_EXEC_PROB_THREAD",
+      "kind": "ThreadInterpretation",
+      "regime_ids": ["R_PROB"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_EXEC_INFER"],
+      "description": "probabilistic branching threads must remain lawful before executable realization",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_EXEC_COMP_EQ",
+      "kind": "EquivalenceInterpretation",
+      "regime_ids": ["R_COMP"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_EXEC_INFER"],
+      "description": "executable realization must remain adequate under simulation transport",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_EXEC_COMP_TOLL",
+      "kind": "TollInterpretation",
+      "regime_ids": ["R_PROB", "R_COMP"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_EXEC_INFER"],
+      "description": "branching and execution toll must remain lawful on the selected realization route",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_EXEC_COMP_KNOT",
+      "kind": "KnotInterpretation",
+      "regime_ids": ["R_COMP"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_EXEC_INFER"],
+      "description": "no executable obstruction knot may remain after simulation realization",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_EXEC_PROB_COMP_BRIDGE",
+      "kind": "BridgeSoundness",
+      "regime_ids": ["R_PROB", "R_COMP"],
+      "bridge_ids": ["B_PROB_TO_COMP"],
+      "theorem_ids": ["THS_EXEC_INFER"],
+      "description": "the prob-to-comp bridge must carry Exec soundness on the selected route",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_JDG_PROB_OBJECT",
+      "kind": "ObjectInterpretation",
+      "regime_ids": ["R_PROB"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_PROB_JUDG"],
+      "description": "probabilistic judgment objects must remain normalized on the selected logical route",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_JDG_PROB_THREAD",
+      "kind": "ThreadInterpretation",
+      "regime_ids": ["R_PROB"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_PROB_JUDG"],
+      "description": "probabilistic judgment threads must remain lawful under logical transport",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_JDG_LOG_EQ",
+      "kind": "EquivalenceInterpretation",
+      "regime_ids": ["R_LOG"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_PROB_JUDG"],
+      "description": "probabilistic theorem equivalence must remain adequate on the selected logic shell",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_JDG_PROB_TOLL",
+      "kind": "TollInterpretation",
+      "regime_ids": ["R_PROB"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_PROB_JUDG"],
+      "description": "normalization and conditioning toll must remain lawful on the selected judgment route",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_JDG_PROB_KNOT",
+      "kind": "KnotInterpretation",
+      "regime_ids": ["R_PROB"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_PROB_JUDG"],
+      "description": "no probabilistic obstruction knot may remain on the active judgment route",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_JDG_PROB_LOG_BRIDGE",
+      "kind": "BridgeSoundness",
+      "regime_ids": ["R_PROB", "R_LOG"],
+      "bridge_ids": ["B_PROB_TO_LOG"],
+      "theorem_ids": ["THS_PROB_JUDG"],
+      "description": "the prob-to-log bridge must carry ProbJudg_phi soundness on the selected route",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_CERT_COMP_OBJECT",
+      "kind": "ObjectInterpretation",
+      "regime_ids": ["R_COMP"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_CERT_PROP"],
+      "description": "computational property witnesses must remain executable objects on the selected route",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_CERT_COMP_THREAD",
+      "kind": "ThreadInterpretation",
+      "regime_ids": ["R_COMP"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_CERT_PROP"],
+      "description": "computational execution threads must remain replayable on the selected route",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_CERT_LOG_EQ",
+      "kind": "EquivalenceInterpretation",
+      "regime_ids": ["R_LOG"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_CERT_PROP"],
+      "description": "certified property equivalence must remain adequate on the selected logic shell",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_CERT_COMP_TOLL",
+      "kind": "TollInterpretation",
+      "regime_ids": ["R_COMP"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_CERT_PROP"],
+      "description": "computational cost toll must remain lawful under certification transport",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_CERT_COMP_KNOT",
+      "kind": "KnotInterpretation",
+      "regime_ids": ["R_COMP"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_CERT_PROP"],
+      "description": "no executable obstruction knot may remain on the certified property witness",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_CERT_COMP_LOG_BRIDGE",
+      "kind": "BridgeSoundness",
+      "regime_ids": ["R_COMP", "R_LOG"],
+      "bridge_ids": ["B_COMP_TO_LOG"],
+      "theorem_ids": ["THS_CERT_PROP"],
+      "description": "the comp-to-log bridge must carry Cert_phi soundness on the selected route",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_CHI_TYP_OBJECT",
+      "kind": "ObjectInterpretation",
+      "regime_ids": ["R_TYP"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_CH_INH"],
+      "description": "typed inherited objects must remain inhabited before algebraic enrichment",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_CHI_TYP_THREAD",
+      "kind": "ThreadInterpretation",
+      "regime_ids": ["R_TYP"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_CH_INH"],
+      "description": "typed inherited threads must remain lawful before algebraic enrichment",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_CHI_ALG_EQ",
+      "kind": "EquivalenceInterpretation",
+      "regime_ids": ["R_ALG"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_CH_INH"],
+      "description": "structure-preserving algebra equality must remain adequate on the selected route",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_CHI_TYP_TOLL",
+      "kind": "TollInterpretation",
+      "regime_ids": ["R_TYP"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_CH_INH"],
+      "description": "typed inhabitance toll must remain lawful before algebraic enrichment",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_CHI_TYP_KNOT",
+      "kind": "KnotInterpretation",
+      "regime_ids": ["R_TYP"],
+      "bridge_ids": [],
+      "theorem_ids": ["THS_CH_INH"],
+      "description": "no type-side obstruction knot may remain before algebraic enrichment",
+      "blocking": true
+    },
+    {
+      "id": "ADQ_CHI_TYP_ALG_BRIDGE",
+      "kind": "BridgeSoundness",
+      "regime_ids": ["R_TYP", "R_ALG"],
+      "bridge_ids": ["B_TYPE_TO_ALG"],
+      "theorem_ids": ["THS_CH_INH"],
+      "description": "the type-to-alg bridge must carry Lift^Typ->Alg soundness on the selected route",
+      "blocking": true
+    }
+  ],
+  "codebook_packs": [
+    {
+      "id": "CB_CORE",
+      "version": "1",
+      "symbols": ["CTX","CUT","THR","BRC","SLK","TOL","KNT","WIT","CAN","PRM"]
+    }
+  ],
+  "glyph_packs": [
+    {
+      "id": "GLYPH_PACK_A",
+      "version": "1",
+      "pack": "PackA",
+      "delimiters": {
+        "identity_open": "⟦",
+        "identity_close": "⟧",
+        "struct_open": "⟨",
+        "struct_close": "⟩",
+        "constraint_open": "〔",
+        "constraint_close": "〕",
+        "evidence_open": "⦃",
+        "evidence_close": "⦄",
+        "alias_open": "⟪",
+        "alias_close": "⟫"
+      },
+      "operators": {
+        "maps_to": "↦",
+        "approx": "≈",
+        "compose": "∘"
+      }
+    }
+  ],
+  "combo_packs": [
+    {
+      "id": "COMBO_PACK_A",
+      "version": "1",
+      "pack": "PackA",
+      "combos": {
+        "id_open": "⟦",
+        "id_close": "⟧",
+        "st_open": "⟨",
+        "st_close": "⟩",
+        "ct_open": "〔",
+        "ct_close": "〕",
+        "ev_open": "⦃",
+        "ev_close": "⦄",
+        "al_open": "⟪",
+        "al_close": "⟫",
+        "maps_to": "↦",
+        "approx": "≈",
+        "compose": "∘",
+        "nl": "\n"
+      }
+    }
+  ],
+  "projection_policies": [
+    {
+      "id": "PROJ_QC0_CORE",
+      "kind": "StrictAuthority",
+      "allow_qk0_export": false,
+      "allow_qa0_downgrade": false
+    },
+    {
+      "id": "PROJ_QM0_A",
+      "kind": "CanonicalAuthored",
+      "allow_qk0_export": true,
+      "allow_qa0_downgrade": true
+    },
+    {
+      "id": "PROJ_QK0_A",
+      "kind": "InputProjectionOnly",
+      "allow_qk0_export": true,
+      "allow_qa0_downgrade": false
+    },
+    {
+      "id": "PROJ_QA0_A",
+      "kind": "DebugMirrorOnly",
+      "allow_qk0_export": false,
+      "allow_qa0_downgrade": true
+    }
+  ],
+  "alias_expansion_policies": [
+    {
+      "id": "ALIAS_STRICT",
+      "kind": "ForbidImplicit",
+      "allowed_aliases": []
+    },
+    {
+      "id": "ALIAS_DECLARED",
+      "kind": "ExpandAndReceipt",
+      "allowed_aliases": ["ctx_set","ctx_set_canon"]
+    }
+  ],
+  "surface_policies": [
+    {
+      "id": "POL_QC0_CORE",
+      "codebook_pack": "CB_CORE",
+      "profile": "core",
+      "projection_policy": "PROJ_QC0_CORE",
+      "combo_pack": null,
+      "glyph_pack": null,
+      "alias_expansion_policy": "ALIAS_STRICT",
+      "allowed_loss_classes": []
+    },
+    {
+      "id": "POL_QM0_PACK_A",
+      "codebook_pack": "CB_CORE",
+      "profile": "pack-a",
+      "projection_policy": "PROJ_QM0_A",
+      "combo_pack": null,
+      "glyph_pack": "GLYPH_PACK_A",
+      "alias_expansion_policy": "ALIAS_DECLARED",
+      "allowed_loss_classes": []
+    },
+    {
+      "id": "POL_QK0_PACK_A",
+      "codebook_pack": "CB_CORE",
+      "profile": "pack-a",
+      "projection_policy": "PROJ_QK0_A",
+      "combo_pack": "COMBO_PACK_A",
+      "glyph_pack": "GLYPH_PACK_A",
+      "alias_expansion_policy": "ALIAS_DECLARED",
+      "allowed_loss_classes": []
+    },
+    {
+      "id": "POL_QA0_PACK_A",
+      "codebook_pack": "CB_CORE",
+      "profile": "pack-a",
+      "projection_policy": "PROJ_QA0_A",
+      "combo_pack": null,
+      "glyph_pack": null,
+      "alias_expansion_policy": "ALIAS_DECLARED",
+      "allowed_loss_classes": ["ascii-mirror"]
+    }
+  ],
+  "capability_matrices": [
+    {
+      "id": "CAP_QC0_CORE",
+      "surface_kind": "Qc0",
+      "supported_packs": ["Core"],
+      "import_support": true,
+      "export_support": true,
+      "transcode_support": ["Qa0","Qm0","Qk0"],
+      "roundtrip_support": true,
+      "known_limits": []
+    },
+    {
+      "id": "CAP_QM0_PACK_A",
+      "surface_kind": "Qm0",
+      "supported_packs": ["PackA"],
+      "import_support": true,
+      "export_support": true,
+      "transcode_support": ["Qc0","Qa0","Qk0"],
+      "roundtrip_support": true,
+      "known_limits": ["bundle entries outside object shell remain textual payloads"]
+    },
+    {
+      "id": "CAP_QK0_PACK_A",
+      "surface_kind": "Qk0",
+      "supported_packs": ["PackA"],
+      "import_support": true,
+      "export_support": true,
+      "transcode_support": ["Qm0","Qc0","Qa0"],
+      "roundtrip_support": true,
+      "known_limits": ["projection-only authority"]
+    },
+    {
+      "id": "CAP_QA0_PACK_A",
+      "surface_kind": "Qa0",
+      "supported_packs": ["PackA"],
+      "import_support": true,
+      "export_support": true,
+      "transcode_support": ["Qc0","Qm0","Qk0"],
+      "roundtrip_support": true,
+      "known_limits": ["ascii mirror can require receipted downgrade"]
+    }
+  ],
+  "roundtrip_reports": [],
+  "transform_receipts": [],
+  "surface_deficiencies": [
+    {
+      "id": "SBD_ROUNDTRIP_UNVERIFIED",
+      "kind": "RoundtripUnverified",
+      "surface_kind": "Qk0",
+      "message": "surface routes require explicit round-trip evidence"
+    }
+  ]
+}

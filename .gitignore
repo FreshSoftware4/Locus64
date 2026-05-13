@@ -1,0 +1,10 @@
+target/
+.mf-cache/
+release/perfopt/
+release/compact/
+release/src/
+release/torture/
+*.tmp
+*.log
+.DS_Store
+Thumbs.db

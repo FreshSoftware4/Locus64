@@ -1,0 +1,8 @@
+{
+  "subject_id": "CPG_CHAIN_RULE",
+  "decision": "FastPathCoverage",
+  "route_fast_path": true,
+  "reason": "promoted operator and exact obligation coverage present",
+  "covered_by": ["OPR_PROMOTED_OPR_CHAIN1"],
+  "residual_obligation_ids": []
+}
