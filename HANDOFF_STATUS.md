@@ -69,6 +69,7 @@ They are not hard-deleted.
 
 - `README.md`: concise project overview and release layout
 - `USAGE_GUIDE.md`: operator command guide
+- `SEMANTIC_USAGE_GUIDE.md`: semantic usage guide for claim governance, branch/challenge tracking, and research-framework integration
 - `COMPOUNDING_CHANGE_CHAIN.md`: architecture rail and phase status
 - `scripts/torture-test.ps1`: regression/torture harness
 - `Cargo.toml`: workspace members and release profiles

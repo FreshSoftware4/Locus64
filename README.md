@@ -71,5 +71,6 @@ Zip files for all five release packages are placed directly under `release`.
 
 - `COMPOUNDING_CHANGE_CHAIN.md`: active implementation rail and closure status
 - `USAGE_GUIDE.md`: command guide
+- `SEMANTIC_USAGE_GUIDE.md`: semantic/claim-governance guide for research frameworks and indirect ChatGPT workflows
 - `HANDOFF_STATUS.md`: developer handoff and verification notes
 - `LOCUS64_STACK.md`: stack overview
