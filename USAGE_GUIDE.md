@@ -89,6 +89,8 @@ mf research-promotion-readiness REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE
 mf research-status
 ```
 
+For exact syntax and record shapes, see `LOCUS64_LANGUAGE_SPEC.md`.
+
 For semantic claim governance, branch tracking, derivation lineage, and cosmology-style workflows, see `SEMANTIC_USAGE_GUIDE.md`.
 
 ## Coverage and Tower

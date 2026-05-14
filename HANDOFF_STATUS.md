@@ -68,6 +68,7 @@ They are not hard-deleted.
 ## Most Important Files
 
 - `README.md`: concise project overview and release layout
+- `LOCUS64_LANGUAGE_SPEC.md`: concrete command/RNA/QC0 language specification
 - `USAGE_GUIDE.md`: operator command guide
 - `SEMANTIC_USAGE_GUIDE.md`: semantic usage guide for claim governance, branch/challenge tracking, and research-framework integration
 - `COMPOUNDING_CHANGE_CHAIN.md`: architecture rail and phase status

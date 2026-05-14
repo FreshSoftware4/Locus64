@@ -70,6 +70,7 @@ Zip files for all five release packages are placed directly under `release`.
 ## Development References
 
 - `COMPOUNDING_CHANGE_CHAIN.md`: active implementation rail and closure status
+- `LOCUS64_LANGUAGE_SPEC.md`: concrete command/RNA/QC0 syntax and record schema for interacting with Locus64
 - `USAGE_GUIDE.md`: command guide
 - `SEMANTIC_USAGE_GUIDE.md`: semantic/claim-governance guide for research frameworks and indirect ChatGPT workflows
 - `HANDOFF_STATUS.md`: developer handoff and verification notes
