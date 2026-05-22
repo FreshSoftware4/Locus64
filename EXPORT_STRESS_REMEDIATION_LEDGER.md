@@ -18,7 +18,7 @@ This ledger now treats exported-chat/runtime findings as first-class remediation
 These entries should exist simultaneously as:
 - persisted remediation objects under the research host
 - command/artifact contract fixes where relevant
-- phased items in the compounding change chain
+- phased items in `LINEAR_EXECUTION_RAIL.md` or in a trajectory-preserving compounding change chain applied to it
 
 ## Law
 

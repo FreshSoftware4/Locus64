@@ -69,7 +69,7 @@ Zip files for all five release packages are placed directly under `release`.
 
 ## Development References
 
-- `COMPOUNDING_CHANGE_CHAIN.md`: active substrate inversion execution rail and compounding change chain
+- `LINEAR_EXECUTION_RAIL.md`: authoritative linear rail; compounding change chains are trajectory-preserving changes to this file
 - `LOCUS64_LANGUAGE_SPEC.md`: concrete command/RNA/QC0 syntax and record schema for interacting with Locus64
 - `USAGE_GUIDE.md`: command guide
 - `SEMANTIC_USAGE_GUIDE.md`: semantic/claim-governance guide for research frameworks and indirect ChatGPT workflows

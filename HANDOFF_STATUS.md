@@ -21,7 +21,7 @@ Implemented transitional substrates include:
 - proof coverage dispatch with reuse legality, reuse decisions, and residual verification receipts
 - research lineage records that carry canonical hash, lowering receipt id, phase ids, and phase ledger
 
-The current `COMPOUNDING_CHANGE_CHAIN.md` supersedes earlier completion framing. It classifies the current system as graph-persistence/proto-DNA infrastructure that must be inverted into true structural execution substrate before upper-stack expansion continues.
+The current `LINEAR_EXECUTION_RAIL.md` supersedes earlier completion framing. It classifies the current system as graph-persistence/proto-DNA infrastructure that must be inverted into true structural execution substrate before upper-stack expansion continues.
 
 ## Shipping Entry Points
 
@@ -73,6 +73,6 @@ They are not hard-deleted.
 - `LOCUS64_LANGUAGE_SPEC.md`: concrete command/RNA/QC0 language specification
 - `USAGE_GUIDE.md`: operator command guide
 - `SEMANTIC_USAGE_GUIDE.md`: semantic usage guide for claim governance, branch/challenge tracking, and research-framework integration
-- `COMPOUNDING_CHANGE_CHAIN.md`: substrate inversion rail and phase sequence
+- `LINEAR_EXECUTION_RAIL.md`: authoritative linear execution rail and phase sequence
 - `scripts/torture-test.ps1`: regression/torture harness
 - `Cargo.toml`: workspace members and release profiles
