@@ -4,13 +4,13 @@
 
 The workspace builds and tests as a Rust workspace with the unified `mf` wrapper, direct `mf-cli`, and direct `mf-admin` binaries.
 
-The active lower chain is implemented as:
+The active lower chain is implemented as a transitional path:
 
 ```text
 Tokenization -> RnaNormalization -> StructuralResolution -> CanonicalNormalization -> DNA emission
 ```
 
-Implemented closure substrates include:
+Implemented transitional substrates include:
 
 - token classes, token streams, tokenization receipts, token specs
 - RNORM diagnostic specs and token-grounded normalization receipts
@@ -20,6 +20,8 @@ Implemented closure substrates include:
 - execution exactness and execution closure receipts
 - proof coverage dispatch with reuse legality, reuse decisions, and residual verification receipts
 - research lineage records that carry canonical hash, lowering receipt id, phase ids, and phase ledger
+
+The current `COMPOUNDING_CHANGE_CHAIN.md` supersedes earlier completion framing. It classifies the current system as graph-persistence/proto-DNA infrastructure that must be inverted into true structural execution substrate before upper-stack expansion continues.
 
 ## Shipping Entry Points
 
@@ -71,6 +73,6 @@ They are not hard-deleted.
 - `LOCUS64_LANGUAGE_SPEC.md`: concrete command/RNA/QC0 language specification
 - `USAGE_GUIDE.md`: operator command guide
 - `SEMANTIC_USAGE_GUIDE.md`: semantic usage guide for claim governance, branch/challenge tracking, and research-framework integration
-- `COMPOUNDING_CHANGE_CHAIN.md`: architecture rail and phase status
+- `COMPOUNDING_CHANGE_CHAIN.md`: substrate inversion rail and phase sequence
 - `scripts/torture-test.ps1`: regression/torture harness
 - `Cargo.toml`: workspace members and release profiles

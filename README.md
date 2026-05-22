@@ -7,8 +7,8 @@ The primary binary is `mf`. It routes commands to the CLI or admin implementatio
 ## Current Architecture
 
 - **Locus Kernel**: cold semantic authority for certification, adequacy, replay, and promotion decisions.
-- **RNA/DNA lower chain**: `TOKENIZE -> RNORM -> SSR -> CNORM -> DNA`, with ledger-visible receipts and closure checks.
-- **Locus Genome**: binary packet substrate for `.dna` artifacts; `.locus` remains readable during compatibility rollout.
+- **RNA/DNA lower chain**: transitional `TOKENIZE -> RNORM -> SSR -> CNORM -> DNA` support exists, but the active rail now treats SSR/CNORM/DNA as substrate-inversion targets rather than fully closed final architecture.
+- **Locus Genome**: current `.dna` artifacts are proto-DNA during the inversion; `.locus` remains readable during compatibility rollout.
 - **Research Host**: governed task, signature, review, challenge, lineage, promotion, handoff, and remediation surfaces.
 - **Tower/Coverage**: proof coverage dispatch, lawful reuse receipts, residual verification, distress/help, recipes, and promotion candidates.
 
@@ -69,7 +69,7 @@ Zip files for all five release packages are placed directly under `release`.
 
 ## Development References
 
-- `COMPOUNDING_CHANGE_CHAIN.md`: active implementation rail and closure status
+- `COMPOUNDING_CHANGE_CHAIN.md`: active substrate inversion execution rail and compounding change chain
 - `LOCUS64_LANGUAGE_SPEC.md`: concrete command/RNA/QC0 syntax and record schema for interacting with Locus64
 - `USAGE_GUIDE.md`: command guide
 - `SEMANTIC_USAGE_GUIDE.md`: semantic/claim-governance guide for research frameworks and indirect ChatGPT workflows
