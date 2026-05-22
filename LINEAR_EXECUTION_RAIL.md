@@ -61,6 +61,7 @@ Forbidden change chains:
 
 - add upper-stack work before lower substrate closure
 - introduce a parallel public surface model
+- preserve obsolete compatibility formats without an actual ecosystem requirement
 - promote compatibility formats into authority
 - hide unresolved ambiguity in future implementation details
 - widen scope without reducing downstream cost
@@ -916,7 +917,7 @@ Current codebase classification:
 - DNA exists as proto-DNA and must be rebuilt into compact structural encoding.
 - CLI exists but must be phase-engine enforced.
 - Research, certification, tower, and coverage systems are valuable but must be reattached as derived overlays.
-- QC0/JSON/document workflows are compatibility/import/export projections, not final public authority.
+- QC0/QA0/QK0/QM0/JSON/document workflows are extraction sources and deletion targets, not compatibility commitments or final public authority.
 
 ## 22. First Compounding Change Chain
 
@@ -996,11 +997,16 @@ Depends on:
 
 Code targets:
 
+- current `mf-*` crates until renamed
+- future `l64-*` crate and binary names
 - `mf-cli`
 - `mf-admin`
 - `mf-command`
 - `mf-locus`
 - `mf-qc0`
+- `mf-qa0`
+- `mf-qk0`
+- `mf-qm0`
 - `mf-research`
 - `mf-cert`
 - `mf-runtime`
@@ -1008,20 +1014,20 @@ Code targets:
 Actions:
 
 - add an authority classification enum or equivalent static table
-- classify paths as `SubstrateAuthority`, `DerivedSemantic`, `CompatibilityProjection`, or `LegacyRisk`
-- expose `mf authority-audit` or equivalent admin command
-- make the audit fail if QC0, JSON, report text, or SSR identities claim substrate authority
+- classify paths as `SubstrateAuthority`, `DerivedSemantic`, `ExtractionSource`, or `DeletionTarget`
+- expose `l64 authority-audit` or equivalent admin command
+- make the audit fail if QC0/QA0/QK0/QM0, JSON, report text, or SSR identities claim substrate authority
 
 Invariants:
 
 - RNA and DNA are the only target public representation surfaces
-- compatibility paths are explicitly compatibility
+- Q-surface paths are not compatibility commitments
 - semantic persistence cannot silently become substrate authority
 
 Tests:
 
 - command smoke test for authority audit
-- assertion that QC0/JSON/report paths are not classified as substrate authority
+- assertion that QC0/QA0/QK0/QM0/JSON/report paths are not classified as substrate authority
 - regression test that DNA/lower receipts remain authority-capable
 
 Exit condition:
@@ -1543,9 +1549,11 @@ Depends on:
 
 Code targets:
 
-- `mf-cli`
-- `mf-admin`
-- `mf-command`
+- public command name `l64`
+- crate prefix target `l64-*`
+- current `mf-cli`
+- current `mf-admin`
+- current `mf-command`
 - `README.md`
 - `USAGE_GUIDE.md`
 - `LOCUS64_LANGUAGE_SPEC.md`
@@ -1553,20 +1561,23 @@ Code targets:
 Actions:
 
 - align commands around `import`, `splice`, `fold`, `compile`, `validate`, `sequence`, `execute`, `trace`, `certify`, and `reuse`
-- label legacy commands or compatibility workflows clearly
+- choose `l64` as the public binary name; use uppercase `L64` only for prose/product identity where appropriate
+- plan crate rename from `mf-*` to `l64-*` after lower substrate tests protect behavior
+- remove, not merely label, obsolete Q-surface commands unless still required as an extraction source during the active migration node
 - ensure extension is hint and header is truth
 - implement RNA mutation UX with backup and explicit confirmation where applicable
 
 Invariants:
 
 - CLI trace equals phase trace
-- user-facing docs do not imply QC0/JSON are public authority
+- user-facing docs do not imply QC0/QA0/QK0/QM0/JSON are public authority or supported ecosystem formats
 - mutation is never silent
 
 Tests:
 
 - CLI smoke suite
 - help text scan for stale authority wording
+- `rg "mf |mf-|qc0|qa0|qk0|qm0"` with documented exceptions only
 - RNA backup/rollback test where implemented
 
 Exit condition:
@@ -1577,11 +1588,11 @@ Downstream payoff:
 
 - documentation and CLI stop fighting the architecture
 
-### Node 14 - Compatibility Demotion
+### Node 14 - Q-Surface Extraction And Deletion
 
 Purpose:
 
-- preserve useful legacy workflows without allowing them to define authority
+- extract required implementation value from obsolete Q-surface crates, redirect surviving behavior into RNA/DNA substrate modules, and delete the Q-surface crates instead of preserving fake compatibility
 
 Depends on:
 
@@ -1596,33 +1607,48 @@ Code targets:
 - `mf-surfaces`
 - `mf-bundle`
 - `samples`
+- `Cargo.toml`
+- `Cargo.lock`
+- future or existing RNA/DNA homes:
+  - `l64-rna` or current `mf-locus`/`mf-core`
+  - `l64-dna` or current `mf-locus`
+  - `l64-command` or current `mf-command`
+  - `l64-research` or current `mf-research`
 
 Actions:
 
-- mark QC0/JSON/report paths as compatibility import/export projections
-- require recompilation or validated lineage before promotion
-- add compatibility receipts with origin and projection status
-- update sample docs to distinguish compatibility from target public surface
+- inventory all Q-surface crates by used type, parser, fixture, sample, command, and receipt
+- extract reusable logic into RNA/DNA or shared substrate modules only when still required
+- redirect commands and tests from `.qc0`, `.qa0`, `.qk0`, and `.qm0` files to `.rna` and `.dna` artifacts
+- replace Q-surface samples with rail-native `.gene.rna`, `.locus.rna`, `.genome.rna`, and `.dna` samples
+- remove Q-surface crates from the workspace once consumers are redirected
+- remove Q-surface exports from user documentation
+- preserve no compatibility shim unless an active test proves a still-required internal transition cannot yet be completed
+- document any temporary shim with an owner node and deletion condition
 
 Invariants:
 
-- compatibility artifacts cannot silently become substrate authority
+- Q-surface artifacts cannot become substrate authority
 - public doctrine remains RNA/DNA
-- legacy import remains useful but subordinate
+- Q-surface support is not treated as a user-facing ecosystem because no real ecosystem exists yet
+- extracted code must be smaller and better-rooted than the deleted surface crate
+- no Q-surface crate remains in the workspace after this node exits
 
 Tests:
 
-- compatibility import tests
-- promotion rejection test for lineage-free legacy object
-- sample certification regression tests
+- `rg "mf-qc0|mf-qa0|mf-qk0|mf-qm0|\\.qc0|\\.qa0|\\.qk0|\\.qm0"` returns only allowed historical notes, if any
+- workspace membership no longer includes Q-surface crates
+- sample certification regression tests pass through RNA/DNA or lineage-native replacements
+- promotion rejection test for lineage-free extracted/imported object
+- build and test after each removed crate or command group
 
 Exit condition:
 
-- legacy paths are safe adapters rather than competing languages
+- Q-surface crates are gone, useful logic has been absorbed into RNA/DNA substrate homes, and user-facing workflow is RNA/DNA only
 
 Downstream payoff:
 
-- current sample and certification value is retained without preserving the inversion
+- reduces code hoarding, removes false compatibility pressure, and prevents obsolete surface names from shaping future architecture
 
 ### Node 15 - Semantic Rekeying And Upper Reattachment
 
@@ -1649,12 +1675,14 @@ Actions:
 - require lineage for claim, route, adequacy, bridge, operator, proof-shape, and coverage records
 - make generator/tower growth blocker-driven and lineage-grounded
 - preserve challenge/remediation records as derived overlays
+- ensure any useful semantic payload formerly expressed in QC0 exists as RNA/DNA-backed lineage objects or native Rust records, not as Q-surface text
 
 Invariants:
 
 - no floating report semantics
 - no theorem/campaign object becomes authority without DNA lineage
 - upper systems can be replayed or challenged
+- no upper system depends on Q-surface crates
 
 Tests:
 
@@ -1662,6 +1690,7 @@ Tests:
 - imported claim regression
 - lineage-required rejection tests
 - coverage reuse tests
+- Q-surface dependency absence test
 
 Exit condition:
 
@@ -1717,7 +1746,19 @@ Downstream payoff:
 
 - future work has a regression net and clear resume point
 
-## 24. Definition Of Done
+## 24. Second Compounding Change Chain
+
+This change chain is now applied to the rail:
+
+1. Reclassify Q-surface crates as extraction-and-deletion targets, not compatibility surfaces.
+2. Replace Node 14 compatibility demotion with Q-surface extraction and deletion.
+3. Require useful code from `mf-qc0`, `mf-qa0`, `mf-qk0`, and `mf-qm0` to move into RNA/DNA or shared substrate modules.
+4. Require commands, samples, and docs to redirect to `.rna` and `.dna` artifacts instead of `.qc0`, `.qa0`, `.qk0`, or `.qm0`.
+5. Start the naming migration target from `mf`/`math framework` toward `l64` for command and crate identity.
+6. Permit temporary shims only when they have an owner node and explicit deletion condition.
+7. Add search/build/test gates proving Q-surface residue is gone rather than merely documented.
+
+## 25. Definition Of Done
 
 The rail is implemented when:
 
@@ -1729,10 +1770,12 @@ The rail is implemented when:
 - execution traverses DNA or canonical topology directly
 - every public CLI command maps to phase-engine transitions and ledger entries
 - semantic systems are lineage-keyed derived overlays
-- compatibility imports are clearly marked and cannot become authority without recompilation
+- Q-surface crates are removed and no longer shape the architecture
+- public command/crate naming has migrated to `l64` or has a bounded transitional shim with deletion criteria
+- compatibility imports are removed unless backed by a concrete active requirement and deletion condition
 - conformance, fuzz, torture, replay, migration, and cross-platform determinism tests pass
 
-## 25. Final System Definition
+## 26. Final System Definition
 
 Locus64 is a deterministic structural substrate in which symbolic interaction surfaces are normalized into canonical graph structure, encoded into reconstructive machine form, executed under lineage-preserving authority, and amortized through lawful structural reuse.
 

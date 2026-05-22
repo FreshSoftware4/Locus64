@@ -1,5 +1,7 @@
 # Locus64 Interaction Language Specification
 
+Status note: this file is now transitional. The active rail in `LINEAR_EXECUTION_RAIL.md` makes RNA/DNA the target language model and treats QC0/QA0/QK0/QM0 as extraction-and-deletion targets, not compatibility commitments or final public languages. Use this document to understand existing commands and records while migrating them into RNA/DNA-backed lineage or native Rust records.
+
 This is the concrete syntax and record-shape specification for interacting with Locus64.
 
 There are three practical languages/surfaces:
@@ -8,7 +10,7 @@ There are three practical languages/surfaces:
 2. **RNA language**: small symbolic input compiled into DNA.
 3. **QC0 bundle language**: line-oriented semantic/certification records.
 
-If you are driving Locus64 indirectly from ChatGPT or another system, generate **QC0** for semantic objects and **RNA** only for lower-chain symbolic roots.
+If you are driving Locus64 indirectly from ChatGPT or another system, prefer RNA/DNA-backed lineage. Existing QC0 examples document the current transitional implementation only and should be treated as migration material, not the target language.
 
 ## 1. Command Language
 
@@ -114,7 +116,7 @@ Use this for identity and canonicalization. Use QC0 for claims, assumptions, evi
 
 ## 3. QC0 Bundle Language
 
-QC0 is the main semantic interaction language.
+QC0 is the current transitional semantic interaction language. It is not the target public language and is slated for extraction into RNA/DNA-backed lineage objects or native Rust records.
 
 ### 3.1 File Structure
 

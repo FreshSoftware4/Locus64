@@ -54,7 +54,7 @@ Windows target used by this release pass: `x86_64-pc-windows-msvc`.
 
 - The repo has no git metadata in this working copy, so cleanup is conservative and destructive source pruning is avoided unless tests prove it safe.
 - `.locus` decode remains as a compatibility path; `.dna` is the preferred machine artifact language.
-- Q-surface crates remain in the workspace as compatibility/implementation crates. Public doctrine is RNA/DNA, not a Q-surface product model.
+- Q-surface crates currently remain in the workspace, but the active rail now treats them as extraction-and-deletion targets, not compatibility commitments. Public doctrine is RNA/DNA, with `l64` as the target public command/crate naming direction.
 - SSR is intentionally ephemeral and must not become a persisted semantic authority layer.
 
 ## Cleanup Policy Used
@@ -70,7 +70,7 @@ They are not hard-deleted.
 ## Most Important Files
 
 - `README.md`: concise project overview and release layout
-- `LOCUS64_LANGUAGE_SPEC.md`: concrete command/RNA/QC0 language specification
+- `LOCUS64_LANGUAGE_SPEC.md`: transitional command/RNA/QC0 notes; QC0 content is slated for extraction into RNA/DNA-backed lineage or native Rust records
 - `USAGE_GUIDE.md`: operator command guide
 - `SEMANTIC_USAGE_GUIDE.md`: semantic usage guide for claim governance, branch/challenge tracking, and research-framework integration
 - `LINEAR_EXECUTION_RAIL.md`: authoritative linear execution rail and phase sequence
