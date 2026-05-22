@@ -89,6 +89,35 @@ Node:
 
 If a node cannot be written in that form, it is still a concept, not executable rail material.
 
+## Rust Development Optimization Rules
+
+The rail must be executed in Rust-native increments, not architecture-sized rewrites.
+
+Rules:
+
+- Prefer type boundaries over prose boundaries: every important phase state should become a Rust type or enum before broad logic moves.
+- Prefer newtypes for authority-sensitive IDs: `CanonicalId`, `DnaDigest`, `PhaseId`, `LedgerEntryId`, `LineageId`.
+- Prefer table-driven law over scattered matches for token classes, opcodes, phase IDs, artifact classes, failure kinds, and exactness classes.
+- Prefer `Result<T, E>` with domain errors over stringly `anyhow` at substrate boundaries; `anyhow` is acceptable at CLI edges.
+- Prefer mechanical rename commits over mixed semantic commits.
+- Prefer crate-local tests before workspace-wide tests during rename/deletion passes.
+- Prefer `cargo check -p <crate>` after local edits, then `cargo test -p <crate>`, then workspace tests only at phase exit.
+- Do not refactor `release/src`, `target`, or generated release payloads as source of truth.
+- Do not remove a crate and rename its dependents in the same step unless the dependency graph proves it is isolated.
+- Do not introduce macros/generators until the hand-written shape has repeated at least twice and the generator input is smaller than generated output.
+- Do not add `unsafe` for parser/codec performance until conformance and fuzz tests exist around the safe version.
+
+Adversarial audit checklist for every node:
+
+- Could this node make later deletion harder?
+- Could this node preserve an obsolete format out of inertia?
+- Could this node hide semantic authority behind a debug field, label, or string table?
+- Could this node make `l64` renaming harder by adding new `mf` references?
+- Could this node create a second path around the phase engine?
+- Could this node pass tests only because stale Q-surface samples still exercise the old architecture?
+- Could this node edit generated release snapshots instead of source crates?
+- Could this node broaden scope without reducing downstream ambiguity?
+
 ## 0. System Identity
 
 Locus64 is a deterministic structural transformation substrate.
@@ -934,6 +963,17 @@ Observed codebase facts that affect the rail:
 Plan-altering conclusion:
 
 - The rail must include a dedicated rename node before Q-surface deletion, because deleting Q crates and renaming the workspace at the same time would make failures harder to localize.
+- The phase contract skeleton must exist before lower-chain work, because otherwise token/RNORM/SSR/CNORM/DNA changes will each invent local validation and failure semantics.
+- Authority audit must include workspace ownership and dependency fanout, because the Q-surface crates are still actively referenced by CLI, tests, samples, and `mf-surfaces`.
+- End-to-end closure must include release packaging and documentation verification, because the rail was created to carry the project to a shippable endpoint.
+
+Adversarial audit result:
+
+- Highest rework risk: performing `mf` -> `l64` rename too late, after new code adds more `mf` references.
+- Highest architecture risk: treating Q-surface crates as compatibility instead of deleting them.
+- Highest Rust risk: moving logic between crates without first establishing typed phase/error/ID contracts in `core`/command substrate.
+- Highest testing risk: workspace tests staying green because `.qc0` fixtures still dominate coverage.
+- Highest release risk: stale `release/src` snapshots or old docs being mistaken for current source truth.
 
 ## 22. First Compounding Change Chain
 
@@ -1006,6 +1046,7 @@ Purpose:
 
 - identify every path that can currently create, validate, import, export, or promote artifacts
 - classify those paths by authority level before lower-chain changes begin
+- establish the current workspace dependency map before renaming or deletion work begins
 
 Depends on:
 
@@ -1015,6 +1056,7 @@ Code targets:
 
 - current `mf-*` crates until renamed
 - future `l64-*` crate and binary names
+- root `Cargo.toml`
 - `mf-cli`
 - `mf-admin`
 - `mf-command`
@@ -1027,21 +1069,34 @@ Code targets:
 - `mf-cert`
 - `mf-runtime`
 
+Step sequence:
+
+1. Run `cargo metadata` or equivalent workspace inspection and record crate membership.
+2. Build a dependency fanout map for Q-surface crates, CLI/admin binaries, surfaces, bundle, cert, and tests.
+3. Classify each command/import/export/promote path by authority category.
+4. Mark generated release snapshots and `target` output as non-source.
+5. Add or plan the `authority-audit` command only after the static classification is clear.
+6. Add residue searches for Q-surface and `mf` naming.
+7. Run targeted checks for the crates touched by the audit.
+
 Actions:
 
 - add an authority classification enum or equivalent static table
 - classify paths as `SubstrateAuthority`, `DerivedSemantic`, `ExtractionSource`, or `DeletionTarget`
 - expose `l64 authority-audit` or equivalent admin command
 - make the audit fail if QC0/QA0/QK0/QM0, JSON, report text, or SSR identities claim substrate authority
+- record crate dependency fanout so later rename/deletion order is mechanical
 
 Invariants:
 
 - RNA and DNA are the only target public representation surfaces
 - Q-surface paths are not compatibility commitments
 - semantic persistence cannot silently become substrate authority
+- release snapshots are not edited as authoritative source
 
 Tests:
 
+- `cargo metadata` or equivalent workspace inventory succeeds
 - command smoke test for authority audit
 - assertion that QC0/QA0/QK0/QM0/JSON/report paths are not classified as substrate authority
 - regression test that DNA/lower receipts remain authority-capable
@@ -1054,10 +1109,11 @@ Downstream payoff:
 
 - prevents substrate work from being invalidated by hidden upper-stack authority leakage
 
-### Node 02 - Canonical Identity Foundation
+### Node 02 - Phase Contract Skeleton And Canonical Identity Foundation
 
 Purpose:
 
+- establish the Rust phase contract before individual phases invent incompatible validation/error/receipt shapes
 - make canonical identity precise before token/opcode/DNA work depends on it
 
 Depends on:
@@ -1069,9 +1125,21 @@ Code targets:
 - `mf-core`
 - `mf-canon`
 - `mf-locus`
+- `mf-command`
+
+Step sequence:
+
+1. Define closed enums or equivalent stable IDs for `PhaseId`, `ArtifactClass`, `FailureKind`, `ExactnessClass`, and `AuthorityClass`.
+2. Define newtypes for `CanonicalId`, `DnaDigest`, `LineageId`, and `LedgerEntryId`.
+3. Define minimal `PhaseInput`, `PhaseOutput`, `PhaseReceipt`, and `PhaseFailure` traits or structs.
+4. Define canonical identity as BLAKE3 over canonical binary structure.
+5. Add collision fallback semantics as structural equality, even if collision tests use an injected/fake hash.
+6. Add tests around metadata independence and source formatting independence.
+7. Only after these types exist, let later nodes add phase-specific payloads.
 
 Actions:
 
+- add minimal phase contract types without forcing every phase through the engine yet
 - verify or add BLAKE3 support for canonical binary structure
 - define `CanonicalId` as hash over canonical binary structure, not metadata
 - add structural equality fallback for hash collision handling
@@ -1082,20 +1150,22 @@ Invariants:
 - metadata does not affect identity
 - source formatting does not affect identity
 - canonical binary structure is the only identity input
+- later phase receipts share the same phase/failure/authority vocabulary
 
 Tests:
 
+- compile test for shared phase contract types
 - same structure with different metadata yields same ID
 - different structure yields different ID or falls through to structural comparison on forced collision test
 - canonical ID stable across repeated runs
 
 Exit condition:
 
-- all later phases can depend on one identity law
+- all later phases can depend on one identity law and one minimal phase contract vocabulary
 
 Downstream payoff:
 
-- reuse, ledger, DNA integrity, and semantic rekeying share one root
+- tokenization, RNORM, SSR, CNORM, DNA, execution, reuse, and semantic rekeying do not each invent local contract shapes
 
 ### Node 03 - Token Algebra Freeze
 
@@ -1113,6 +1183,15 @@ Code targets:
 - `mf-cli`
 - `mf-locus`
 - existing RNA normalization code
+
+Step sequence:
+
+1. Locate all token-like classification currently embedded in RNA, CLI, locus, and tests.
+2. Create the closed `TokenClass` and byte classification table in the lowest appropriate crate.
+3. Redirect one existing tokenizer path to the shared table.
+4. Add fixtures for accepted bytes, rejected bytes, boundaries, whitespace, and newlines.
+5. Remove duplicated local token rules only after the shared tests pass.
+6. Run crate-local checks before wider workspace tests.
 
 Actions:
 
@@ -1158,6 +1237,15 @@ Code targets:
 - `mf-core`
 - `mf-locus`
 - `mf-cli`
+
+Step sequence:
+
+1. Introduce RNA state types or equivalent wrappers without changing behavior.
+2. Make RNORM accept the shared `TokenStream`.
+3. Move shorthand/splice expansion behind explicit RNORM functions.
+4. Emit `RnormReceipt` using shared phase/failure vocabulary.
+5. Add idempotence and failure fixtures.
+6. Remove old string-only normalization paths after tests prove equivalent or intentionally stricter behavior.
 
 Actions:
 
@@ -1206,6 +1294,15 @@ Code targets:
 - `mf-locus`
 - `mf-runtime`
 
+Step sequence:
+
+1. Inventory existing opcode-like enums, packet tags, and structural node kind matches.
+2. Define the shared `Opcode` enum and arity table.
+3. Redirect SSR/KGRAPH first, DNA second, execution third.
+4. Add forbidden semantic opcode tests.
+5. Replace scattered local matches with table lookups where this reduces duplication.
+6. Run targeted tests for each consumer before deleting old local definitions.
+
 Actions:
 
 - define one `Opcode` enum
@@ -1249,6 +1346,15 @@ Code targets:
 - `mf-core`
 - `mf-locus`
 - any current structural resolution module
+
+Step sequence:
+
+1. Identify every persisted SSR-like ID, graph, receipt, or export path.
+2. Add the bounded SSR reducer while leaving old path behind a testable comparison if needed.
+3. Emit `SsrReceipt` without authority identity.
+4. Switch CNORM input to the new KGRAPH path.
+5. Delete or demote SSR persistence/export.
+6. Add tests that fail if SSR becomes serializable authority again.
 
 Actions:
 
@@ -1298,6 +1404,15 @@ Code targets:
 - `mf-canon`
 - `mf-locus`
 
+Step sequence:
+
+1. Define KGRAPH node/storage shape in the lower crate.
+2. Add DAG-by-default validation and explicit cycle representation if needed.
+3. Remove semantic payloads from node identity.
+4. Make CNORM consume only KGRAPH.
+5. Add graph property tests.
+6. Remove legacy graph snapshot inputs from CNORM once callers move.
+
 Actions:
 
 - define explicit `KGraph` node shape
@@ -1341,6 +1456,15 @@ Code targets:
 - `mf-canon`
 - `mf-core`
 - `mf-locus`
+
+Step sequence:
+
+1. Introduce `CanonicalTopology` beside existing canonical graph code.
+2. Implement canonical ordering for the smallest real structure family first.
+3. Add idempotence and equivalence fixtures.
+4. Compute canonical binary form and canonical ID through Node 02 identity types.
+5. Redirect DNA encoding to consume `CanonicalTopology`.
+6. Remove presentation-dependent identity inputs.
 
 Actions:
 
@@ -1388,6 +1512,15 @@ Code targets:
 - `mf-locus`
 - `mf-core`
 
+Step sequence:
+
+1. Define DNA header and section structs using fixed-size/varint primitives.
+2. Encode a minimal canonical topology without optional strings.
+3. Add optional debug/string sections only after required sections validate alone.
+4. Add staged decode and validation helpers.
+5. Keep proto-DNA import only long enough to migrate tests.
+6. Add binary inspection tests proving required sections do not need semantic text.
+
 Actions:
 
 - implement required DNA header fields
@@ -1434,6 +1567,14 @@ Code targets:
 - `mf-runtime`
 - `mf-cli`
 
+Step sequence:
+
+1. Add `DNA_VALIDATE` as a distinct phase ID.
+2. Implement validator over the new DNA structures.
+3. Route CLI validate through validator.
+4. Block executor entry points that lack validation receipts.
+5. Add invalid corpus tests before execution refactor.
+
 Actions:
 
 - add explicit `DNA_VALIDATE` phase
@@ -1477,6 +1618,15 @@ Code targets:
 - `mf-runtime`
 - `mf-cert`
 - `mf-core`
+
+Step sequence:
+
+1. Add execution input type that requires validated DNA or canonical topology plus validation receipt.
+2. Implement the smallest structural traversal path before optimizing.
+3. Split exact witness, numeric evidence, counterexample candidate, replay trace, and residual obligation outputs.
+4. Add resource budget and structural bomb checks.
+5. Redirect certification to consume execution-native receipts.
+6. Remove graph/document execution shortcuts after parity tests pass.
 
 Actions:
 
@@ -1524,9 +1674,18 @@ Code targets:
 - `mf-cli`
 - `mf-admin`
 
+Step sequence:
+
+1. Upgrade Node 02 phase contract skeleton into an actual phase engine.
+2. Route one low-risk command through the engine.
+3. Add ledger commit and failure-state behavior.
+4. Route compile/validate/execute paths through the engine.
+5. Add replay/trace command support.
+6. Remove direct phase bypasses after tests prove equivalent behavior.
+
 Actions:
 
-- introduce global phase execution kernel if not already sufficient
+- upgrade the early phase contract skeleton into the global execution kernel
 - make phase transitions emit exactly one ledger entry
 - add failure state with rollback pointer and last valid ledger
 - define transaction boundaries and interruption behavior
@@ -1573,6 +1732,15 @@ Code targets:
 - `README.md`
 - `USAGE_GUIDE.md`
 - `LOCUS64_LANGUAGE_SPEC.md`
+
+Step sequence:
+
+1. Add `l64` command surface while `mf` still exists only if tests require a transitional alias.
+2. Move docs examples to `l64`.
+3. Route `l64` commands through the phase engine.
+4. Remove Q-surface command examples before Q crate deletion.
+5. Run command smoke tests and stale wording scans.
+6. Remove `mf` alias in Node 14 when crate/binary rename completes.
 
 Actions:
 
@@ -1627,13 +1795,14 @@ Code targets:
 Step sequence:
 
 1. Inventory all package names, directory names, binary names, import paths, docs, scripts, and tests containing `mf`, `mf-`, or `mf_`.
-2. Add a temporary `l64` wrapper or alias only if needed to keep tests green during the rename.
-3. Rename leaf crates first where dependency fanout is smallest.
-4. Rename shared crates next and update Rust import paths from `mf_*` to `l64_*`.
-5. Rename binary crates and command examples from `mf` to `l64`.
-6. Update release scripts and package docs.
-7. Remove temporary aliases once all tests pass through `l64`.
-8. Run the full workspace tests and a help-text scan for stale public `mf` usage.
+2. Freeze source-of-truth scope: exclude `target`, `release/src`, generated zips, and old release payloads from rename edits until final packaging.
+3. Add a temporary `l64` wrapper or alias only if needed to keep tests green during the rename.
+4. Rename leaf crates first where dependency fanout is smallest.
+5. Rename shared crates next and update Rust import paths from `mf_*` to `l64_*`.
+6. Rename binary crates and command examples from `mf` to `l64`.
+7. Update release scripts and package docs.
+8. Remove temporary aliases once all tests pass through `l64`.
+9. Run the full workspace tests and a help-text scan for stale public `mf` usage.
 
 Actions:
 
@@ -1648,6 +1817,7 @@ Invariants:
 - no package name remains `mf-*` after the rename node exits
 - any temporary alias has an explicit deletion condition
 - Q-surface crates are not deleted in this node unless the rename exposes a trivial isolated removal
+- generated release snapshots are regenerated after source rename rather than hand-edited as source truth
 
 Tests:
 
@@ -1931,7 +2101,20 @@ This change chain is now applied to the rail:
 9. Add an end-to-end delivery closure node so the rail endpoint includes docs, releases, source archive, GitHub state, and handoff.
 10. Add per-node step sequences for new and plan-altering nodes to keep execution temporally honest.
 
-## 25. Definition Of Done
+## 25. Third Compounding Change Chain
+
+This change chain optimizes the rail for Rust-specific, high-efficiency execution:
+
+1. Add Rust development optimization rules so implementation proceeds through typed contracts, crate-local tests, table-driven law, and mechanical rename bands.
+2. Add an adversarial audit checklist for each node.
+3. Record plan-altering codebase facts: Q-surface crates are active dependencies, `mf` naming is pervasive, and release snapshots are not source truth.
+4. Move the phase contract skeleton earlier by merging it into Node 02 with canonical identity foundation.
+5. Keep the full phase engine later as Node 12, but make it an upgrade of the early skeleton rather than a late invention.
+6. Add nested step sequences to lower-chain nodes that previously had only actions.
+7. Tighten rename sequencing to exclude generated release snapshots and isolate naming churn from Q-surface deletion.
+8. Add local Rust test strategy: check crate, test crate, then run workspace tests at phase exit.
+
+## 26. Definition Of Done
 
 The rail is implemented when:
 
@@ -1948,7 +2131,7 @@ The rail is implemented when:
 - compatibility imports are removed unless backed by a concrete active requirement and deletion condition
 - conformance, fuzz, torture, replay, migration, and cross-platform determinism tests pass
 
-## 26. Final System Definition
+## 27. Final System Definition
 
 Locus64 is a deterministic structural substrate in which symbolic interaction surfaces are normalized into canonical graph structure, encoded into reconstructive machine form, executed under lineage-preserving authority, and amortized through lawful structural reuse.
 
