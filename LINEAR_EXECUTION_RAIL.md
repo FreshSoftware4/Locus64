@@ -79,6 +79,7 @@ Node:
   purpose:
   depends_on:
   code_targets:
+  step_sequence:
   actions:
   invariants:
   tests:
@@ -919,6 +920,21 @@ Current codebase classification:
 - Research, certification, tower, and coverage systems are valuable but must be reattached as derived overlays.
 - QC0/QA0/QK0/QM0/JSON/document workflows are extraction sources and deletion targets, not compatibility commitments or final public authority.
 
+Observed codebase facts that affect the rail:
+
+- The workspace still uses `mf-*` crate directories and package identities throughout `Cargo.toml`.
+- The public wrapper binary is still `mf`, with `mf-cli` and `mf-admin` shipped beside it.
+- Q-surface crates are first-class workspace members: `mf-qc0`, `mf-qa0`, `mf-qk0`, and `mf-qm0`.
+- `mf-surfaces` directly imports Q-surface crates and performs Q-surface transcode/export/import work.
+- CLI/admin/cert tests still create `.qc0`, `.qa0`, `.qk0`, and `.qm0` fixtures.
+- Samples still include `.qc0` bundles.
+- Release source snapshots under `release/src` mirror the old `mf-*` names and should not be treated as authoritative source during refactors.
+- The rename from `mf` to `l64` is not only cosmetic; it must be staged so dependency names, package names, binary names, docs, release scripts, and tests converge without breaking every edge at once.
+
+Plan-altering conclusion:
+
+- The rail must include a dedicated rename node before Q-surface deletion, because deleting Q crates and renaming the workspace at the same time would make failures harder to localize.
+
 ## 22. First Compounding Change Chain
 
 This change chain is now applied to the rail:
@@ -1588,11 +1604,11 @@ Downstream payoff:
 
 - documentation and CLI stop fighting the architecture
 
-### Node 14 - Q-Surface Extraction And Deletion
+### Node 14 - Codebase Prefix Rename To l64
 
 Purpose:
 
-- extract required implementation value from obsolete Q-surface crates, redirect surviving behavior into RNA/DNA substrate modules, and delete the Q-surface crates instead of preserving fake compatibility
+- rename the codebase identity from `mf`/`math framework` to `l64`/Locus64 without mixing naming churn with substrate deletion
 
 Depends on:
 
@@ -1600,20 +1616,91 @@ Depends on:
 
 Code targets:
 
-- `mf-qc0`
-- `mf-qa0`
-- `mf-qk0`
-- `mf-qm0`
-- `mf-surfaces`
-- `mf-bundle`
+- `Cargo.toml`
+- every crate `Cargo.toml`
+- crate directories currently named `mf-*`
+- root wrapper crate currently named `mf`
+- Rust imports using `mf_*`
+- command docs and release scripts
+- generated release source snapshots only after source-of-truth crates are renamed
+
+Step sequence:
+
+1. Inventory all package names, directory names, binary names, import paths, docs, scripts, and tests containing `mf`, `mf-`, or `mf_`.
+2. Add a temporary `l64` wrapper or alias only if needed to keep tests green during the rename.
+3. Rename leaf crates first where dependency fanout is smallest.
+4. Rename shared crates next and update Rust import paths from `mf_*` to `l64_*`.
+5. Rename binary crates and command examples from `mf` to `l64`.
+6. Update release scripts and package docs.
+7. Remove temporary aliases once all tests pass through `l64`.
+8. Run the full workspace tests and a help-text scan for stale public `mf` usage.
+
+Actions:
+
+- preserve behavior while changing names
+- prefer mechanical rename patches over semantic edits
+- keep one commit or checkpoint per rename band if implementation is split
+- treat `mf` mentions as allowed only in historical migration notes until final deletion
+
+Invariants:
+
+- no public command remains `mf` after the rename node exits
+- no package name remains `mf-*` after the rename node exits
+- any temporary alias has an explicit deletion condition
+- Q-surface crates are not deleted in this node unless the rename exposes a trivial isolated removal
+
+Tests:
+
+- `cargo test`
+- `cargo build -p l64` or final binary equivalent
+- `rg "mf |mf-|mf_"` returns only documented historical notes or no results
+- release script dry-run or smoke inspection
+
+Exit condition:
+
+- the active codebase, docs, and release scripts use `l64` naming as the default identity
+
+Downstream payoff:
+
+- Q-surface deletion happens under final project naming, not a discarded `math framework` identity
+
+### Node 15 - Q-Surface Extraction And Deletion
+
+Purpose:
+
+- extract required implementation value from obsolete Q-surface crates, redirect surviving behavior into RNA/DNA substrate modules, and delete the Q-surface crates instead of preserving fake compatibility
+
+Depends on:
+
+- Node 14
+
+Code targets:
+
+- old `mf-qc0` / renamed `l64-qc0` during migration window
+- old `mf-qa0` / renamed `l64-qa0` during migration window
+- old `mf-qk0` / renamed `l64-qk0` during migration window
+- old `mf-qm0` / renamed `l64-qm0` during migration window
+- old `mf-surfaces` / renamed `l64-surfaces`
+- old `mf-bundle` / renamed `l64-bundle`
 - `samples`
 - `Cargo.toml`
 - `Cargo.lock`
 - future or existing RNA/DNA homes:
-  - `l64-rna` or current `mf-locus`/`mf-core`
-  - `l64-dna` or current `mf-locus`
-  - `l64-command` or current `mf-command`
-  - `l64-research` or current `mf-research`
+  - `l64-rna` or current lower-chain module home
+  - `l64-dna` or current locus/DNA module home
+  - `l64-command`
+  - `l64-research`
+
+Step sequence:
+
+1. Inventory Q-surface exports, parsers, renderers, fixtures, tests, commands, and sample files.
+2. Classify each item as `Delete`, `MoveToRna`, `MoveToDna`, `MoveToResearchRecord`, `MoveToTestFixture`, or `TemporaryShim`.
+3. Move required data structures and logic into the selected RNA/DNA/research home.
+4. Redirect commands and tests from Q files to `.rna`, `.dna`, or native lineage records.
+5. Delete one Q crate at a time and run targeted tests after each deletion.
+6. Remove `mf-surfaces`/`l64-surfaces` only after transcode duties are gone or absorbed into rail-native modules.
+7. Remove Q sample files and replace them with rail-native samples.
+8. Run full workspace tests and residue searches.
 
 Actions:
 
@@ -1650,7 +1737,7 @@ Downstream payoff:
 
 - reduces code hoarding, removes false compatibility pressure, and prevents obsolete surface names from shaping future architecture
 
-### Node 15 - Semantic Rekeying And Upper Reattachment
+### Node 16 - Semantic Rekeying And Upper Reattachment
 
 Purpose:
 
@@ -1658,16 +1745,25 @@ Purpose:
 
 Depends on:
 
-- Node 14
+- Node 15
 
 Code targets:
 
-- `mf-research`
-- `mf-cert`
-- `mf-selector`
-- `mf-atlas`
-- `mf-registry`
-- `mf-observe`
+- `l64-research`
+- `l64-cert`
+- `l64-selector`
+- `l64-atlas`
+- `l64-registry`
+- `l64-observe`
+
+Step sequence:
+
+1. Inventory semantic records that currently derive from reports, Q bundles, or JSON.
+2. Add canonical ID and DNA digest fields where missing.
+3. Require lineage for claim, route, adequacy, bridge, operator, proof-shape, and coverage records.
+4. Convert former Q semantic payloads into RNA/DNA-backed lineage records or native Rust records.
+5. Add rejection tests for lineage-free semantic promotion.
+6. Rerun seeded campaigns and imported-claim equivalents through lineage-native paths.
 
 Actions:
 
@@ -1700,7 +1796,7 @@ Downstream payoff:
 
 - the extensive current semantic system becomes an asset rather than substrate debt
 
-### Node 16 - Conformance, Torture, And Release Gates
+### Node 17 - Conformance, Torture, And Release Gates
 
 Purpose:
 
@@ -1708,14 +1804,23 @@ Purpose:
 
 Depends on:
 
-- Node 15
+- Node 16
 
 Code targets:
 
-- `mf-testkit`
+- `l64-testkit`
 - `scripts`
 - release docs
 - CI or local release commands
+
+Step sequence:
+
+1. Build a conformance corpus for token, RNORM, SSR, CNORM, DNA, execution, lineage, and reuse.
+2. Add randomized or fuzz-style stress where practical.
+3. Update torture tests to exercise the full rail under `l64` naming.
+4. Add residue scans for `mf`, Q surfaces, proto-DNA claims, and stale docs.
+5. Add release smoke tests for Windows, Linux, compact, perfopt, and source packages.
+6. Make failed conformance block release generation.
 
 Actions:
 
@@ -1746,17 +1851,85 @@ Downstream payoff:
 
 - future work has a regression net and clear resume point
 
+### Node 18 - End-To-End Delivery Closure
+
+Purpose:
+
+- ensure the rail endpoint satisfies the requirements that caused the rail to be created, not merely internal architecture cleanup
+
+Depends on:
+
+- Node 17
+
+Code targets:
+
+- `README.md`
+- `USAGE_GUIDE.md`
+- `LOCUS64_LANGUAGE_SPEC.md`
+- `SEMANTIC_USAGE_GUIDE.md`
+- `HANDOFF_STATUS.md`
+- `release`
+- release scripts
+- GitHub repository metadata
+
+Step sequence:
+
+1. Verify the implemented system matches the final rail definition: RNA/DNA public surface, structural authority, canonical identity, lineage-bound execution, lawful reuse.
+2. Verify user-facing commands use `l64` and documented examples run.
+3. Verify no Q-surface or `mf` naming residue remains outside approved historical notes.
+4. Generate or refresh usage documentation for actual interaction language, command syntax, RNA authoring, DNA validation, execution, tracing, certification, and reuse.
+5. Run conformance, torture, and release smoke tests.
+6. Produce Windows and Linux binary releases for performance and compact profiles.
+7. Produce a source release without stale generated cache, target output, or obsolete release payloads.
+8. Zip release artifacts and verify archive contents.
+9. Commit, tag or document release version, and push to GitHub.
+10. Write final handoff with exact commands run, tests passed, known limits, and next rail node if any remains.
+
+Actions:
+
+- close documentation and release packaging as first-class rail outputs
+- treat stale docs as release failures
+- treat missing source/binary release artifacts as endpoint failure
+- keep known limitations explicit rather than hidden behind marketing language
+
+Invariants:
+
+- final endpoint is usable by a new operator without knowing the chat history
+- release contents match docs
+- GitHub state matches local release state
+- all unresolved limitations are documented with next-step location
+
+Tests:
+
+- full conformance suite
+- torture test
+- release package smoke test
+- archive content inspection
+- docs command scan
+- `git status --short`
+
+Exit condition:
+
+- the project is shipped end-to-end against the rail requirements with reproducible docs, releases, and handoff
+
+Downstream payoff:
+
+- the rail terminates in a product-ready state, not an unfinished implementation plan
+
 ## 24. Second Compounding Change Chain
 
 This change chain is now applied to the rail:
 
 1. Reclassify Q-surface crates as extraction-and-deletion targets, not compatibility surfaces.
-2. Replace Node 14 compatibility demotion with Q-surface extraction and deletion.
-3. Require useful code from `mf-qc0`, `mf-qa0`, `mf-qk0`, and `mf-qm0` to move into RNA/DNA or shared substrate modules.
-4. Require commands, samples, and docs to redirect to `.rna` and `.dna` artifacts instead of `.qc0`, `.qa0`, `.qk0`, or `.qm0`.
-5. Start the naming migration target from `mf`/`math framework` toward `l64` for command and crate identity.
-6. Permit temporary shims only when they have an owner node and explicit deletion condition.
-7. Add search/build/test gates proving Q-surface residue is gone rather than merely documented.
+2. Insert Node 14 as the path-optimized `mf` -> `l64` rename sequence.
+3. Replace the former compatibility-demotion phase with Node 15 Q-surface extraction and deletion.
+4. Require useful code from `mf-qc0`, `mf-qa0`, `mf-qk0`, and `mf-qm0` to move into RNA/DNA or shared substrate modules.
+5. Require commands, samples, and docs to redirect to `.rna` and `.dna` artifacts instead of `.qc0`, `.qa0`, `.qk0`, or `.qm0`.
+6. Start the naming migration target from `mf`/`math framework` toward `l64` for command and crate identity.
+7. Permit temporary shims only when they have an owner node and explicit deletion condition.
+8. Add search/build/test gates proving Q-surface residue is gone rather than merely documented.
+9. Add an end-to-end delivery closure node so the rail endpoint includes docs, releases, source archive, GitHub state, and handoff.
+10. Add per-node step sequences for new and plan-altering nodes to keep execution temporally honest.
 
 ## 25. Definition Of Done
 
