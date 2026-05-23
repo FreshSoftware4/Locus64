@@ -1,0 +1,8 @@
+[package]
+name = "l64-testkit"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+[dependencies]
+l64-core = { path = "../l64-core" }

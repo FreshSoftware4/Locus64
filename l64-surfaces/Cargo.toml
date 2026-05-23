@@ -1,0 +1,23 @@
+[package]
+name = "l64-surfaces"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+l64-core = { path = "../l64-core" }
+l64-locus = { path = "../l64-locus" }
+l64-registry = { path = "../l64-registry" }
+l64-runtime = { path = "../l64-runtime" }
+l64-canon = { path = "../l64-canon" }
+l64-atlas = { path = "../l64-atlas" }
+l64-cert = { path = "../l64-cert" }
+l64-qc0 = { path = "../l64-qc0" }
+l64-qm0 = { path = "../l64-qm0" }
+l64-qk0 = { path = "../l64-qk0" }
+l64-qa0 = { path = "../l64-qa0" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+bincode = { workspace = true }

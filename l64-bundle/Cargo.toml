@@ -1,0 +1,13 @@
+[package]
+name = "l64-bundle"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+l64-core = { path = "../l64-core" }
+l64-registry = { path = "../l64-registry" }
+l64-surfaces = { path = "../l64-surfaces" }

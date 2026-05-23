@@ -1,0 +1,9 @@
+[package]
+name = "l64-registry"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+l64-core = { path = "../l64-core" }
+serde_json = { workspace = true }
+thiserror = { workspace = true }

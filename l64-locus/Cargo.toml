@@ -1,0 +1,12 @@
+[package]
+name = "l64-locus"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+[dependencies]
+l64-core = { path = "../l64-core" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+bincode = { workspace = true }
+thiserror = { workspace = true }

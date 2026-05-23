@@ -1,0 +1,11 @@
+[package]
+name = "l64-canon"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+[dependencies]
+l64-core = { path = "../l64-core" }
+l64-runtime = { path = "../l64-runtime" }
+l64-registry = { path = "../l64-registry" }
+thiserror = { workspace = true }

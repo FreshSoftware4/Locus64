@@ -6,7 +6,7 @@ This is the concrete syntax and record-shape specification for interacting with 
 
 There are three practical languages/surfaces:
 
-1. **Command language**: shell commands accepted by `mf`.
+1. **Command language**: shell commands accepted by `l64`.
 2. **RNA language**: small symbolic input compiled into DNA.
 3. **QC0 bundle language**: line-oriented semantic/certification records.
 
@@ -17,32 +17,32 @@ If you are driving Locus64 indirectly from ChatGPT or another system, prefer RNA
 Primary executable:
 
 ```text
-mf <command> [args...]
+l64 <command> [args...]
 ```
 
-`mf` is a wrapper. Keep `mf`, `mf-cli`, and `mf-admin` in the same directory.
+`l64` is a wrapper. Keep `l64`, `l64-cli`, and `l64-admin` in the same directory.
 
 Core commands:
 
 ```text
-mf normalize-rna <file>
-mf compile-rna <file> [--out <file.dna>] [--artifact-class gene|haplotype|chromosome|genome] [--persist-lineage]
-mf sequence-dna <file.dna>
+l64 normalize-rna <file>
+l64 compile-rna <file> [--out <file.dna>] [--artifact-class gene|haplotype|chromosome|genome] [--persist-lineage]
+l64 sequence-dna <file.dna>
 
-mf certify-bundle --file <file.qc0> --conflict-policy exact-match
-mf certify-derived --campaign <campaign-id>
-mf observe-run --report <report-id>
-mf export-report --id <report-id> --to qc0|qa0|qm0|qk0
-mf export-validation-bundle --id <report-id> --to qc0
-mf validate <file> --as qc0
+l64 certify-bundle --file <file.qc0> --conflict-policy exact-match
+l64 certify-derived --campaign <campaign-id>
+l64 observe-run --report <report-id>
+l64 export-report --id <report-id> --to qc0|qa0|qm0|qk0
+l64 export-validation-bundle --id <report-id> --to qc0
+l64 validate <file> --as qc0
 
-mf research-derive-from-report --report-id <report-id> --persist
-mf research-promotion-readiness <report-id>
-mf research-status
+l64 research-derive-from-report --report-id <report-id> --persist
+l64 research-promotion-readiness <report-id>
+l64 research-status
 
-mf dispatch-coverage --report-id <report-id>
-mf derive-frontier --report-id <report-id>
-mf tower-step --report-id <report-id>
+l64 dispatch-coverage --report-id <report-id>
+l64 derive-frontier --report-id <report-id>
+l64 tower-step --report-id <report-id>
 ```
 
 ## 2. RNA Language
@@ -96,9 +96,9 @@ Unclosed splice regions fail.
 ### 2.3 RNA Commands
 
 ```powershell
-mf normalize-rna .\claim_root.gene.rna
-mf compile-rna .\claim_root.gene.rna --out .\claim_root.gene.dna --artifact-class gene --persist-lineage
-mf sequence-dna .\claim_root.gene.dna
+l64 normalize-rna .\claim_root.gene.rna
+l64 compile-rna .\claim_root.gene.rna --out .\claim_root.gene.dna --artifact-class gene --persist-lineage
+l64 sequence-dna .\claim_root.gene.dna
 ```
 
 ### 2.4 RNA Output Guarantees
@@ -564,15 +564,15 @@ adequacy {"id":"ADQ_COSMO_CHALLENGE","kind":"ChallengeInterpretation","regime_id
 Run it:
 
 ```powershell
-mf certify-bundle --file .\cosmo.qc0 --conflict-policy exact-match
+l64 certify-bundle --file .\cosmo.qc0 --conflict-policy exact-match
 ```
 
 Then inspect the generated report id:
 
 ```powershell
-mf observe-run --report REPORT_THS_COSMO_CPG_COSMO
-mf research-derive-from-report --report-id REPORT_THS_COSMO_CPG_COSMO --persist
-mf research-promotion-readiness REPORT_THS_COSMO_CPG_COSMO
+l64 observe-run --report REPORT_THS_COSMO_CPG_COSMO
+l64 research-derive-from-report --report-id REPORT_THS_COSMO_CPG_COSMO --persist
+l64 research-promotion-readiness REPORT_THS_COSMO_CPG_COSMO
 ```
 
 ## 7. ChatGPT Output Contract
@@ -602,8 +602,8 @@ Do not ask ChatGPT for “Locus64 prose.” Ask for valid QC0 lines.
 After generating QC0:
 
 ```powershell
-mf validate .\file.qc0 --as qc0
-mf certify-bundle --file .\file.qc0 --conflict-policy exact-match
+l64 validate .\file.qc0 --as qc0
+l64 certify-bundle --file .\file.qc0 --conflict-policy exact-match
 ```
 
 If validation fails:

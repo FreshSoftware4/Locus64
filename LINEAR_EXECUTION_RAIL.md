@@ -952,9 +952,9 @@ Current codebase classification:
 Observed codebase facts that affect the rail:
 
 - The workspace still uses `mf-*` crate directories and package identities throughout `Cargo.toml`.
-- The public wrapper binary is still `mf`, with `mf-cli` and `mf-admin` shipped beside it.
-- Q-surface crates are first-class workspace members: `mf-qc0`, `mf-qa0`, `mf-qk0`, and `mf-qm0`.
-- `mf-surfaces` directly imports Q-surface crates and performs Q-surface transcode/export/import work.
+- The public wrapper binary is still `mf`, with `l64-cli` and `l64-admin` shipped beside it.
+- Q-surface crates are first-class workspace members: `l64-qc0`, `l64-qa0`, `l64-qk0`, and `l64-qm0`.
+- `l64-surfaces` directly imports Q-surface crates and performs Q-surface transcode/export/import work.
 - CLI/admin/cert tests still create `.qc0`, `.qa0`, `.qk0`, and `.qm0` fixtures.
 - Samples still include `.qc0` bundles.
 - Release source snapshots under `release/src` mirror the old `mf-*` names and should not be treated as authoritative source during refactors.
@@ -964,7 +964,7 @@ Plan-altering conclusion:
 
 - The rail must include a dedicated rename node before Q-surface deletion, because deleting Q crates and renaming the workspace at the same time would make failures harder to localize.
 - The phase contract skeleton must exist before lower-chain work, because otherwise token/RNORM/SSR/CNORM/DNA changes will each invent local validation and failure semantics.
-- Authority audit must include workspace ownership and dependency fanout, because the Q-surface crates are still actively referenced by CLI, tests, samples, and `mf-surfaces`.
+- Authority audit must include workspace ownership and dependency fanout, because the Q-surface crates are still actively referenced by CLI, tests, samples, and `l64-surfaces`.
 - End-to-end closure must include release packaging and documentation verification, because the rail was created to carry the project to a shippable endpoint.
 
 Adversarial audit result:
@@ -1057,17 +1057,17 @@ Code targets:
 - current `mf-*` crates until renamed
 - future `l64-*` crate and binary names
 - root `Cargo.toml`
-- `mf-cli`
-- `mf-admin`
-- `mf-command`
-- `mf-locus`
-- `mf-qc0`
-- `mf-qa0`
-- `mf-qk0`
-- `mf-qm0`
-- `mf-research`
-- `mf-cert`
-- `mf-runtime`
+- `l64-cli`
+- `l64-admin`
+- `l64-command`
+- `l64-locus`
+- `l64-qc0`
+- `l64-qa0`
+- `l64-qk0`
+- `l64-qm0`
+- `l64-research`
+- `l64-cert`
+- `l64-runtime`
 
 Step sequence:
 
@@ -1122,10 +1122,10 @@ Depends on:
 
 Code targets:
 
-- `mf-core`
-- `mf-canon`
-- `mf-locus`
-- `mf-command`
+- `l64-core`
+- `l64-canon`
+- `l64-locus`
+- `l64-command`
 
 Step sequence:
 
@@ -1179,9 +1179,9 @@ Depends on:
 
 Code targets:
 
-- `mf-core`
-- `mf-cli`
-- `mf-locus`
+- `l64-core`
+- `l64-cli`
+- `l64-locus`
 - existing RNA normalization code
 
 Step sequence:
@@ -1234,9 +1234,9 @@ Depends on:
 
 Code targets:
 
-- `mf-core`
-- `mf-locus`
-- `mf-cli`
+- `l64-core`
+- `l64-locus`
+- `l64-cli`
 
 Step sequence:
 
@@ -1290,9 +1290,9 @@ Depends on:
 
 Code targets:
 
-- `mf-core`
-- `mf-locus`
-- `mf-runtime`
+- `l64-core`
+- `l64-locus`
+- `l64-runtime`
 
 Step sequence:
 
@@ -1343,8 +1343,8 @@ Depends on:
 
 Code targets:
 
-- `mf-core`
-- `mf-locus`
+- `l64-core`
+- `l64-locus`
 - any current structural resolution module
 
 Step sequence:
@@ -1400,9 +1400,9 @@ Depends on:
 
 Code targets:
 
-- `mf-core`
-- `mf-canon`
-- `mf-locus`
+- `l64-core`
+- `l64-canon`
+- `l64-locus`
 
 Step sequence:
 
@@ -1453,9 +1453,9 @@ Depends on:
 
 Code targets:
 
-- `mf-canon`
-- `mf-core`
-- `mf-locus`
+- `l64-canon`
+- `l64-core`
+- `l64-locus`
 
 Step sequence:
 
@@ -1509,8 +1509,8 @@ Depends on:
 
 Code targets:
 
-- `mf-locus`
-- `mf-core`
+- `l64-locus`
+- `l64-core`
 
 Step sequence:
 
@@ -1563,9 +1563,9 @@ Depends on:
 
 Code targets:
 
-- `mf-locus`
-- `mf-runtime`
-- `mf-cli`
+- `l64-locus`
+- `l64-runtime`
+- `l64-cli`
 
 Step sequence:
 
@@ -1615,9 +1615,9 @@ Depends on:
 
 Code targets:
 
-- `mf-runtime`
-- `mf-cert`
-- `mf-core`
+- `l64-runtime`
+- `l64-cert`
+- `l64-core`
 
 Step sequence:
 
@@ -1669,10 +1669,10 @@ Depends on:
 
 Code targets:
 
-- `mf-core`
-- `mf-command`
-- `mf-cli`
-- `mf-admin`
+- `l64-core`
+- `l64-command`
+- `l64-cli`
+- `l64-admin`
 
 Step sequence:
 
@@ -1726,9 +1726,9 @@ Code targets:
 
 - public command name `l64`
 - crate prefix target `l64-*`
-- current `mf-cli`
-- current `mf-admin`
-- current `mf-command`
+- current `l64-cli`
+- current `l64-admin`
+- current `l64-command`
 - `README.md`
 - `USAGE_GUIDE.md`
 - `LOCUS64_LANGUAGE_SPEC.md`
@@ -1846,12 +1846,12 @@ Depends on:
 
 Code targets:
 
-- old `mf-qc0` / renamed `l64-qc0` during migration window
-- old `mf-qa0` / renamed `l64-qa0` during migration window
-- old `mf-qk0` / renamed `l64-qk0` during migration window
-- old `mf-qm0` / renamed `l64-qm0` during migration window
-- old `mf-surfaces` / renamed `l64-surfaces`
-- old `mf-bundle` / renamed `l64-bundle`
+- old `l64-qc0` / renamed `l64-qc0` during migration window
+- old `l64-qa0` / renamed `l64-qa0` during migration window
+- old `l64-qk0` / renamed `l64-qk0` during migration window
+- old `l64-qm0` / renamed `l64-qm0` during migration window
+- old `l64-surfaces` / renamed `l64-surfaces`
+- old `l64-bundle` / renamed `l64-bundle`
 - `samples`
 - `Cargo.toml`
 - `Cargo.lock`
@@ -1868,7 +1868,7 @@ Step sequence:
 3. Move required data structures and logic into the selected RNA/DNA/research home.
 4. Redirect commands and tests from Q files to `.rna`, `.dna`, or native lineage records.
 5. Delete one Q crate at a time and run targeted tests after each deletion.
-6. Remove `mf-surfaces`/`l64-surfaces` only after transcode duties are gone or absorbed into rail-native modules.
+6. Remove `l64-surfaces`/`l64-surfaces` only after transcode duties are gone or absorbed into rail-native modules.
 7. Remove Q sample files and replace them with rail-native samples.
 8. Run full workspace tests and residue searches.
 
@@ -1893,7 +1893,7 @@ Invariants:
 
 Tests:
 
-- `rg "mf-qc0|mf-qa0|mf-qk0|mf-qm0|\\.qc0|\\.qa0|\\.qk0|\\.qm0"` returns only allowed historical notes, if any
+- `rg "l64-qc0|l64-qa0|l64-qk0|l64-qm0|\\.qc0|\\.qa0|\\.qk0|\\.qm0"` returns only allowed historical notes, if any
 - workspace membership no longer includes Q-surface crates
 - sample certification regression tests pass through RNA/DNA or lineage-native replacements
 - promotion rejection test for lineage-free extracted/imported object
@@ -2093,7 +2093,7 @@ This change chain is now applied to the rail:
 1. Reclassify Q-surface crates as extraction-and-deletion targets, not compatibility surfaces.
 2. Insert Node 14 as the path-optimized `mf` -> `l64` rename sequence.
 3. Replace the former compatibility-demotion phase with Node 15 Q-surface extraction and deletion.
-4. Require useful code from `mf-qc0`, `mf-qa0`, `mf-qk0`, and `mf-qm0` to move into RNA/DNA or shared substrate modules.
+4. Require useful code from `l64-qc0`, `l64-qa0`, `l64-qk0`, and `l64-qm0` to move into RNA/DNA or shared substrate modules.
 5. Require commands, samples, and docs to redirect to `.rna` and `.dna` artifacts instead of `.qc0`, `.qa0`, `.qk0`, or `.qm0`.
 6. Start the naming migration target from `mf`/`math framework` toward `l64` for command and crate identity.
 7. Permit temporary shims only when they have an owner node and explicit deletion condition.

@@ -65,9 +65,9 @@ Current RNA syntax is structural and intentionally minimal. If the equation is t
 ### 2. Compile RNA To DNA
 
 ```powershell
-mf normalize-rna .\distributed_tolman.gene.rna
-mf compile-rna .\distributed_tolman.gene.rna --out .\distributed_tolman.gene.dna --artifact-class gene --persist-lineage
-mf sequence-dna .\distributed_tolman.gene.dna
+l64 normalize-rna .\distributed_tolman.gene.rna
+l64 compile-rna .\distributed_tolman.gene.rna --out .\distributed_tolman.gene.dna --artifact-class gene --persist-lineage
+l64 sequence-dna .\distributed_tolman.gene.dna
 ```
 
 This creates a lower-chain record:
@@ -183,9 +183,9 @@ This preserves derivational memory and prevents accidental reintroduction of bro
 After certification or report generation:
 
 ```powershell
-mf research-derive-from-report --report-id REPORT_ID --persist
-mf research-promotion-readiness REPORT_ID
-mf research-status
+l64 research-derive-from-report --report-id REPORT_ID --persist
+l64 research-promotion-readiness REPORT_ID
+l64 research-status
 ```
 
 Lineage should answer:
@@ -305,22 +305,22 @@ Locus64 can live separately and be called by scripts or ChatGPT-generated workfl
 
 ```powershell
 # 1. Compile identity/derivation root.
-mf compile-rna .\rna\distributed_tolman.gene.rna --out .\dna\distributed_tolman.gene.dna --artifact-class gene --persist-lineage
+l64 compile-rna .\rna\distributed_tolman.gene.rna --out .\dna\distributed_tolman.gene.dna --artifact-class gene --persist-lineage
 
 # 2. Certify or validate surfaced bundle.
-mf certify-bundle --file .\claims\distributed_tolman.claim.qc0 --conflict-policy exact-match
+l64 certify-bundle --file .\claims\distributed_tolman.claim.qc0 --conflict-policy exact-match
 
 # 3. Inspect report.
-mf observe-run --report REPORT_ID
+l64 observe-run --report REPORT_ID
 
 # 4. Persist research lineage.
-mf research-derive-from-report --report-id REPORT_ID --persist
+l64 research-derive-from-report --report-id REPORT_ID --persist
 
 # 5. Check promotion readiness.
-mf research-promotion-readiness REPORT_ID
+l64 research-promotion-readiness REPORT_ID
 
 # 6. Export artifacts for review or ChatGPT handoff.
-mf export-report --id REPORT_ID --to qc0
+l64 export-report --id REPORT_ID --to qc0
 ```
 
 ## ChatGPT Integration Pattern

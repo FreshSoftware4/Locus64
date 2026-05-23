@@ -91,13 +91,13 @@ function Invoke-Mf {
         [string]$CapturePath
     )
 
-    $mf = Join-Path $WorkspaceRoot "target\release\mf.exe"
-    if (-not (Test-Path $mf)) {
-        throw "Missing binary: $mf"
+    $l64 = Join-Path $WorkspaceRoot "target\release\l64.exe"
+    if (-not (Test-Path $l64)) {
+        throw "Missing binary: $l64"
     }
 
     $psi = New-Object System.Diagnostics.ProcessStartInfo
-    $psi.FileName = $mf
+    $psi.FileName = $l64
     $psi.Arguments = ($CommandArgs -join ' ')
     $psi.WorkingDirectory = $WorkspaceRoot
     $psi.RedirectStandardOutput = $true
@@ -122,7 +122,7 @@ function Invoke-Mf {
     }
 
     if ($process.ExitCode -ne 0) {
-        throw "mf failed: $($CommandArgs -join ' ')`n$stderr`n$stdout"
+        throw "l64 failed: $($CommandArgs -join ' ')`n$stderr`n$stdout"
     }
 
     return $stdout
@@ -130,7 +130,7 @@ function Invoke-Mf {
 
 Push-Location $WorkspaceRoot
 try {
-    cargo build --release -p mf -p mf-cli -p mf-admin | Out-Host
+    cargo build --release -p l64 -p l64-cli -p l64-admin | Out-Host
     cargo test -q | Out-Host
     $summary.test_runs++
 

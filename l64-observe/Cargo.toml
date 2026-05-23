@@ -1,0 +1,17 @@
+[package]
+name = "l64-observe"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+bincode.workspace = true
+l64-core = { path = "../l64-core" }
+l64-locus = { path = "../l64-locus" }
+l64-bundle = { path = "../l64-bundle" }
+l64-cert = { path = "../l64-cert" }
+l64-atlas = { path = "../l64-atlas" }
+l64-policy = { path = "../l64-policy" }

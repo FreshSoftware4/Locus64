@@ -59,10 +59,22 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f202df86484c868dbad7eaa557ef785d5c66295e41b460ef922eca0723b842c"
 
 [[package]]
-name = "assert_cmd"
-version = "2.2.0"
+name = "arrayref"
+version = "0.3.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9a686bbee5efb88a82df0621b236e74d925f470e5445d3220a5648b892ec99c9"
+checksum = "76a2e8124351fda1ef8aaaa3bbd7ebbcb486bbcd4225aca0aa0d84bb2db8fecb"
+
+[[package]]
+name = "arrayvec"
+version = "0.7.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7c02d123df017efcdfbd739ef81735b36c5ba83ec3c59c80a9d7ecc718f92e50"
+
+[[package]]
+name = "assert_cmd"
+version = "2.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2aa3a22042e45de04255c7bf3626e239f450200fd0493c1e382263544b20aea6"
 dependencies = [
  "anstyle",
  "bstr",
@@ -84,9 +96,23 @@ dependencies = [
 
 [[package]]
 name = "bitflags"
-version = "2.11.0"
+version = "2.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "843867be96c8daad0d758b57df9392b6d8d271134fce549de6ce169ff98a92af"
+checksum = "c4512299f36f043ab09a583e57bceb5a5aab7a73db1805848e8fef3c9e8c78b3"
+
+[[package]]
+name = "blake3"
+version = "1.8.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0aa83c34e62843d924f905e0f5c866eb1dd6545fc4d719e803d9ba6030371fce"
+dependencies = [
+ "arrayref",
+ "arrayvec",
+ "cc",
+ "cfg-if",
+ "constant_time_eq",
+ "cpufeatures",
+]
 
 [[package]]
 name = "bstr"
@@ -100,6 +126,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "cc"
+version = "1.2.62"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a1dce859f0832a7d088c4f1119888ab94ef4b5d6795d1ce05afb7fe159d79f98"
+dependencies = [
+ "find-msvc-tools",
+ "shlex",
+]
+
+[[package]]
 name = "cfg-if"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -107,9 +143,9 @@ checksum = "9330f8b2ff13f34540b44e946ef35111825727b38d33286ef986142615121801"
 
 [[package]]
 name = "clap"
-version = "4.6.0"
+version = "4.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b193af5b67834b676abd72466a96c1024e6a6ad978a1f484bd90b85c94041351"
+checksum = "1ddb117e43bbf7dacf0a4190fef4d345b9bad68dfc649cb349e7d17d28428e51"
 dependencies = [
  "clap_builder",
  "clap_derive",
@@ -129,9 +165,9 @@ dependencies = [
 
 [[package]]
 name = "clap_derive"
-version = "4.6.0"
+version = "4.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1110bd8a634a1ab8cb04345d8d878267d57c3cf1b38d91b71af6686408bbca6a"
+checksum = "f2ce8604710f6733aa641a2b3731eaa1e8b3d9973d5e3565da11800813f997a9"
 dependencies = [
  "heck",
  "proc-macro2",
@@ -152,10 +188,31 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1d07550c9036bf2ae0c684c4297d503f838287c83c53686d05370d0e139ae570"
 
 [[package]]
+name = "constant_time_eq"
+version = "0.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3d52eff69cd5e647efe296129160853a42795992097e8af39800e1060caeea9b"
+
+[[package]]
+name = "cpufeatures"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8b2a41393f66f16b0823bb79094d54ac5fbd34ab292ddafb9a0456ac9f87d201"
+dependencies = [
+ "libc",
+]
+
+[[package]]
 name = "difflib"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6184e33543162437515c2e2b48714794e37845ec9851711914eec9d308f6ebe8"
+
+[[package]]
+name = "find-msvc-tools"
+version = "0.1.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5baebc0774151f905a1a2cc41989300b1e6fbb29aff0ceffa1064fdd3088d582"
 
 [[package]]
 name = "futures-core"
@@ -217,10 +274,296 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8f42a60cbdf9a97f5d2305f08a87dc4e09308d1276d28c869c684d7777685682"
 
 [[package]]
+name = "l64"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+]
+
+[[package]]
+name = "l64-admin"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "assert_cmd",
+ "clap",
+ "l64-atlas",
+ "l64-bundle",
+ "l64-cert",
+ "l64-command",
+ "l64-core",
+ "l64-locus",
+ "l64-observe",
+ "l64-policy",
+ "l64-registry",
+ "l64-surfaces",
+ "serde_json",
+ "serial_test",
+]
+
+[[package]]
+name = "l64-atlas"
+version = "0.1.0"
+dependencies = [
+ "l64-core",
+ "l64-kernel",
+ "l64-policy",
+ "l64-registry",
+ "serde",
+ "thiserror",
+]
+
+[[package]]
+name = "l64-bundle"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "l64-core",
+ "l64-registry",
+ "l64-surfaces",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
+name = "l64-canon"
+version = "0.1.0"
+dependencies = [
+ "l64-core",
+ "l64-registry",
+ "l64-runtime",
+ "thiserror",
+]
+
+[[package]]
+name = "l64-cert"
+version = "0.1.0"
+dependencies = [
+ "bincode",
+ "l64-atlas",
+ "l64-bundle",
+ "l64-core",
+ "l64-kernel",
+ "l64-locus",
+ "l64-policy",
+ "l64-registry",
+ "l64-runtime",
+ "serde",
+ "serde_json",
+ "serial_test",
+ "thiserror",
+]
+
+[[package]]
+name = "l64-cli"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "assert_cmd",
+ "bincode",
+ "clap",
+ "hex",
+ "l64-atlas",
+ "l64-bundle",
+ "l64-canon",
+ "l64-cert",
+ "l64-command",
+ "l64-core",
+ "l64-kernel",
+ "l64-locus",
+ "l64-policy",
+ "l64-qa0",
+ "l64-registry",
+ "l64-research",
+ "l64-runtime",
+ "l64-selector",
+ "l64-surfaces",
+ "serde_json",
+]
+
+[[package]]
+name = "l64-command"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "l64-core",
+]
+
+[[package]]
+name = "l64-core"
+version = "0.1.0"
+dependencies = [
+ "blake3",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "l64-kernel"
+version = "0.1.0"
+dependencies = [
+ "l64-core",
+ "l64-testkit",
+ "serde",
+ "thiserror",
+]
+
+[[package]]
+name = "l64-locus"
+version = "0.1.0"
+dependencies = [
+ "bincode",
+ "l64-core",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
+name = "l64-observe"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bincode",
+ "l64-atlas",
+ "l64-bundle",
+ "l64-cert",
+ "l64-core",
+ "l64-locus",
+ "l64-policy",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "l64-policy"
+version = "0.1.0"
+dependencies = [
+ "l64-core",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
+name = "l64-qa0"
+version = "0.1.0"
+dependencies = [
+ "l64-core",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
+name = "l64-qc0"
+version = "0.1.0"
+dependencies = [
+ "l64-core",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
+name = "l64-qk0"
+version = "0.1.0"
+dependencies = [
+ "hex",
+ "l64-core",
+ "l64-qm0",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
+name = "l64-qm0"
+version = "0.1.0"
+dependencies = [
+ "l64-core",
+ "l64-qc0",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
+name = "l64-registry"
+version = "0.1.0"
+dependencies = [
+ "l64-core",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
+name = "l64-research"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bincode",
+ "l64-cert",
+ "l64-core",
+ "l64-locus",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "l64-runtime"
+version = "0.1.0"
+dependencies = [
+ "bincode",
+ "l64-core",
+ "l64-registry",
+ "serde",
+ "thiserror",
+]
+
+[[package]]
+name = "l64-selector"
+version = "0.1.0"
+dependencies = [
+ "l64-core",
+ "l64-kernel",
+ "l64-testkit",
+]
+
+[[package]]
+name = "l64-surfaces"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bincode",
+ "l64-atlas",
+ "l64-canon",
+ "l64-cert",
+ "l64-core",
+ "l64-locus",
+ "l64-qa0",
+ "l64-qc0",
+ "l64-qk0",
+ "l64-qm0",
+ "l64-registry",
+ "l64-runtime",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
+name = "l64-testkit"
+version = "0.1.0"
+dependencies = [
+ "l64-core",
+]
+
+[[package]]
 name = "libc"
-version = "0.2.184"
+version = "0.2.186"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "48f5d2a454e16a5ea0f4ced81bd44e4cfc7bd3a507b61887c99fd3538b28e4af"
+checksum = "68ab91017fe16c622486840e4c83c9a37afeff978bd239b5293d61ece587de66"
 
 [[package]]
 name = "lock_api"
@@ -242,291 +585,6 @@ name = "memchr"
 version = "2.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f8ca58f447f06ed17d5fc4043ce1b10dd205e060fb3ce5b979b8ed8e59ff3f79"
-
-[[package]]
-name = "mf"
-version = "0.1.0"
-dependencies = [
- "anyhow",
-]
-
-[[package]]
-name = "mf-admin"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "assert_cmd",
- "clap",
- "mf-atlas",
- "mf-bundle",
- "mf-cert",
- "mf-command",
- "mf-core",
- "mf-locus",
- "mf-observe",
- "mf-policy",
- "mf-registry",
- "mf-surfaces",
- "serde_json",
- "serial_test",
-]
-
-[[package]]
-name = "mf-atlas"
-version = "0.1.0"
-dependencies = [
- "mf-core",
- "mf-kernel",
- "mf-policy",
- "mf-registry",
- "serde",
- "thiserror",
-]
-
-[[package]]
-name = "mf-bundle"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "mf-core",
- "mf-registry",
- "mf-surfaces",
- "serde",
- "serde_json",
- "thiserror",
-]
-
-[[package]]
-name = "mf-canon"
-version = "0.1.0"
-dependencies = [
- "mf-core",
- "mf-registry",
- "mf-runtime",
- "thiserror",
-]
-
-[[package]]
-name = "mf-cert"
-version = "0.1.0"
-dependencies = [
- "bincode",
- "mf-atlas",
- "mf-bundle",
- "mf-core",
- "mf-kernel",
- "mf-locus",
- "mf-policy",
- "mf-registry",
- "mf-runtime",
- "serde",
- "serde_json",
- "serial_test",
- "thiserror",
-]
-
-[[package]]
-name = "mf-cli"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "assert_cmd",
- "bincode",
- "clap",
- "hex",
- "mf-atlas",
- "mf-bundle",
- "mf-canon",
- "mf-cert",
- "mf-command",
- "mf-core",
- "mf-kernel",
- "mf-locus",
- "mf-policy",
- "mf-qa0",
- "mf-registry",
- "mf-research",
- "mf-runtime",
- "mf-selector",
- "mf-surfaces",
- "serde_json",
-]
-
-[[package]]
-name = "mf-command"
-version = "0.1.0"
-dependencies = [
- "clap",
- "mf-core",
-]
-
-[[package]]
-name = "mf-core"
-version = "0.1.0"
-dependencies = [
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "mf-kernel"
-version = "0.1.0"
-dependencies = [
- "mf-core",
- "mf-testkit",
- "serde",
- "thiserror",
-]
-
-[[package]]
-name = "mf-locus"
-version = "0.1.0"
-dependencies = [
- "bincode",
- "mf-core",
- "serde",
- "serde_json",
- "thiserror",
-]
-
-[[package]]
-name = "mf-observe"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "bincode",
- "mf-atlas",
- "mf-bundle",
- "mf-cert",
- "mf-core",
- "mf-locus",
- "mf-policy",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "mf-policy"
-version = "0.1.0"
-dependencies = [
- "mf-core",
- "serde",
- "serde_json",
- "thiserror",
-]
-
-[[package]]
-name = "mf-qa0"
-version = "0.1.0"
-dependencies = [
- "mf-core",
- "serde_json",
- "thiserror",
-]
-
-[[package]]
-name = "mf-qc0"
-version = "0.1.0"
-dependencies = [
- "mf-core",
- "serde",
- "serde_json",
- "thiserror",
-]
-
-[[package]]
-name = "mf-qk0"
-version = "0.1.0"
-dependencies = [
- "hex",
- "mf-core",
- "mf-qm0",
- "serde",
- "serde_json",
- "thiserror",
-]
-
-[[package]]
-name = "mf-qm0"
-version = "0.1.0"
-dependencies = [
- "mf-core",
- "mf-qc0",
- "serde",
- "serde_json",
- "thiserror",
-]
-
-[[package]]
-name = "mf-registry"
-version = "0.1.0"
-dependencies = [
- "mf-core",
- "serde_json",
- "thiserror",
-]
-
-[[package]]
-name = "mf-research"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "bincode",
- "mf-cert",
- "mf-core",
- "mf-locus",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "mf-runtime"
-version = "0.1.0"
-dependencies = [
- "bincode",
- "mf-core",
- "mf-registry",
- "serde",
- "thiserror",
-]
-
-[[package]]
-name = "mf-selector"
-version = "0.1.0"
-dependencies = [
- "mf-core",
- "mf-kernel",
- "mf-testkit",
-]
-
-[[package]]
-name = "mf-surfaces"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "bincode",
- "mf-atlas",
- "mf-canon",
- "mf-cert",
- "mf-core",
- "mf-locus",
- "mf-qa0",
- "mf-qc0",
- "mf-qk0",
- "mf-qm0",
- "mf-registry",
- "mf-runtime",
- "serde",
- "serde_json",
- "thiserror",
-]
-
-[[package]]
-name = "mf-testkit"
-version = "0.1.0"
-dependencies = [
- "mf-core",
-]
 
 [[package]]
 name = "once_cell"
@@ -682,9 +740,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.149"
+version = "1.0.150"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "83fc039473c5595ace860d8c4fafa220ff474b3fc6bfdb4293327f1a37e94d86"
+checksum = "e8014e44b4736ed0538adeecded0fce2a272f22dc9578a7eb6b2d9993c74cfb9"
 dependencies = [
  "itoa",
  "memchr",
@@ -718,6 +776,12 @@ dependencies = [
  "quote",
  "syn",
 ]
+
+[[package]]
+name = "shlex"
+version = "1.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
 name = "slab"

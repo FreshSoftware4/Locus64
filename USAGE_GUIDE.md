@@ -1,57 +1,57 @@
 # Locus64 Usage Guide
 
-Use `mf` as the primary command. On Windows release bundles, run `mf.exe` from the release directory. On Linux release bundles, run `./mf`.
+Use `l64` as the primary command. On Windows release bundles, run `l64.exe` from the release directory. On Linux release bundles, run `./l64`.
 
 ## Verify Installation
 
 ```powershell
-mf surface-capabilities
-mf dump-runtime-roots
-mf clear-cache --scope all
+l64 surface-capabilities
+l64 dump-runtime-roots
+l64 clear-cache --scope all
 ```
 
 If running from source on Windows:
 
 ```powershell
-cargo build --release -p mf -p mf-cli -p mf-admin
-.\target\release\mf.exe surface-capabilities
+cargo build --release -p l64 -p l64-cli -p l64-admin
+.\target\release\l64.exe surface-capabilities
 ```
 
 ## Campaign Certification
 
 ```powershell
-mf certify-derived --campaign CPG_CHAIN_RULE
-mf certify-derived --campaign CPG_CHAIN_RULE_RECIPE
-mf certify-derived --campaign CPG_CHAIN_RULE_TRANSPORT
-mf certify-derived --campaign CPG_BAYES_BRACE
-mf certify-derived --campaign CPG_EXEC_INFER
-mf certify-derived --campaign CPG_PROB_JUDG
-mf certify-derived --campaign CPG_CERT_PROP
-mf certify-derived --campaign CPG_CH_NORM
-mf certify-derived --campaign CPG_CH_INH
+l64 certify-derived --campaign CPG_CHAIN_RULE
+l64 certify-derived --campaign CPG_CHAIN_RULE_RECIPE
+l64 certify-derived --campaign CPG_CHAIN_RULE_TRANSPORT
+l64 certify-derived --campaign CPG_BAYES_BRACE
+l64 certify-derived --campaign CPG_EXEC_INFER
+l64 certify-derived --campaign CPG_PROB_JUDG
+l64 certify-derived --campaign CPG_CERT_PROP
+l64 certify-derived --campaign CPG_CH_NORM
+l64 certify-derived --campaign CPG_CH_INH
 ```
 
 Use `observe-run` after certification:
 
 ```powershell
-mf observe-run --report REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE
+l64 observe-run --report REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE
 ```
 
 ## Bundle Certification
 
 ```powershell
-mf certify-bundle --file samples/chain_rule_bundle.qc0 --conflict-policy exact-match
-mf certify-bundle --file samples/chain_rule_integrated_bundle.qc0 --conflict-policy exact-match
-mf certify-bundle --file samples/imported_claim_bundle.qc0 --conflict-policy exact-match
-mf certify-bundle --file samples/imported_claim_stress_gap_bundle.qc0 --conflict-policy exact-match
+l64 certify-bundle --file samples/chain_rule_bundle.qc0 --conflict-policy exact-match
+l64 certify-bundle --file samples/chain_rule_integrated_bundle.qc0 --conflict-policy exact-match
+l64 certify-bundle --file samples/imported_claim_bundle.qc0 --conflict-policy exact-match
+l64 certify-bundle --file samples/imported_claim_stress_gap_bundle.qc0 --conflict-policy exact-match
 ```
 
 ## RNA/DNA Commands
 
 ```powershell
-mf normalize-rna sample.gene.rna
-mf compile-rna sample.gene.rna --out sample.gene.dna --artifact-class gene --persist-lineage
-mf sequence-dna sample.gene.dna
+l64 normalize-rna sample.gene.rna
+l64 compile-rna sample.gene.rna --out sample.gene.dna --artifact-class gene --persist-lineage
+l64 sequence-dna sample.gene.dna
 ```
 
 The lower chain is ledgered as:
@@ -65,28 +65,28 @@ DNA emission validates header truth, structural opcode law, and symbol-table non
 ## Export, Import, Validate
 
 ```powershell
-mf export-report --id REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE --to qc0
-mf export-validation-bundle --id REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE --to qc0
-mf export-locus-packet --report-id REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE --out chain-rule.dna
-mf import-locus-packet chain-rule.dna
+l64 export-report --id REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE --to qc0
+l64 export-validation-bundle --id REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE --to qc0
+l64 export-locus-packet --report-id REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE --out chain-rule.dna
+l64 import-locus-packet chain-rule.dna
 ```
 
 ## Lock and Replay
 
 ```powershell
-mf lock-bundle samples/chain_rule_integrated_bundle.qc0 --optimizer-policy conservative --conflict-policy exact-match
-mf replay-with-lock <LOCK_ID> --parallel-obligations --max-obligation-workers 3
+l64 lock-bundle samples/chain_rule_integrated_bundle.qc0 --optimizer-policy conservative --conflict-policy exact-match
+l64 replay-with-lock <LOCK_ID> --parallel-obligations --max-obligation-workers 3
 ```
 
 ## Research Host
 
 ```powershell
-mf research-import --kind task samples/research/task_operational_truth.json
-mf research-import --kind signature samples/research/signature_operational_truth.json
-mf research-route --task-id TASK_OPERATIONAL_TRUTH_HARDENING --signature-id SIG_OPERATIONAL_TRUTH_HARDENING
-mf research-derive-from-report --report-id REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE --persist
-mf research-promotion-readiness REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE
-mf research-status
+l64 research-import --kind task samples/research/task_operational_truth.json
+l64 research-import --kind signature samples/research/signature_operational_truth.json
+l64 research-route --task-id TASK_OPERATIONAL_TRUTH_HARDENING --signature-id SIG_OPERATIONAL_TRUTH_HARDENING
+l64 research-derive-from-report --report-id REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE --persist
+l64 research-promotion-readiness REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE
+l64 research-status
 ```
 
 For exact syntax and record shapes, see `LOCUS64_LANGUAGE_SPEC.md`.
@@ -96,10 +96,10 @@ For semantic claim governance, branch tracking, derivation lineage, and cosmolog
 ## Coverage and Tower
 
 ```powershell
-mf dispatch-coverage --report-id REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE
-mf derive-frontier --report-id REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE
-mf tower-step --report-id REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE
-mf derive-distress --report-id REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE
+l64 dispatch-coverage --report-id REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE
+l64 derive-frontier --report-id REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE
+l64 tower-step --report-id REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE
+l64 derive-distress --report-id REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE
 ```
 
 Reuse is lawful only when canonical identity or declared transport-equivalence, closure-valid lineage, replay legality, and residual-obligation accounting all pass.
@@ -124,7 +124,7 @@ Set `MF_CACHE_NAMESPACE` to isolate runs:
 
 ```powershell
 $env:MF_CACHE_NAMESPACE='demo'
-mf clear-cache --scope all
+l64 clear-cache --scope all
 ```
 
-Release users can delete `.mf-cache` safely when no run needs cached reports or research artifacts.
+Release users can delete `.l64-cache` safely when no run needs cached reports or research artifacts.

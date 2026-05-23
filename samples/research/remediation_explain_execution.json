@@ -4,8 +4,8 @@
   "class": "RuntimeBug",
   "summary": "explain-execution should resolve linked execution state or degrade with exact contract truth instead of generic missing-file failure",
   "affected_surfaces": [
-    "mf-admin",
-    "mf-observe",
+    "l64-admin",
+    "l64-observe",
     "execution manifests",
     "report execution envelopes"
   ],

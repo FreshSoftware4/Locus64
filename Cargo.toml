@@ -1,28 +1,28 @@
 [workspace]
 members = [
-    "mf-core",
-    "mf-locus",
-    "mf-research",
-    "mf-qa0",
-    "mf-kernel",
-    "mf-registry",
-    "mf-selector",
-    "mf-cli",
-    "mf-runtime",
-    "mf-canon",
-    "mf-atlas",
-    "mf-cert",
-    "mf-surfaces",
-    "mf-qc0",
-    "mf-qm0",
-    "mf-qk0",
-    "mf-bundle",
-    "mf-policy",
-    "mf-observe",
-    "mf-admin",
-    "mf-command",
-    "mf",
-    "mf-testkit",
+    "l64-core",
+    "l64-locus",
+    "l64-research",
+    "l64-qa0",
+    "l64-kernel",
+    "l64-registry",
+    "l64-selector",
+    "l64-cli",
+    "l64-runtime",
+    "l64-canon",
+    "l64-atlas",
+    "l64-cert",
+    "l64-surfaces",
+    "l64-qc0",
+    "l64-qm0",
+    "l64-qk0",
+    "l64-bundle",
+    "l64-policy",
+    "l64-observe",
+    "l64-admin",
+    "l64-command",
+    "l64",
+    "l64-testkit",
 ]
 resolver = "2"
 
@@ -39,6 +39,7 @@ serde_json = "1.0"
 thiserror = "2.0"
 bincode = "1.3"
 hex = "0.4"
+blake3 = "1.5"
 
 [profile.release]
 opt-level = "z"

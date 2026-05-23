@@ -4,7 +4,7 @@
   "class": "CommandContractBug",
   "summary": "predict-impact needs a live argument contract stronger than help text",
   "affected_surfaces": [
-    "mf-admin predict-impact",
+    "l64-admin predict-impact",
     "command contract surfaces"
   ],
   "expected_fix_chain": [

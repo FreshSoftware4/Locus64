@@ -2,7 +2,7 @@
 
 Locus64 is a Rust command-line certification framework for routed mathematical campaigns, lower-chain RNA/DNA compilation, adequacy checking, replayable execution, proof coverage, and governed research artifacts.
 
-The primary binary is `mf`. It routes commands to the CLI or admin implementation as needed. `mf-cli` and `mf-admin` are still shipped for compatibility and scripting.
+The primary binary is `l64`. It routes commands to the CLI or admin implementation as needed. `l64-cli` and `l64-admin` are still shipped for compatibility and scripting.
 
 ## Current Architecture
 
@@ -16,10 +16,10 @@ The primary binary is `mf`. It routes commands to the CLI or admin implementatio
 
 ```powershell
 cargo test -q
-cargo build --release -p mf -p mf-cli -p mf-admin
-.\target\release\mf.exe clear-cache --scope all
-.\target\release\mf.exe certify-derived --campaign CPG_CHAIN_RULE
-.\target\release\mf.exe observe-run --report REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE
+cargo build --release -p l64 -p l64-cli -p l64-admin
+.\target\release\l64.exe clear-cache --scope all
+.\target\release\l64.exe certify-derived --campaign CPG_CHAIN_RULE
+.\target\release\l64.exe observe-run --report REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE
 ```
 
 Expected seeded verdicts:
@@ -31,9 +31,9 @@ Expected seeded verdicts:
 
 ```powershell
 Set-Content .\sample.gene.rna "ι ≔ σ ‖ κ" -Encoding UTF8
-.\target\release\mf.exe normalize-rna .\sample.gene.rna
-.\target\release\mf.exe compile-rna .\sample.gene.rna --out .\sample.gene.dna --artifact-class gene --persist-lineage
-.\target\release\mf.exe sequence-dna .\sample.gene.dna
+.\target\release\l64.exe normalize-rna .\sample.gene.rna
+.\target\release\l64.exe compile-rna .\sample.gene.rna --out .\sample.gene.dna --artifact-class gene --persist-lineage
+.\target\release\l64.exe sequence-dna .\sample.gene.dna
 ```
 
 RNA is the human symbolic surface. DNA is the machine artifact surface. SSR is ephemeral and must not be treated as public authority.
@@ -41,10 +41,10 @@ RNA is the human symbolic surface. DNA is the machine artifact surface. SSR is e
 ## Sample Bundles
 
 ```powershell
-.\target\release\mf.exe certify-bundle --file samples/chain_rule_bundle.qc0 --conflict-policy exact-match
-.\target\release\mf.exe certify-bundle --file samples/chain_rule_integrated_bundle.qc0 --conflict-policy exact-match
-.\target\release\mf.exe certify-bundle --file samples/imported_claim_bundle.qc0 --conflict-policy exact-match
-.\target\release\mf.exe certify-bundle --file samples/imported_claim_stress_gap_bundle.qc0 --conflict-policy exact-match
+.\target\release\l64.exe certify-bundle --file samples/chain_rule_bundle.qc0 --conflict-policy exact-match
+.\target\release\l64.exe certify-bundle --file samples/chain_rule_integrated_bundle.qc0 --conflict-policy exact-match
+.\target\release\l64.exe certify-bundle --file samples/imported_claim_bundle.qc0 --conflict-policy exact-match
+.\target\release\l64.exe certify-bundle --file samples/imported_claim_stress_gap_bundle.qc0 --conflict-policy exact-match
 ```
 
 The imported-claim samples exercise evidence contracts, benchmark receipts, challenge receipts, reproducibility packets, and sharp stress-gap blocking.

@@ -1,0 +1,12 @@
+[package]
+name = "l64-runtime"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+[dependencies]
+l64-core = { path = "../l64-core" }
+l64-registry = { path = "../l64-registry" }
+serde = { workspace = true }
+thiserror = { workspace = true }
+bincode = { workspace = true }

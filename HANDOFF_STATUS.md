@@ -2,7 +2,9 @@
 
 ## Current State
 
-The workspace builds and tests as a Rust workspace with the unified `mf` wrapper, direct `mf-cli`, and direct `mf-admin` binaries.
+The workspace builds and tests as a Rust workspace with the unified `l64` wrapper, direct `l64-cli`, and direct `l64-admin` binaries.
+
+The source crate/package/binary prefix rename from `mf` to `l64` has been executed. Remaining `mf` mentions should be limited to historical rail notes or explicitly documented transitional residue.
 
 The active lower chain is implemented as a transitional path:
 
@@ -25,19 +27,19 @@ The current `LINEAR_EXECUTION_RAIL.md` supersedes earlier completion framing. It
 
 ## Shipping Entry Points
 
-- `mf`: canonical wrapper
-- `mf-cli`: direct CLI compatibility binary
-- `mf-admin`: direct admin compatibility binary
+- `l64`: canonical wrapper
+- `l64-cli`: direct CLI compatibility binary
+- `l64-admin`: direct admin compatibility binary
 
-Release packages include all three because `mf` dispatches to sibling `mf-cli` or `mf-admin`.
+Release packages include all three because `l64` dispatches to sibling `l64-cli` or `l64-admin`.
 
 ## Verification Commands
 
 ```powershell
 cargo fmt --check
 cargo test -q
-cargo build --profile perfopt -p mf -p mf-cli -p mf-admin
-cargo build --profile compact -p mf -p mf-cli -p mf-admin
+cargo build --profile perfopt -p l64 -p l64-cli -p l64-admin
+cargo build --profile compact -p l64 -p l64-cli -p l64-admin
 powershell -ExecutionPolicy Bypass -File .\scripts\torture-test.ps1 -OuterRounds 1 -InnerNamespaces 1
 ```
 
@@ -46,13 +48,13 @@ powershell -ExecutionPolicy Bypass -File .\scripts\torture-test.ps1 -OuterRounds
 - `perfopt`: `opt-level=3`, fat LTO, one codegen unit, stripped, abort panic
 - `compact`: size optimization, LTO, one codegen unit, stripped, abort panic
 
-Linux target used by this release pass: `x86_64-unknown-linux-gnu`.
+Linux target attempted by this release pass: `x86_64-unknown-linux-gnu`. The Rust target is installed, but packaging Linux binaries is blocked locally because the GNU linker `cc` is missing.
 
 Windows target used by this release pass: `x86_64-pc-windows-msvc`.
 
 ## Known Constraints
 
-- The repo has no git metadata in this working copy, so cleanup is conservative and destructive source pruning is avoided unless tests prove it safe.
+- The repo is a Git repository connected to GitHub.
 - `.locus` decode remains as a compatibility path; `.dna` is the preferred machine artifact language.
 - Q-surface crates currently remain in the workspace, but the active rail now treats them as extraction-and-deletion targets, not compatibility commitments. Public doctrine is RNA/DNA, with `l64` as the target public command/crate naming direction.
 - SSR is intentionally ephemeral and must not become a persisted semantic authority layer.

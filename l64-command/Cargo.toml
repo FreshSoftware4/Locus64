@@ -1,0 +1,9 @@
+[package]
+name = "l64-command"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+[dependencies]
+clap = { workspace = true }
+l64-core = { path = "../l64-core" }

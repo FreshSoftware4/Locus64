@@ -1,0 +1,12 @@
+[package]
+name = "l64-kernel"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+l64-core = { path = "../l64-core" }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+l64-testkit = { path = "../l64-testkit" }
+serde = { workspace = true }

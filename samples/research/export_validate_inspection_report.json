@@ -4,9 +4,9 @@
   "class": "ArtifactTypingBug",
   "summary": "inspection exports should remain distinct from validation-complete bundles",
   "affected_surfaces": [
-    "mf-cli export-report",
-    "mf-cli export-validation-bundle",
-    "mf-cli validate"
+    "l64-cli export-report",
+    "l64-cli export-validation-bundle",
+    "l64-cli validate"
   ],
   "expected_fix_chain": [
     "artifact_class_law",

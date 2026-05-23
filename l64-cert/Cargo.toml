@@ -1,0 +1,22 @@
+[package]
+name = "l64-cert"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+[dependencies]
+l64-core = { path = "../l64-core" }
+l64-locus = { path = "../l64-locus" }
+l64-kernel = { path = "../l64-kernel" }
+l64-registry = { path = "../l64-registry" }
+l64-atlas = { path = "../l64-atlas" }
+l64-runtime = { path = "../l64-runtime" }
+l64-policy = { path = "../l64-policy" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+bincode = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+l64-bundle = { path = "../l64-bundle" }
+serial_test = "3.2"

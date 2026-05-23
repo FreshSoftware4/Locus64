@@ -4,7 +4,7 @@
   "class": "RuntimeBug",
   "summary": "explain-execution should resolve execution-linked context or degrade with exact contract truth instead of generic missing-file failure",
   "affected_surfaces": [
-    "mf-admin explain-execution",
+    "l64-admin explain-execution",
     "execution cache",
     "report/manifest/lock/observe resolution"
   ],
