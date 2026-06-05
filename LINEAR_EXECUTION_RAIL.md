@@ -63,11 +63,143 @@ Forbidden change chains:
 - introduce a parallel public surface model
 - preserve obsolete compatibility formats without an actual ecosystem requirement
 - promote compatibility formats into authority
+- organize work primarily around file/crate deletion before the replacement authority path exists
+- choose easy leaf deletion ahead of replacing a higher-fanout obsolete authority mechanism
+- elevate an implementation representation such as a graph, arena, tree, or opcode stream into substrate authority
 - hide unresolved ambiguity in future implementation details
 - widen scope without reducing downstream cost
 - reorder phases without stating the dependency reason
 
 Every accepted change chain must leave the rail more executable than before.
+
+## Load-Bearing Beam Strategy
+
+Execution order is chosen by dependency pressure, not by which deletion is easiest.
+
+When obsolete mechanisms remain, rank them by how much authority flow they still carry:
+
+1. Replace the highest-fanout obsolete authority beam with a stronger RNA/DNA or lineage-native substrate.
+2. Migrate the smallest representative command, fixture, and test through that replacement.
+3. Expand the migration until the obsolete beam no longer carries major workflow responsibility.
+4. Delete residual leaf projections, helper crates, samples, and docs only after the replacement path proves it can carry the load.
+
+Leaf deletion is allowed early only when the leaf is genuinely isolated and does not delay a higher-pressure replacement. The completed QK0 deletion is an isolated-leaf cut, not the default template for remaining work. The remaining strategy prioritizes the QC0-style bundle/import/certification beam because it still carries fixture, command, and certification pressure.
+
+## External Proving Slice Rule
+
+External proving projects are allowed only when they strengthen the main authority path.
+
+A proving slice must enter through the same temporal dependency chain as the rest of the system:
+
+```text
+external authored structure
+ -> RNA ingestion
+ -> RNORM/SSR/CNORM
+ -> DNA authority
+ -> validation receipts
+ -> derived projections
+```
+
+External source code, Markdown reports, DOT graphs, JSON, Julia objects, notebooks, or other documents are not authority. They may provide extraction material, fixtures, or derived projections, but the proving value is real only when the same structure can be represented as RNA, compiled to DNA, validated, replayed, and projected back out.
+
+The CKI typed registry is the current best pilot candidate because it is small, dependency-explicit, validation-oriented, and mathematically interpretable. It must remain a proving slice for the authority path, not a new side quest or a new public surface.
+
+## Current Execution Ledger
+
+This ledger records landed rail movement so future passes do not rediscover or accidentally reverse it.
+
+Landed:
+
+- `CanonicalGraph` authority has been removed from the lower chain.
+- `CanonicalStructure` is now the CNORM output carried by lower-chain execution artifacts.
+- DNA canonical payloads now use `canonical_structure.v1`.
+- DNA validation checks canonical payload digest, canonical id, and canonical bytes consistency before sequencing.
+- DNA sequencing uses one packet validation chokepoint before reconstructing a stabilized RNA-facing artifact.
+- Research persistence writes and reads `.dna` packet artifacts only; `.locus` mirror writes and JSON fallback reads are removed from that path.
+- Observe and surface cache loads no longer use silent JSON fallback helpers.
+- The old `read_section_packet_or_json` convenience API has been removed.
+- CLI tests now cover the primary `compile-rna` -> `.dna` -> `sequence-dna` authority path directly.
+- Surface export commands no longer write textual Q projection cache files as a side channel.
+- Surface cache root creation no longer creates an obsolete `exports` cache directory.
+- QK0 active projection support has been removed from CLI arguments, `l64-surfaces`, and the workspace.
+- The `l64-qk0` crate has been deleted; its only remaining value is historical.
+- Bundle import has a surface-free `QaDocument` core path.
+- Bundle file import can now consume `.dna` packets carrying native bundle documents before falling back to surface parsing.
+- CLI bundle execution/certification now has a `.dna` bundle fixture path that bypasses QC0 parsing.
+- Certification option bundle hashes are computed over file bytes, so binary `.dna` bundle files do not force UTF-8 text assumptions.
+- Node 16 has been split into Node 16A primary obsolete beam replacement and Node 16B residual projection extraction/deletion.
+- CLI chain-rule certification, promoted-operator reuse, broken-bridge blocking, and imported-claim certification inputs now use `.dna` bundle fixtures instead of `.qc0` files.
+- Admin optimizer, evaluator, replay, lock, prediction, scheduler, obligation, and chain-rule workflow tests now generate `.dna` bundle fixtures for bundle inputs instead of `.qc0` files.
+- Admin lock-bundle certification options hash bundle bytes, so binary `.dna` bundle files do not force UTF-8 text assumptions.
+- Cert crate imported overlay, multi-campaign, imported-kernel-claim, and stress-gap unit fixtures now use `.dna` bundle packets instead of `.qc0` files.
+- CLI `run-theorem --file` and `certify-derived --file` now have a native `.dna` bundle fixture path instead of exporting theorem/campaign `.qc0` files as their representative test input.
+- CLI now exposes `compile-bundle`, a narrow migration command that compiles current bundle-entry projection text into native `.dna` bundle packets.
+- Root sample bundles now have generated `.dna` artifacts and README sample certification commands point at those `.dna` files.
+- Admin replay adequacy sample coverage now generates a `.dna` bundle fixture from the sample text before lock/replay execution.
+- Language documentation now routes ChatGPT-generated bundle-entry text through `compile-bundle` before certification, rather than telling users to certify QC0 directly.
+- Bundle execution/import now rejects silent projection parsing when no explicit projection kind is provided; projection bundle text must be compiled with `compile-bundle` before normal execution.
+- Root `.qc0` sample bundles have been deleted after active `.dna` sample bundles replaced them.
+- Torture-test and usage-guide bundle/lock flows now point at `.dna` samples.
+- CLI projection leaf commands `transcode`, `normalize-surface`, `roundtrip-check`, `surface-capabilities`, `dump-transform-receipt`, `parse`, `normalize`, `validate`, `import`, and `export` have been deleted.
+- Remaining projection import tests use neutral `.projection` filenames plus explicit `--as`, so extension hints no longer drive projection behavior.
+- Torture harness no longer calls deleted projection capability commands.
+- Standalone projection normalize/import/export is no longer a user command path.
+- `l64-surfaces` projection utility leaves `transcode_text`, `normalize_surface`, `roundtrip_check`, `surface_capabilities`, and `dump_transform_receipt` have been deleted after CLI callers were removed.
+- Report packet cache persistence now writes `.dna` as the primary report artifact instead of `.locus`; `.locus` packet reads remain fallback-only.
+- CLI export-report regression tests now assert report packet cache authority lands at `reports/<report-id>.dna` and does not create a primary `.locus` report packet.
+- Torture-test report packet export/import now uses `.dna` output paths instead of `.locus`.
+- CLI now exposes `export-validation-dna-bundle`, which emits self-contained validation bundles as native `.dna` bundle packets instead of requiring QC0 textual projection output.
+- CLI validation hints, language docs, usage docs, and torture validation-bundle flow now prefer `export-validation-dna-bundle` plus native `import-bundle --conflict-policy exact-match`.
+- A CLI regression test proves exported validation `.dna` bundles decode as `QaDocument` payloads and import through the native bundle path without projection parsing.
+- The obsolete textual `export-validation-bundle --to qc0|qa0|qm0` command has been deleted after the `.dna` validation bundle replacement landed.
+- A CLI regression test proves `export-validation-bundle` is no longer accepted and points users toward `export-validation-dna-bundle`.
+- Native report packet export/import commands are now named `export-report-dna` and `import-report-dna`, replacing the misleading `export-locus-packet`/`import-locus-packet` public route.
+- Textual report projection export has been deleted; report export now uses `export-report-dna` or `export-validation-dna-bundle`.
+- CLI regression tests prove `export-report` and `export-report-projection` are rejected and point users toward DNA report export.
+- Admin textual artifact projection export has been deleted.
+- Admin regression tests prove `export-artifact` and `export-artifact-projection` are rejected.
+- QM0 active projection support has been removed from CLI/admin surface arguments, registry capabilities, policy defaults, `l64-surfaces`, and the workspace. `SurfaceKind::Qm0` remains as a tombstoned enum discriminant so existing `.dna` bincode payloads do not shift variant indexes.
+- The `l64-qm0` crate has been deleted; its only remaining value is historical.
+- Explicit bundle projection import has been removed from `l64-bundle`, `l64-cli`, and `l64-admin`; bundle execution inputs are `.dna` only.
+- `compile-bundle --as`, `certify --file --as`, `run-bundle --as`, `certify-bundle --as`, `run-theorem --as`, `lock-bundle --as`, and `predict-impact --as` have been removed.
+- Report projection sidecars and report-surface flags have been removed from CLI commands.
+- `l64-surfaces`, `l64-qc0`, and `l64-qa0` have been removed from workspace membership and deleted from the codebase.
+- Bundle-entry text remains only as an authoring convenience compiled by `compile-bundle` into `.dna`; it is not a public authority surface.
+
+Still active extraction targets:
+
+- None for QC0/QA0/surfaces. Remaining references to removed projection command names are negative regression tests or historical rail notes only.
+- The next active extraction target is any residual semantic-object persistence that bypasses `.dna` lineage, not Q-surface compatibility.
+
+Current verified gate:
+
+- `cargo test -p l64-cli` passes after `.dna` migration of representative certification bundle tests.
+- `cargo test --workspace` passes after the Node 16A `.dna` migration of representative bundle/import/certification tests.
+- `cargo test -p l64-admin` passes after `.dna` migration of admin-generated bundle workflow tests.
+- `cargo test -p l64-cert` passes after `.dna` migration of cert imported-bundle unit tests.
+- `cargo test -p l64-cli` passes after `.dna` migration of theorem/campaign file execution tests.
+- `cargo test --workspace` passes after cert and CLI theorem/campaign `.dna` fixture migration.
+- `cargo test -p l64-cli` passes after adding `compile-bundle` and verifying compiled `.dna` bundle certification.
+- `cargo test -p l64-admin` passes after admin sample replay coverage reroutes through a generated `.dna` bundle fixture.
+- All generated root `.dna` sample bundles certify through `l64-cli certify-bundle`.
+- `cargo test --workspace` passes after `compile-bundle`, `.dna` sample generation, and documentation rerouting.
+- `cargo test -p l64-bundle` passes after rejecting silent projection bundle import without an explicit projection kind.
+- `cargo test -p l64-cli` and `cargo test -p l64-admin` pass after sample and bundle execution reroutes to `.dna`.
+- `cargo test --workspace` passes after strict bundle execution seam and `.qc0` sample deletion.
+- `scripts/torture-test.ps1 -OuterRounds 1 -InnerNamespaces 1` passes with `.dna` sample bundle execution and zero failures.
+- `cargo test -p l64-cli` and `cargo check -p l64-cli` pass after projection leaf command deletion.
+- `cargo test --workspace` and `scripts/torture-test.ps1 -OuterRounds 1 -InnerNamespaces 1` pass after projection leaf command deletion.
+- `cargo test -p l64-bundle` passes after deleting projection bundle import and making bundle file import `.dna` only.
+- `cargo test -p l64-cli --test cli` passes after deleting projection import, report projection export, report sidecars, and report-surface flags.
+- `cargo test -p l64-admin --test admin` passes after deleting admin artifact projection export.
+- `cargo test --workspace` passes after deleting `l64-surfaces`, `l64-qc0`, and `l64-qa0` from the workspace.
+- `scripts/torture-test.ps1 -OuterRounds 1 -InnerNamespaces 1` passes after removing report projection export from the torture harness.
+- Residue scan for `l64_surfaces`, `l64-qc0`, `l64-qa0`, and `l64-surfaces` returns no source/workspace dependency references; remaining mentions are historical rail notes or negative regression tests.
+- Manifest and bundle-lock packet persistence has moved from `l64-surfaces` to `l64-locus`, so execution artifact storage no longer depends on the projection adapter crate.
+- Report packet cache ownership, report IDs, and report packet persistence have moved from `l64-surfaces` to `l64-cert`, so report artifact storage now lives beside certification/report packet encoding.
+- Report-to-document derivation and validation-bundle document derivation have moved from `l64-surfaces` to `l64-cert`, so certification-derived report documents now live beside report packet/cache ownership.
+- `l64-surfaces` no longer depends on `l64-cert`; remaining duties are registry object projection lookup and explicit QC0/QA0 adapter import/export.
+- Projection transform receipt persistence has been deleted from `l64-surfaces`; import/export still returns receipts to callers, but no longer writes projection transform history into cache as pseudo-lineage.
 
 ## Rail Node Template
 
@@ -99,20 +231,25 @@ Rules:
 - Prefer newtypes for authority-sensitive IDs: `CanonicalId`, `DnaDigest`, `PhaseId`, `LedgerEntryId`, `LineageId`.
 - Prefer table-driven law over scattered matches for token classes, opcodes, phase IDs, artifact classes, failure kinds, and exactness classes.
 - Prefer `Result<T, E>` with domain errors over stringly `anyhow` at substrate boundaries; `anyhow` is acceptable at CLI edges.
-- Prefer mechanical rename commits over mixed semantic commits.
-- Prefer crate-local tests before workspace-wide tests during rename/deletion passes.
+- Treat naming as coordination hygiene, not execution. Rename only when the name itself creates authority confusion, public API drift, dependency cleanup risk, or repeated implementation mistakes.
+- When a rename is necessary, prefer mechanical rename commits over mixed semantic commits.
+- Prefer crate-local tests before workspace-wide tests during deletion or justified naming-hygiene passes.
 - Prefer `cargo check -p <crate>` after local edits, then `cargo test -p <crate>`, then workspace tests only at phase exit.
 - Do not refactor `release/src`, `target`, or generated release payloads as source of truth.
-- Do not remove a crate and rename its dependents in the same step unless the dependency graph proves it is isolated.
+- Do not remove a crate and change dependent names in the same step unless the dependency graph proves it is isolated.
 - Do not introduce macros/generators until the hand-written shape has repeated at least twice and the generator input is smaller than generated output.
 - Do not add `unsafe` for parser/codec performance until conformance and fuzz tests exist around the safe version.
 
 Adversarial audit checklist for every node:
 
+- Which mechanism is still acting as semantic authority after this node?
+- Does this node make structure more authoritative, or only delete/rename artifacts around the old authority path?
+- Does this node confuse structure with one representation of structure?
 - Could this node make later deletion harder?
 - Could this node preserve an obsolete format out of inertia?
 - Could this node hide semantic authority behind a debug field, label, or string table?
-- Could this node make `l64` renaming harder by adding new `mf` references?
+- Could this node create or preserve names that mislead implementation, public usage, or authority boundaries?
+- Is any proposed rename doing real coordination work, or is it just cosmetic churn?
 - Could this node create a second path around the phase engine?
 - Could this node pass tests only because stale Q-surface samples still exercise the old architecture?
 - Could this node edit generated release snapshots instead of source crates?
@@ -160,7 +297,7 @@ RNA
  -> TOKENIZE
  -> RNORM
  -> SSR
- -> KGRAPH
+ -> STRUCTURAL_FORM
  -> CNORM
  -> DNA
  -> EXEC
@@ -182,7 +319,7 @@ Determinism:
 
 ```text
 same input
--> same canonical graph
+-> same canonical structure
 -> same canonical hash
 -> same DNA
 ```
@@ -471,7 +608,7 @@ SSR constraints:
 SSR output:
 
 ```text
-KGRAPH
+STRUCTURAL_FORM
 SSR_RECEIPT
 ```
 
@@ -482,35 +619,44 @@ Rust target:
 - source maps allowed for diagnostics only
 - no SSR serialization path
 
-## 9. KGRAPH
+## 9. Structural Form Transfer Representation
 
-KGRAPH is an ephemeral structural graph emitted by SSR and consumed by CNORM.
+SSR emits a temporary structural form consumed by CNORM.
 
-Node shape:
+This structural form is a recoverable structural arrangement. It may be implemented as an arena graph, tree, DAG, term structure, opcode arena, compressed structural tape, or another efficient representation. The representation is not authority. The recovered structure is what later phases canonicalize and encode.
+
+If the Rust code keeps a `KGraph` or `KernelGraph` name during migration, that name means "one internal representation of structural form," not public identity and not substrate authority.
+
+Minimal structural item shape:
 
 ```text
-NODE := (
+ITEM := (
   opcode,
-  inputs[],
+  relation_inputs[],
   aux,
   flags
 )
 ```
 
-Default graph property:
+Implementation options:
 
 ```text
+arena graph
+tree
 DAG
+term form
+opcode arena
+compressed structural tape
 ```
 
-Cycles are explicit only.
+Representation legality is an implementation policy until the equivalence law declares a structural reason to require or forbid a shape. DAG-by-default, cycle handling, storage layout, and traversal strategy are not substrate law by themselves.
 
-KGRAPH constraints:
+Structural form constraints:
 
 - no semantic payloads
 - contiguous storage preferred
 - locality-oriented layout
-- temporary graph authority only
+- temporary representation only
 
 Rust target:
 
@@ -570,7 +716,24 @@ Rust target:
 
 ## 11. CNORM
 
-CNORM collapses structurally equivalent graphs into identical canonical forms.
+CNORM collapses structurally equivalent forms into identical canonical structures.
+
+CNORM does not canonize the graph layout, arena layout, parse tree, or any other representation. It canonizes the recovered structure itself.
+
+CNORM is not defined until the structural equivalence law is defined.
+
+The equivalence law must answer, at minimum:
+
+- when ordering is significant
+- when ordering is erased
+- when grouping is significant
+- when grouping is erased
+- when associative flattening is lawful
+- when commutative ordering is lawful
+- when references remain distinct
+- when redundant structure collapses
+- what minimal invariant set determines identity
+- what canonical ordering rule is used after equivalence is known
 
 Canonicalization operations:
 
@@ -607,7 +770,7 @@ Deduplication:
 
 Rust target:
 
-- `CanonicalTopology`
+- `CanonicalStructure`
 - canonical ordering law
 - deterministic binary canonical form
 - cross-platform hash-stability tests
@@ -678,7 +841,7 @@ Rust target:
 - staged DNA validator
 - compact structural sections
 - local compression only
-- compatibility import for proto-DNA and `.locus`, not preferred authority emission
+- proto-DNA and `.locus` are migration observations only, not authority paths
 
 ## 13. Codebook Policy
 
@@ -730,7 +893,7 @@ Execution guarantees:
 
 Rust target:
 
-- executor over DNA/canonical topology, not reconstructed semantic documents
+- executor over DNA/canonical structure, not reconstructed semantic documents
 - deterministic scheduling policy
 - resource budgeting
 - malicious DNA handling
@@ -943,36 +1106,58 @@ Current codebase classification:
 - RNA surface exists as partial success.
 - RNORM is mostly real but still needs byte/token-grounded closure.
 - SSR exists but must be forced into ephemeral lower-chain form.
-- CNORM exists partially but must become canonical topology rather than graph snapshot persistence.
+- CNORM exists partially but must become canonical structure rather than graph snapshot persistence.
 - DNA exists as proto-DNA and must be rebuilt into compact structural encoding.
 - CLI exists but must be phase-engine enforced.
 - Research, certification, tower, and coverage systems are valuable but must be reattached as derived overlays.
 - QC0/QA0/QK0/QM0/JSON/document workflows are extraction sources and deletion targets, not compatibility commitments or final public authority.
 
+Authority-flow finding:
+
+- the bottleneck is not primarily Q, `.locus`, crate names, or documentation
+- the bottleneck is that structure is not yet the sole authority
+- the immediate substrate bottleneck is the missing structural equivalence law under CNORM
+- current DNA is encoded graph persistence rather than encoded canonical structure
+- current SSR preserves representation identities too easily
+- current CNORM still depends on presentation-rich structures
+- current tests still assert old representations more than structural invariants
+
+Mechanism-first correction:
+
+- deletion is delayed until the replacement authority path exists
+- first establish `RNA -> RNORM -> SSR -> EQUIV -> CNORM -> DNA -> DNA_DECODE -> CNORM_RECONSTRUCTION`
+- then move execution, lineage, and reuse onto that authority path
+- then classify every remaining subsystem as feeding the authority path, consuming it, or irrelevant
+- only irrelevant or authority-competing subsystems are deleted
+
 Observed codebase facts that affect the rail:
 
-- The workspace still uses `mf-*` crate directories and package identities throughout `Cargo.toml`.
-- The public wrapper binary is still `mf`, with `l64-cli` and `l64-admin` shipped beside it.
-- Q-surface crates are first-class workspace members: `l64-qc0`, `l64-qa0`, `l64-qk0`, and `l64-qm0`.
-- `l64-surfaces` directly imports Q-surface crates and performs Q-surface transcode/export/import work.
-- CLI/admin/cert tests still create `.qc0`, `.qa0`, `.qk0`, and `.qm0` fixtures.
-- Samples still include `.qc0` bundles.
-- Release source snapshots under `release/src` mirror the old `mf-*` names and should not be treated as authoritative source during refactors.
-- The rename from `mf` to `l64` is not only cosmetic; it must be staged so dependency names, package names, binary names, docs, release scripts, and tests converge without breaking every edge at once.
+- The active workspace has already largely moved to `l64` naming.
+- Remaining stale names matter only when they affect public usage, authority boundaries, dependency cleanup, or deletion sequencing.
+- Q-surface crates are no longer workspace members; `l64-qc0`, `l64-qa0`, and `l64-surfaces` have been deleted.
+- `l64-qm0` has been deleted as an active crate. Its remaining presence is limited to the tombstoned `SurfaceKind::Qm0` enum discriminant required to keep existing bincode-encoded `.dna` artifacts stable until a stable numeric surface encoding replaces enum-index persistence.
+- CLI/admin tests now keep only negative regressions for removed projection commands.
+- Root bundle samples are now `.dna`; old `.qc0` sample bundles have been deleted.
+- Release source snapshots under `release/src` may be stale and should not be treated as authoritative source during refactors.
+- Naming is not execution; stale names are plan-altering only when they cause coordination failure or preserve obsolete architecture.
 
 Plan-altering conclusion:
 
-- The rail must include a dedicated rename node before Q-surface deletion, because deleting Q crates and renaming the workspace at the same time would make failures harder to localize.
+- The rail must not begin with deletion. It must first make canonical structure the sole authority path.
 - The phase contract skeleton must exist before lower-chain work, because otherwise token/RNORM/SSR/CNORM/DNA changes will each invent local validation and failure semantics.
-- Authority audit must include workspace ownership and dependency fanout, because the Q-surface crates are still actively referenced by CLI, tests, samples, and `l64-surfaces`.
+- Authority audit must classify mechanisms and authority flows before it classifies crate deletion targets.
+- After replacement begins, extraction/deletion order must attack load-bearing obsolete authority beams before low-fanout leaves.
+- Naming hygiene remains subordinate and is applied only where names hide authority, dependency, or public-use mistakes.
 - End-to-end closure must include release packaging and documentation verification, because the rail was created to carry the project to a shippable endpoint.
 
 Adversarial audit result:
 
-- Highest rework risk: performing `mf` -> `l64` rename too late, after new code adds more `mf` references.
-- Highest architecture risk: treating Q-surface crates as compatibility instead of deleting them.
+- Highest rework risk: allowing misleading names to survive where they hide authority or dependency edges.
+- Highest architecture risk: allowing a new non-DNA persistence path to replace the deleted Q-surface compatibility path.
+- Highest mechanism risk: deleting legacy crates before the RNA/DNA authority path can replace their load-bearing behavior.
+- Highest sequencing risk: pursuing leaf cleanup before replacing the next high-fanout non-DNA persistence beam.
 - Highest Rust risk: moving logic between crates without first establishing typed phase/error/ID contracts in `core`/command substrate.
-- Highest testing risk: workspace tests staying green because `.qc0` fixtures still dominate coverage.
+- Highest testing risk: workspace tests staying green while generated `.dna` artifacts still contain presentation-rich payloads that should become leaner structural encodings.
 - Highest release risk: stale `release/src` snapshots or old docs being mistaken for current source truth.
 
 ## 22. First Compounding Change Chain
@@ -981,14 +1166,18 @@ This change chain is now applied to the rail:
 
 1. Rename the authoritative rail from `COMPOUNDING_CHANGE_CHAIN.md` to `LINEAR_EXECUTION_RAIL.md`.
 2. Define compounding change chains as trajectory-preserving changes to the linear execution rail.
-3. Consolidate the substrate ontology into one sequence: RNA, token algebra, RNORM, SSR, KGRAPH, CNORM, DNA, EXEC, LINEAGE, REUSE.
+3. Consolidate the substrate ontology into one sequence: RNA, token algebra, RNORM, SSR, structural form, CNORM, DNA, EXEC, LINEAGE, REUSE.
 4. Make DNA explicitly reconstructive structural encoding, not graph persistence.
-5. Make KGRAPH explicitly ephemeral and temporary.
+5. Make every SSR structural-form representation explicitly ephemeral and temporary.
 6. Add `CONST`, `PROJ`, and `ANNOT` as structural opcodes while keeping semantic opcodes forbidden.
 7. Make BLAKE3 over canonical binary structure the identity target.
 8. Add mandatory/optional file header requirements.
 9. Add the phase execution kernel as the implementation anchor.
 10. Preserve the old substrate inversion finding as current codebase alignment, not as the main rail text.
+11. Apply the mechanism-first correction: build the replacement authority path before deleting legacy mechanisms.
+12. Replace topology-as-authority wording with canonical-structure wording.
+13. Insert structural equivalence law before CNORM, because canonical structure is not defined until equivalence is defined.
+14. Strengthen the first authority-chain gate from roundtrip reconstruction to fixed-point stability.
 
 ## 23. Temporal Implementation Rail
 
@@ -1046,7 +1235,7 @@ Purpose:
 
 - identify every path that can currently create, validate, import, export, or promote artifacts
 - classify those paths by authority level before lower-chain changes begin
-- establish the current workspace dependency map before renaming or deletion work begins
+- establish the current workspace dependency map before naming-hygiene or deletion work begins
 
 Depends on:
 
@@ -1054,8 +1243,8 @@ Depends on:
 
 Code targets:
 
-- current `mf-*` crates until renamed
-- future `l64-*` crate and binary names
+- current `l64-*` crates and binary names
+- any stale aliases or historical names that still affect public usage or deletion
 - root `Cargo.toml`
 - `l64-cli`
 - `l64-admin`
@@ -1063,8 +1252,6 @@ Code targets:
 - `l64-locus`
 - `l64-qc0`
 - `l64-qa0`
-- `l64-qk0`
-- `l64-qm0`
 - `l64-research`
 - `l64-cert`
 - `l64-runtime`
@@ -1076,7 +1263,7 @@ Step sequence:
 3. Classify each command/import/export/promote path by authority category.
 4. Mark generated release snapshots and `target` output as non-source.
 5. Add or plan the `authority-audit` command only after the static classification is clear.
-6. Add residue searches for Q-surface and `mf` naming.
+6. Add residue searches for Q-surface authority leakage and misleading public names.
 7. Run targeted checks for the crates touched by the audit.
 
 Actions:
@@ -1084,8 +1271,8 @@ Actions:
 - add an authority classification enum or equivalent static table
 - classify paths as `SubstrateAuthority`, `DerivedSemantic`, `ExtractionSource`, or `DeletionTarget`
 - expose `l64 authority-audit` or equivalent admin command
-- make the audit fail if QC0/QA0/QK0/QM0, JSON, report text, or SSR identities claim substrate authority
-- record crate dependency fanout so later rename/deletion order is mechanical
+- make the audit fail if QC0/QA0/QK0/QM0 tombstone paths, JSON, report text, or SSR identities claim substrate authority
+- record crate dependency fanout so later naming-hygiene/deletion order is mechanical
 
 Invariants:
 
@@ -1298,7 +1485,7 @@ Step sequence:
 
 1. Inventory existing opcode-like enums, packet tags, and structural node kind matches.
 2. Define the shared `Opcode` enum and arity table.
-3. Redirect SSR/KGRAPH first, DNA second, execution third.
+3. Redirect SSR structural-form output first, DNA second, execution third.
 4. Add forbidden semantic opcode tests.
 5. Replace scattered local matches with table lookups where this reduces duplication.
 6. Run targeted tests for each consumer before deleting old local definitions.
@@ -1325,11 +1512,11 @@ Tests:
 
 Exit condition:
 
-- KGRAPH and DNA can share the same structural opcode law
+- structural form and DNA can share the same structural opcode law
 
 Downstream payoff:
 
-- removes duplicated structural meaning from graph, codec, and executor code
+- removes duplicated structural meaning from representation, codec, and executor code
 
 ### Node 06 - SSR Ephemerality Refactor
 
@@ -1352,7 +1539,7 @@ Step sequence:
 1. Identify every persisted SSR-like ID, graph, receipt, or export path.
 2. Add the bounded SSR reducer while leaving old path behind a testable comparison if needed.
 3. Emit `SsrReceipt` without authority identity.
-4. Switch CNORM input to the new KGRAPH path.
+4. Switch CNORM input to the new structural-form path.
 5. Delete or demote SSR persistence/export.
 6. Add tests that fail if SSR becomes serializable authority again.
 
@@ -1378,21 +1565,21 @@ Tests:
 - stack underflow/overflow tests
 - reference legality tests
 - no SSR serialization path test
-- repeated-run deterministic KGRAPH output test
+- repeated-run deterministic structural-form output test
 
 Exit condition:
 
-- SSR produces KGRAPH plus receipt, and only KGRAPH is consumable by CNORM
+- SSR produces structural form plus receipt, and only that structural form is consumable by CNORM
 
 Downstream payoff:
 
 - closes the largest current architecture inversion point
 
-### Node 07 - KGRAPH Transfer Boundary
+### Node 07 - Structural Form Transfer Boundary
 
 Purpose:
 
-- make KGRAPH a temporary transfer object with clear limits
+- make the SSR output representation temporary, explicit, and non-authoritative
 
 Depends on:
 
@@ -1406,16 +1593,16 @@ Code targets:
 
 Step sequence:
 
-1. Define KGRAPH node/storage shape in the lower crate.
+1. Define the structural-form storage shape in the lower crate.
 2. Add DAG-by-default validation and explicit cycle representation if needed.
 3. Remove semantic payloads from node identity.
-4. Make CNORM consume only KGRAPH.
-5. Add graph property tests.
+4. Make CNORM consume only the structural-form type.
+5. Add representation property tests.
 6. Remove legacy graph snapshot inputs from CNORM once callers move.
 
 Actions:
 
-- define explicit `KGraph` node shape
+- define explicit structural-form node/storage shape
 - enforce DAG-by-default with explicit cycle representation if cycles are allowed
 - prefer contiguous node storage
 - remove semantic payloads from node identity
@@ -1423,33 +1610,96 @@ Actions:
 
 Invariants:
 
-- KGRAPH is not a public identity layer
-- KGRAPH does not persist as authority
-- KGRAPH contains structure, not semantic prose
+- structural form is not a public identity layer
+- structural form does not persist as authority
+- structural form contains structure, not semantic prose
+- graph/tree/arena layout is not the canonical structure
 
 Tests:
 
-- graph property tests
+- representation property tests
 - cycle legality tests
 - semantic-label exclusion tests
 
 Exit condition:
 
-- CNORM has a single well-scoped input type
+- CNORM has a single well-scoped structural-form input type
 
 Downstream payoff:
 
 - canonicalization stops depending on legacy graph persistence assumptions
 
-### Node 08 - CNORM Canonical Topology
+### Node 08 - Structural Equivalence Law
 
 Purpose:
 
-- make canonicalization produce execution topology and stable identity
+- define what structural equivalence means before CNORM claims to canonicalize anything
 
 Depends on:
 
 - Node 07
+
+Code targets:
+
+- `l64-core`
+- `l64-canon`
+- `l64-testkit`
+
+Step sequence:
+
+1. Inventory every place the current code assumes equivalence through sorting, grouping, text normalization, or hash equality.
+2. Define the smallest explicit equivalence-law table for the first real structure family.
+3. Mark each relation as ordered, unordered, associative, commutative, identity-preserving, or non-collapsible.
+4. Define the minimal invariant set for canonical identity.
+5. Define canonical ordering only after equivalence classes are known.
+6. Add positive and negative fixtures proving what collapses and what remains distinct.
+7. Refuse additional equivalence families until the smallest one passes conformance.
+
+Actions:
+
+- introduce `EquivalenceLaw` or equivalent table-driven law
+- define ordering significance per opcode/relation
+- define grouping significance per opcode/relation
+- define reference identity preservation rules
+- define which redundant structures can collapse
+- define canonical ordering from the equivalence law, not from representation layout
+
+Invariants:
+
+- equivalence is explicit, not inferred from representation shape
+- graph/tree/arena/tape layout does not define equivalence
+- sorting is allowed only where the equivalence law permits it
+- flattening is allowed only where the equivalence law permits it
+- hash equality is not the definition of equivalence
+
+Tests:
+
+- equivalence-positive corpus
+- equivalence-negative corpus
+- ordering-significant fixture
+- ordering-erased fixture
+- grouping-significant fixture
+- grouping-erased fixture
+- reference-preservation fixture
+- forced hash-collision structural equality fallback
+
+Exit condition:
+
+- CNORM has an explicit equivalence law to implement against
+
+Downstream payoff:
+
+- canonical structure becomes a mechanism rather than a named placeholder
+
+### Node 09 - CNORM Canonical Structure
+
+Purpose:
+
+- make canonicalization produce canonical structure and stable identity
+
+Depends on:
+
+- Node 08
 
 Code targets:
 
@@ -1459,17 +1709,18 @@ Code targets:
 
 Step sequence:
 
-1. Introduce `CanonicalTopology` beside existing canonical graph code.
-2. Implement canonical ordering for the smallest real structure family first.
-3. Add idempotence and equivalence fixtures.
-4. Compute canonical binary form and canonical ID through Node 02 identity types.
-5. Redirect DNA encoding to consume `CanonicalTopology`.
-6. Remove presentation-dependent identity inputs.
+1. Introduce `CanonicalStructure` beside existing canonical graph code.
+2. Consume the Node 08 equivalence-law table.
+3. Implement canonical ordering for the smallest real structure family first.
+4. Add idempotence and equivalence fixtures.
+5. Compute canonical binary form and canonical ID through Node 02 identity types.
+6. Redirect DNA encoding to consume `CanonicalStructure`.
+7. Remove presentation-dependent identity inputs.
 
 Actions:
 
-- introduce `CanonicalTopology`
-- implement canonical ordering
+- introduce `CanonicalStructure`
+- implement canonical ordering from the equivalence law
 - flatten associative structures where declared
 - order commutative structures where declared
 - deduplicate only after canonical ordering
@@ -1480,6 +1731,7 @@ Invariants:
 - `CNORM(CNORM(x)) == CNORM(x)`
 - equivalent structures converge
 - non-equivalent structures remain separated
+- equivalence law determines collapse, not representation shape
 - presentation data does not affect identity
 
 Tests:
@@ -1491,13 +1743,13 @@ Tests:
 
 Exit condition:
 
-- DNA encoder consumes canonical topology, not legacy graph snapshots
+- DNA encoder consumes canonical structure, not legacy graph snapshots
 
 Downstream payoff:
 
 - DNA, execution, ledger, and reuse become identity-stable
 
-### Node 09 - DNA Structural Encoding
+### Node 10 - DNA Structural Encoding
 
 Purpose:
 
@@ -1505,7 +1757,7 @@ Purpose:
 
 Depends on:
 
-- Node 08
+- Node 09
 
 Code targets:
 
@@ -1515,7 +1767,7 @@ Code targets:
 Step sequence:
 
 1. Define DNA header and section structs using fixed-size/varint primitives.
-2. Encode a minimal canonical topology without optional strings.
+2. Encode a minimal canonical structure without optional strings.
 3. Add optional debug/string sections only after required sections validate alone.
 4. Add staged decode and validation helpers.
 5. Keep proto-DNA import only long enough to migrate tests.
@@ -1524,17 +1776,17 @@ Step sequence:
 Actions:
 
 - implement required DNA header fields
-- encode required authority sections as opcode/topology data
+- encode required authority sections as canonical structural data
 - encode atoms as varints
 - permit string/debug/local-compression sections only as optional non-authority sections
-- add staged validator for header, section table, topology digest, and canonicality
+- add staged validator for header, section table, structural digest, and canonicality
 
 Invariants:
 
 - required DNA sections contain no semantic text needed for validation or execution
 - DNA is endian-stable
 - DNA is streaming-decodable
-- DNA reconstructs canonical topology
+- DNA reconstructs canonical structure
 
 Tests:
 
@@ -1551,7 +1803,7 @@ Downstream payoff:
 
 - creates the actual machine authority surface
 
-### Node 10 - DNA Validation Phase
+### Node 11 - DNA Validation Phase
 
 Purpose:
 
@@ -1559,7 +1811,7 @@ Purpose:
 
 Depends on:
 
-- Node 09
+- Node 10
 
 Code targets:
 
@@ -1573,7 +1825,9 @@ Step sequence:
 2. Implement validator over the new DNA structures.
 3. Route CLI validate through validator.
 4. Block executor entry points that lack validation receipts.
-5. Add invalid corpus tests before execution refactor.
+5. Add the first complete authority-chain test: `RNA -> TOKENIZE -> RNORM -> SSR -> EQUIV -> CNORM -> DNA -> DNA_DECODE -> CNORM_RECONSTRUCTION`.
+6. Add fixed-point stability tests: `CNORM_A == CNORM_B`, `ID_A == ID_B`, `HASH_A == HASH_B`, and repeated `DNA -> DECODE -> CNORM -> DNA` stabilizes.
+7. Add invalid corpus tests before execution refactor.
 
 Actions:
 
@@ -1594,16 +1848,22 @@ Tests:
 - compatible unknown section test
 - incompatible unknown section test
 - CLI `validate` smoke test
+- RNA-to-DNA-to-canonical-structure reconstruction test
+- canonical ID stability across encode/decode
+- DNA decode/re-encode fixed-point test
+- repeated decode/canonicalize/encode stabilization test
 
 Exit condition:
 
 - executor cannot be called through public path with unvalidated DNA
+- the replacement authority path exists before any legacy deletion begins
 
 Downstream payoff:
 
 - execution and certification trust one validation boundary
+- remaining subsystems can now be classified by whether they feed, consume, or bypass the authority path
 
-### Node 11 - Execution Over DNA
+### Node 12 - Execution Over DNA
 
 Purpose:
 
@@ -1611,7 +1871,7 @@ Purpose:
 
 Depends on:
 
-- Node 10
+- Node 11
 
 Code targets:
 
@@ -1621,7 +1881,7 @@ Code targets:
 
 Step sequence:
 
-1. Add execution input type that requires validated DNA or canonical topology plus validation receipt.
+1. Add execution input type that requires validated DNA or canonical structure plus validation receipt.
 2. Implement the smallest structural traversal path before optimizing.
 3. Split exact witness, numeric evidence, counterexample candidate, replay trace, and residual obligation outputs.
 4. Add resource budget and structural bomb checks.
@@ -1630,7 +1890,7 @@ Step sequence:
 
 Actions:
 
-- execute over DNA or canonical topology
+- execute over DNA or canonical structure
 - keep `ExecutionWitness`, `NumericEvidence`, `CounterexampleCandidate`, `ReplayTrace`, and `ResidualObligation` separate
 - define exactness and approximation fields
 - add replay trace keyed to DNA/canonical ID
@@ -1657,7 +1917,7 @@ Downstream payoff:
 
 - proof and adequacy work can become execution-native
 
-### Node 12 - Phase Engine And Ledger Enforcement
+### Node 13 - Phase Engine And Ledger Enforcement
 
 Purpose:
 
@@ -1665,7 +1925,7 @@ Purpose:
 
 Depends on:
 
-- Node 11
+- Node 12
 
 Code targets:
 
@@ -1712,7 +1972,7 @@ Downstream payoff:
 
 - later semantic systems inherit closure instead of reimplementing it
 
-### Node 13 - CLI Surface Alignment
+### Node 14 - CLI Surface Alignment
 
 Purpose:
 
@@ -1720,7 +1980,7 @@ Purpose:
 
 Depends on:
 
-- Node 12
+- Node 13
 
 Code targets:
 
@@ -1735,18 +1995,18 @@ Code targets:
 
 Step sequence:
 
-1. Add `l64` command surface while `mf` still exists only if tests require a transitional alias.
+1. Keep the current command surface stable unless a name actively misleads usage or authority.
 2. Move docs examples to `l64`.
 3. Route `l64` commands through the phase engine.
 4. Remove Q-surface command examples before Q crate deletion.
 5. Run command smoke tests and stale wording scans.
-6. Remove `mf` alias in Node 14 when crate/binary rename completes.
+6. Remove any obsolete alias in Node 15 only when it is confirmed to be active and misleading.
 
 Actions:
 
 - align commands around `import`, `splice`, `fold`, `compile`, `validate`, `sequence`, `execute`, `trace`, `certify`, and `reuse`
 - choose `l64` as the public binary name; use uppercase `L64` only for prose/product identity where appropriate
-- plan crate rename from `mf-*` to `l64-*` after lower substrate tests protect behavior
+- avoid command or crate renames unless the stale name creates a public or implementation problem
 - remove, not merely label, obsolete Q-surface commands unless still required as an extraction source during the active migration node
 - ensure extension is hint and header is truth
 - implement RNA mutation UX with backup and explicit confirmation where applicable
@@ -1761,7 +2021,7 @@ Tests:
 
 - CLI smoke suite
 - help text scan for stale authority wording
-- `rg "mf |mf-|qc0|qa0|qk0|qm0"` with documented exceptions only
+- residue scan for misleading public names and Q-surface authority wording
 - RNA backup/rollback test where implemented
 
 Exit condition:
@@ -1772,73 +2032,11 @@ Downstream payoff:
 
 - documentation and CLI stop fighting the architecture
 
-### Node 14 - Codebase Prefix Rename To l64
+### Node 15 - Naming Hygiene Gate
 
 Purpose:
 
-- rename the codebase identity from `mf`/`math framework` to `l64`/Locus64 without mixing naming churn with substrate deletion
-
-Depends on:
-
-- Node 13
-
-Code targets:
-
-- `Cargo.toml`
-- every crate `Cargo.toml`
-- crate directories currently named `mf-*`
-- root wrapper crate currently named `mf`
-- Rust imports using `mf_*`
-- command docs and release scripts
-- generated release source snapshots only after source-of-truth crates are renamed
-
-Step sequence:
-
-1. Inventory all package names, directory names, binary names, import paths, docs, scripts, and tests containing `mf`, `mf-`, or `mf_`.
-2. Freeze source-of-truth scope: exclude `target`, `release/src`, generated zips, and old release payloads from rename edits until final packaging.
-3. Add a temporary `l64` wrapper or alias only if needed to keep tests green during the rename.
-4. Rename leaf crates first where dependency fanout is smallest.
-5. Rename shared crates next and update Rust import paths from `mf_*` to `l64_*`.
-6. Rename binary crates and command examples from `mf` to `l64`.
-7. Update release scripts and package docs.
-8. Remove temporary aliases once all tests pass through `l64`.
-9. Run the full workspace tests and a help-text scan for stale public `mf` usage.
-
-Actions:
-
-- preserve behavior while changing names
-- prefer mechanical rename patches over semantic edits
-- keep one commit or checkpoint per rename band if implementation is split
-- treat `mf` mentions as allowed only in historical migration notes until final deletion
-
-Invariants:
-
-- no public command remains `mf` after the rename node exits
-- no package name remains `mf-*` after the rename node exits
-- any temporary alias has an explicit deletion condition
-- Q-surface crates are not deleted in this node unless the rename exposes a trivial isolated removal
-- generated release snapshots are regenerated after source rename rather than hand-edited as source truth
-
-Tests:
-
-- `cargo test`
-- `cargo build -p l64` or final binary equivalent
-- `rg "mf |mf-|mf_"` returns only documented historical notes or no results
-- release script dry-run or smoke inspection
-
-Exit condition:
-
-- the active codebase, docs, and release scripts use `l64` naming as the default identity
-
-Downstream payoff:
-
-- Q-surface deletion happens under final project naming, not a discarded `math framework` identity
-
-### Node 15 - Q-Surface Extraction And Deletion
-
-Purpose:
-
-- extract required implementation value from obsolete Q-surface crates, redirect surviving behavior into RNA/DNA substrate modules, and delete the Q-surface crates instead of preserving fake compatibility
+- prevent obsolete or misleading names from creating coordination failure without treating naming churn as execution
 
 Depends on:
 
@@ -1846,58 +2044,253 @@ Depends on:
 
 Code targets:
 
-- old `l64-qc0` / renamed `l64-qc0` during migration window
-- old `l64-qa0` / renamed `l64-qa0` during migration window
-- old `l64-qk0` / renamed `l64-qk0` during migration window
-- old `l64-qm0` / renamed `l64-qm0` during migration window
-- old `l64-surfaces` / renamed `l64-surfaces`
-- old `l64-bundle` / renamed `l64-bundle`
-- `samples`
 - `Cargo.toml`
-- `Cargo.lock`
+- every crate `Cargo.toml`
+- crate directories or imports whose names still contradict current public identity
+- command docs and release scripts
+- generated release source snapshots only after source-of-truth crates change
+
+Step sequence:
+
+1. Inventory remaining stale, misleading, or authority-confusing names in package names, directory names, binary names, import paths, docs, scripts, and tests.
+2. Classify each name as `Harmless`, `HistoricalNote`, `CoordinationRisk`, `PublicApiRisk`, or `DeletionBlocker`.
+3. Do nothing for `Harmless` and `HistoricalNote` names except keep them out of active public examples.
+4. Rename only `CoordinationRisk`, `PublicApiRisk`, and `DeletionBlocker` names.
+5. Freeze source-of-truth scope: exclude `target`, `release/src`, generated zips, and old release payloads from rename edits until final packaging.
+6. For naming-only cleanup, rename lowest-fanout items first only when the rename is independent of authority replacement.
+7. Do not use leaf-first naming or deletion work to postpone a higher-fanout obsolete authority replacement.
+8. Rename shared crates or public APIs only when tests prove the old name still shapes usage or architecture.
+9. Remove temporary aliases once tests pass through the current name.
+10. Run targeted tests plus a help-text scan for stale public identity usage.
+
+Actions:
+
+- preserve behavior while changing required names
+- prefer mechanical rename patches over semantic edits when a rename is justified
+- keep one checkpoint per rename band if implementation is split
+- do not rename working internals merely because names are old
+- reserve name changes for cases where the name creates a concrete implementation, authority, API, or deletion problem
+
+Invariants:
+
+- no public command or document uses an obsolete name as the active project identity
+- no obsolete name remains where it causes authority confusion, public API drift, or dependency cleanup risk
+- any temporary alias has an explicit deletion condition
+- Q-surface crates are not deleted in this node unless name cleanup exposes a trivial isolated removal
+- generated release snapshots are regenerated after source changes rather than hand-edited as source truth
+
+Tests:
+
+- `cargo test`
+- `cargo build -p l64` or final binary equivalent
+- search for obsolete public identity names returns only historical notes or non-authoritative internals
+- release script dry-run or smoke inspection
+
+Exit condition:
+
+- names no longer mislead implementation, public usage, authority boundaries, or deletion sequencing
+
+Downstream payoff:
+
+- later substrate and Q-surface deletion work is not blocked or distorted by misleading names
+
+### Node 16A - Primary Obsolete Beam Replacement
+
+Purpose:
+
+- replace the highest-pressure obsolete authority beam with a stronger RNA/DNA or lineage-native path
+- collapse QC0-style bundle/import/certification authority pressure before residual projection deletion
+- prove representative commands, fixtures, and certification flows can run without QC0 parsing
+
+Depends on:
+
+- Node 15
+- the Node 11 authority-chain fixed-point test must pass
+
+Code targets:
+
+- deleted historical crates `l64-qc0`, `l64-qa0`, `l64-surfaces`
+- `l64-bundle`
+- `l64-cli`
+- `samples`
 - future or existing RNA/DNA homes:
   - `l64-rna` or current lower-chain module home
   - `l64-dna` or current locus/DNA module home
   - `l64-command`
   - `l64-research`
+- external proving fixtures only if they reduce primary-beam ambiguity:
+  - `cki_registry` as a CKI typed-registry RNA/DNA pilot candidate
 
 Step sequence:
 
-1. Inventory Q-surface exports, parsers, renderers, fixtures, tests, commands, and sample files.
-2. Classify each item as `Delete`, `MoveToRna`, `MoveToDna`, `MoveToResearchRecord`, `MoveToTestFixture`, or `TemporaryShim`.
-3. Move required data structures and logic into the selected RNA/DNA/research home.
-4. Redirect commands and tests from Q files to `.rna`, `.dna`, or native lineage records.
-5. Delete one Q crate at a time and run targeted tests after each deletion.
-6. Remove `l64-surfaces`/`l64-surfaces` only after transcode duties are gone or absorbed into rail-native modules.
-7. Remove Q sample files and replace them with rail-native samples.
-8. Run full workspace tests and residue searches.
+1. Start from the passing authority-chain test, not from the Q crate list.
+2. Classify every Q/surface/document mechanism by authority role: `LoadBearingAuthorityBeam`, `FeedsAuthorityPath`, `ConsumesAuthorityPath`, `BypassesAuthorityPath`, `ExtractionSource`, `LeafProjection`, or `Delete`.
+3. Rank active obsolete beams by fanout across fixtures, commands, tests, samples, cert/admin flows, and upper-stack consumers.
+4. Treat QC0-style bundle/import/certification behavior as the current primary beam unless a fresh audit proves another mechanism carries more authority pressure.
+5. Build or extend the native replacement seam first: direct document import, `.dna` packet import, RNA/DNA fixture generation, lineage-native receipts, or canonical-structure-backed records.
+6. Migrate one representative command/test pair through the replacement seam and verify that the old beam is no longer required for that path.
+7. Expand migration across remaining tests, fixtures, samples, and commands that depend on the same beam.
+8. Move required data structures and logic into the selected RNA/DNA/research home only when they feed or consume the authority path.
+9. Track remaining `.qc0` and `.qa0` fixture pressure by command/test/sample owner, and separately track any `Qm0` tombstone references that exist only for binary compatibility.
+10. If using an external proving slice, choose one small dependency-explicit registry and require it to enter as RNA/DNA, not as Markdown/DOT/JSON authority.
+11. Run targeted beam-migration tests and workspace tests.
 
 Actions:
 
 - inventory all Q-surface crates by used type, parser, fixture, sample, command, and receipt
+- maintain a beam-rank table during execution so work follows dependency pressure rather than deletion convenience
+- continue replacing QC0-style bundle/import/certification flows with native `.dna`, RNA/DNA, or lineage-backed equivalents before spending cycles on lower-fanout projection deletion
 - extract reusable logic into RNA/DNA or shared substrate modules only when still required
-- redirect commands and tests from `.qc0`, `.qa0`, `.qk0`, and `.qm0` files to `.rna` and `.dna` artifacts
+- redirect commands and tests from `.qc0` and `.qa0` files to `.rna` and `.dna` artifacts
 - replace Q-surface samples with rail-native `.gene.rna`, `.locus.rna`, `.genome.rna`, and `.dna` samples
-- remove Q-surface crates from the workspace once consumers are redirected
-- remove Q-surface exports from user documentation
+- use CKI-style typed registry data only as a bounded proof-of-value fixture for RNA ingestion, DNA authority, validation receipts, and derived projection export
 - preserve no compatibility shim unless an active test proves a still-required internal transition cannot yet be completed
 - document any temporary shim with an owner node and deletion condition
 
 Invariants:
 
+- replacement is mechanism-driven, not name-driven
+- replacement is beam-first: remove the load-bearing obsolete authority path before optimizing around easy residual leaves
+- leaf deletion cannot be used as evidence that the main obsolete authority beam is solved
 - Q-surface artifacts cannot become substrate authority
 - public doctrine remains RNA/DNA
 - Q-surface support is not treated as a user-facing ecosystem because no real ecosystem exists yet
-- extracted code must be smaller and better-rooted than the deleted surface crate
+- extracted code must be smaller and better-rooted than the obsolete surface crate
+- external proving slices cannot introduce a third public surface or bypass the RNA/DNA authority path
+- derived Markdown/DOT/report outputs are projections, not authority
+
+Tests:
+
+- primary-beam migration tests prove representative bundle/import/certification commands pass through `.dna`, RNA/DNA, or lineage-native artifacts without QC0 parsing
+- migrated fixture count is tracked until `.qc0` bundle fixtures no longer dominate coverage
+- sample certification regression tests pass through RNA/DNA or lineage-native replacements
+- external registry pilot tests, if added, prove parent/dependency closure before export projection generation
+- promotion rejection test for lineage-free extracted/imported object
+- `cargo test -p l64-bundle`
+- `cargo test -p l64-cli`
+- `cargo test --workspace`
+
+Exit condition:
+
+- the primary obsolete bundle/import/certification beam has native `.dna`, RNA/DNA, or lineage-backed command and test coverage, and remaining Q-surface work is residual rather than load-bearing
+
+Downstream payoff:
+
+- broad deletion can proceed without trimming a branch the workspace still depends on
+
+### Node 16B - Residual Projection Extraction And Deletion
+
+Purpose:
+
+- delete mechanisms that bypass or compete with the RNA/DNA authority path after stronger replacement seams exist
+- extract only required implementation value from obsolete Q-surface crates, redirect surviving behavior into RNA/DNA substrate modules, and delete the Q-surface crates instead of preserving fake compatibility
+
+Depends on:
+
+- Node 16A
+
+Code targets:
+
+- `l64-qc0`
+- `l64-qa0`
+- `l64-surfaces`
+- `samples`
+- `Cargo.toml`
+- `Cargo.lock`
+- docs and command examples that still expose Q-surface workflow
+
+Step sequence:
+
+1. Re-run the authority role classification after Node 16A.
+2. Split `l64-surfaces` by actual mechanism ownership before deleting more code.
+3. Delete `BypassesAuthorityPath`, `Delete`, and `LeafProjection` items after their parent beam is replaced, or earlier only when they are genuinely isolated.
+4. Delete legacy projection utility commands that are not required for `.dna` bundle execution: `transcode`, `normalize-surface`, `roundtrip-check`, `surface-capabilities`, `dump-transform-receipt`, `parse`, `normalize`, `validate`, `import`, and `export`.
+5. Delete remaining projection import/export paths after validation/report DNA replacements carry the workflow.
+6. Remove `l64-surfaces` after report/export/cache duties and explicit bundle import duties are absorbed into rail-native modules. Status: complete.
+7. Remove Q sample files and replace them with rail-native samples. Status: complete.
+8. Remove Q-surface exports from user documentation. Status: complete for public docs.
+9. Run full workspace tests and residue searches. Status: complete; remaining mentions are historical rail notes or negative regression tests.
+
+#### Node 16B.1 - Poorly Mapped Territory Burden Chart
+
+Purpose:
+
+- make the remaining deletion path tactical rather than interpretive
+- prevent `l64-surfaces` from remaining a mixed authority/projection/cache/document crate
+- reduce future work by moving each still-useful mechanism to its natural owner exactly once
+
+Current poorly mapped territory:
+
+| Territory | Current home | Current consumers | Authority role | Target owner | High-efficiency action | Deletion gate |
+|---|---|---|---|---|---|---|
+| QC0/QA0 parser/render adapter | deleted | none | deleted historical projection | none | deleted after `.dna` bundle/document/report paths carried active tests | no source dependency on `l64-surfaces`, `l64-qc0`, or `l64-qa0` |
+| Bundle projection ingestion | deleted | none | deleted authority bypass | `l64-bundle` native DNA/RNA ingest | `compile-bundle` accepts bundle-entry text without `--as`; bundle execution imports `.dna` only | bundle tests pass without `l64_surfaces::import_file` |
+| Report-to-document derivation | `l64-cert` | `l64-cli`, `l64-admin`, validation bundle export | `ConsumesAuthorityPath` | complete for current certification/report owner | moved `report_to_document_with_registry`, `report_to_validation_bundle_with_registry`, `load_report_document_with_registry`, and related report document construction beside certification/report logic | validation bundle and report DNA tests pass without report helpers in `l64-surfaces` |
+| Report packet cache paths | `l64-cert` | `l64-cli`, `l64-admin` | `ConsumesAuthorityPath` | complete for current report owner | moved `report_cache_root`, `report_cache_path`, `legacy_report_cache_path`, `report_id`, and `persist_report_document` to report/cert ownership | replay/export/import report tests pass without report cache functions in `l64-surfaces` |
+| Execution manifest and bundle lock packet persistence | `l64-locus` | `l64-admin`, `l64-cli`, report derivation helpers | `ConsumesAuthorityPath` | complete for current packet-storage owner | moved `load_execution_manifest`, `persist_execution_manifest`, `load_bundle_lock`, `persist_bundle_lock`, `manifest_cache_root` to `l64-locus` | admin lock/replay and CLI report tests pass without manifest/lock helpers in `l64-surfaces` |
+| Registry object projection lookup | deleted projection path | none | deleted leaf projection | none | deleted with `export-report-projection` and `export-artifact-projection` | negative CLI/admin regressions prove removed commands are rejected |
+| Transform receipt store | deleted | projection import/export only | `Delete` | none | deleted because it only recorded obsolete projection transforms; import/export still returns non-persisted receipts | no active tests require `persist_receipt` or `load_receipt_store` |
+| `SurfaceKind::Qm0` tombstone | `l64-core` | bincode-encoded existing `.dna` payload compatibility | `BinaryCompatibilityTombstone` | stable numeric encoding, then delete | do not remove until serialized enum-index dependency is replaced or all fixtures are regenerated under stable encoding | residue scan shows no Qm0 except documented tombstone, and bincode fixture stability no longer depends on enum variant position |
+
+Burden-reduction order:
+
+1. Move manifest/lock persistence first because it is high fanout and not intrinsically projection-related. Status: complete, now owned by `l64-locus`.
+2. Move report cache and report-to-document derivation second because it lets `l64-surfaces` stop owning report authority-adjacent behavior. Status: complete in `l64-cert`.
+3. Move or delete registry object projection lookup third because it is only needed by explicit projection exports.
+4. Delete transform receipt store fourth unless lineage migration proves a non-projection use. Status: complete; no non-projection use existed.
+5. Isolate `l64-surfaces` to QC0/QA0 adapter code only. Status: complete before deletion.
+6. Replace `compile-bundle --as` and `certify --file --as` fixtures with `.dna` or RNA/DNA fixtures. Status: complete; those flags are removed.
+7. Delete `l64-qc0`, `l64-qa0`, and the remaining `l64-surfaces` adapter after consumers are gone. Status: complete.
+8. Remove Q-surface docs and residue notes except approved historical rail notes. Status: complete for public docs; rail retains historical notes only where they explain prior dependency decisions.
+
+Per-slice verification:
+
+- after each ownership move, run the smallest owning-crate test first
+- after every public command removal, add a negative CLI/admin regression proving the old command is rejected
+- after every dependency deletion, run `cargo check -p <former-consumer>` and `cargo test -p <former-consumer>`
+- after every adapter deletion, run `rg "l64_surfaces|l64-qc0|l64-qa0|\\.qc0|\\.qa0"` and `cargo test --workspace`
+- after every report/cache move, run report export/import, lock/replay, validation bundle, and torture compact slice
+
+High-risk traps:
+
+- moving report helpers into `l64-bundle` would couple certification reporting to bundle import; prefer `l64-cert` or a small report artifact module
+- deleting `l64-surfaces` before manifest/lock/report helpers move would remove non-projection cache behavior by accident
+- deleting QC0/QA0 before `compile-bundle --as` is replaced would break the remaining migration seam
+- treating transform receipts as lineage receipts without rekeying them to DNA authority would preserve projection authority under a new name
+- deleting the `Qm0` enum tombstone before stable surface encoding lands can silently break existing bincode `.dna` payloads
+
+Exit condition for 16B.1:
+
+- `l64-surfaces` is deleted
+- all non-projection report/cache/manifest/lock helpers live with their owning authority modules
+- the Q-surface deletion list is empty
+
+Actions:
+
+- remove Q-surface crates from the workspace once consumers are redirected
+- remove Q-surface exports from user documentation
+- delete parser/render code that no longer feeds or consumes the authority path
+- aggressively delete projection leaf commands once their only remaining purpose is compatibility demonstration
+- preserve no compatibility shim unless an active test proves a still-required internal transition cannot yet be completed
+- document any temporary shim with an owner node and deletion condition
+
+Invariants:
+
+- deletion is mechanism-driven, not name-driven
+- no deletion is allowed to remove the only implementation of a still-required authority-chain function
+- Q-surface artifacts cannot become substrate authority
+- public doctrine remains RNA/DNA
+- Q-surface support is not treated as a user-facing ecosystem because no real ecosystem exists yet
 - no Q-surface crate remains in the workspace after this node exits
 
 Tests:
 
-- `rg "l64-qc0|l64-qa0|l64-qk0|l64-qm0|\\.qc0|\\.qa0|\\.qk0|\\.qm0"` returns only allowed historical notes, if any
+- `rg "l64-qc0|l64-qa0|\\.qc0|\\.qa0"` returns only allowed historical notes, if any
+- `rg "l64-qm0|\\.qm0|Qm0"` returns only allowed historical notes and the documented enum tombstone, if still required for bincode stability
 - workspace membership no longer includes Q-surface crates
 - sample certification regression tests pass through RNA/DNA or lineage-native replacements
-- promotion rejection test for lineage-free extracted/imported object
 - build and test after each removed crate or command group
+- `cargo test --workspace`
 
 Exit condition:
 
@@ -1907,7 +2300,7 @@ Downstream payoff:
 
 - reduces code hoarding, removes false compatibility pressure, and prevents obsolete surface names from shaping future architecture
 
-### Node 16 - Semantic Rekeying And Upper Reattachment
+### Node 17 - Semantic Rekeying And Upper Reattachment
 
 Purpose:
 
@@ -1915,7 +2308,7 @@ Purpose:
 
 Depends on:
 
-- Node 15
+- Node 16B
 
 Code targets:
 
@@ -1932,8 +2325,9 @@ Step sequence:
 2. Add canonical ID and DNA digest fields where missing.
 3. Require lineage for claim, route, adequacy, bridge, operator, proof-shape, and coverage records.
 4. Convert former Q semantic payloads into RNA/DNA-backed lineage records or native Rust records.
-5. Add rejection tests for lineage-free semantic promotion.
-6. Rerun seeded campaigns and imported-claim equivalents through lineage-native paths.
+5. Add typed-registry lineage rules for dependency-explicit external structures: node declarations, typed edges, proof dependencies, open obligations, and projection exports.
+6. Add rejection tests for lineage-free semantic promotion.
+7. Rerun seeded campaigns and imported-claim equivalents through lineage-native paths.
 
 Actions:
 
@@ -1942,6 +2336,7 @@ Actions:
 - make generator/tower growth blocker-driven and lineage-grounded
 - preserve challenge/remediation records as derived overlays
 - ensure any useful semantic payload formerly expressed in QC0 exists as RNA/DNA-backed lineage objects or native Rust records, not as Q-surface text
+- treat registry Markdown/DOT/report exports as derived projections that must be regenerated from DNA-backed lineage
 
 Invariants:
 
@@ -1949,6 +2344,7 @@ Invariants:
 - no theorem/campaign object becomes authority without DNA lineage
 - upper systems can be replayed or challenged
 - no upper system depends on Q-surface crates
+- dependency order, parent closure, endpoint closure, and open-obligation status are validation requirements for registry-like semantic structures
 
 Tests:
 
@@ -1957,6 +2353,7 @@ Tests:
 - lineage-required rejection tests
 - coverage reuse tests
 - Q-surface dependency absence test
+- registry-like fixture test proving parent-before-child constructive order and zero undeclared endpoints before projection export
 
 Exit condition:
 
@@ -1966,7 +2363,7 @@ Downstream payoff:
 
 - the extensive current semantic system becomes an asset rather than substrate debt
 
-### Node 17 - Conformance, Torture, And Release Gates
+### Node 18 - Conformance, Torture, And Release Gates
 
 Purpose:
 
@@ -1974,7 +2371,7 @@ Purpose:
 
 Depends on:
 
-- Node 16
+- Node 17
 
 Code targets:
 
@@ -1987,8 +2384,8 @@ Step sequence:
 
 1. Build a conformance corpus for token, RNORM, SSR, CNORM, DNA, execution, lineage, and reuse.
 2. Add randomized or fuzz-style stress where practical.
-3. Update torture tests to exercise the full rail under `l64` naming.
-4. Add residue scans for `mf`, Q surfaces, proto-DNA claims, and stale docs.
+3. Update torture tests to exercise the full rail through the current public command surface.
+4. Add residue scans for misleading names, Q surfaces, proto-DNA claims, and stale docs.
 5. Add release smoke tests for Windows, Linux, compact, perfopt, and source packages.
 6. Make failed conformance block release generation.
 
@@ -2021,7 +2418,7 @@ Downstream payoff:
 
 - future work has a regression net and clear resume point
 
-### Node 18 - End-To-End Delivery Closure
+### Node 19 - End-To-End Delivery Closure
 
 Purpose:
 
@@ -2029,7 +2426,7 @@ Purpose:
 
 Depends on:
 
-- Node 17
+- Node 18
 
 Code targets:
 
@@ -2046,7 +2443,7 @@ Step sequence:
 
 1. Verify the implemented system matches the final rail definition: RNA/DNA public surface, structural authority, canonical identity, lineage-bound execution, lawful reuse.
 2. Verify user-facing commands use `l64` and documented examples run.
-3. Verify no Q-surface or `mf` naming residue remains outside approved historical notes.
+3. Verify no Q-surface or misleading naming residue remains outside approved historical notes.
 4. Generate or refresh usage documentation for actual interaction language, command syntax, RNA authoring, DNA validation, execution, tracing, certification, and reuse.
 5. Run conformance, torture, and release smoke tests.
 6. Produce Windows and Linux binary releases for performance and compact profiles.
@@ -2091,11 +2488,11 @@ Downstream payoff:
 This change chain is now applied to the rail:
 
 1. Reclassify Q-surface crates as extraction-and-deletion targets, not compatibility surfaces.
-2. Insert Node 14 as the path-optimized `mf` -> `l64` rename sequence.
-3. Replace the former compatibility-demotion phase with Node 15 Q-surface extraction and deletion.
-4. Require useful code from `l64-qc0`, `l64-qa0`, `l64-qk0`, and `l64-qm0` to move into RNA/DNA or shared substrate modules.
-5. Require commands, samples, and docs to redirect to `.rna` and `.dna` artifacts instead of `.qc0`, `.qa0`, `.qk0`, or `.qm0`.
-6. Start the naming migration target from `mf`/`math framework` toward `l64` for command and crate identity.
+2. Reframe Node 15 as a naming hygiene gate, not a naming-centered implementation phase.
+3. Replace the former compatibility-demotion phase with Node 16 Q-surface extraction and deletion.
+4. Require useful code from extraction sources to move into RNA/DNA or shared substrate modules before deletion; `l64-qc0`, `l64-qa0`, and `l64-surfaces` have now been deleted, while `Qm0` remains only as a temporary binary-compatibility tombstone if still required.
+5. Require commands, samples, and docs to redirect to `.rna` and `.dna` artifacts instead of `.qc0` or `.qa0`.
+6. Permit naming changes only when they prevent authority confusion, public API drift, dependency cleanup risk, or repeated implementation mistakes.
 7. Permit temporary shims only when they have an owner node and explicit deletion condition.
 8. Add search/build/test gates proving Q-surface residue is gone rather than merely documented.
 9. Add an end-to-end delivery closure node so the rail endpoint includes docs, releases, source archive, GitHub state, and handoff.
@@ -2105,35 +2502,85 @@ This change chain is now applied to the rail:
 
 This change chain optimizes the rail for Rust-specific, high-efficiency execution:
 
-1. Add Rust development optimization rules so implementation proceeds through typed contracts, crate-local tests, table-driven law, and mechanical rename bands.
+1. Add Rust development optimization rules so implementation proceeds through typed contracts, crate-local tests, table-driven law, and mechanical edits when naming hygiene is truly required.
 2. Add an adversarial audit checklist for each node.
-3. Record plan-altering codebase facts: Q-surface crates are active dependencies, `mf` naming is pervasive, and release snapshots are not source truth.
+3. Record plan-altering codebase facts: Q-surface crates are active dependencies, misleading names can hide deletion risk, and release snapshots are not source truth.
 4. Move the phase contract skeleton earlier by merging it into Node 02 with canonical identity foundation.
-5. Keep the full phase engine later as Node 12, but make it an upgrade of the early skeleton rather than a late invention.
+5. Keep the full phase engine later as Node 13, but make it an upgrade of the early skeleton rather than a late invention.
 6. Add nested step sequences to lower-chain nodes that previously had only actions.
-7. Tighten rename sequencing to exclude generated release snapshots and isolate naming churn from Q-surface deletion.
+7. Tighten naming sequencing to exclude generated release snapshots and isolate necessary naming hygiene from Q-surface deletion.
 8. Add local Rust test strategy: check crate, test crate, then run workspace tests at phase exit.
 
-## 26. Definition Of Done
+## 26. Fourth Compounding Change Chain
+
+This change chain corrects the rail's treatment of names:
+
+1. Names are allowed and useful when they coordinate work.
+2. Names are not mechanism and must not become implementation objectives by themselves.
+3. A name change is justified only when the name creates authority confusion, public API drift, dependency cleanup risk, or repeated implementation mistakes.
+4. Existing names may remain when they are harmless implementation handles.
+5. Planning should state a name only when doing so prevents coordination failure or points to a concrete code target.
+6. Node 15 is now a naming hygiene gate rather than a rename-centered phase.
+7. Renaming must stay subordinate to substrate closure, Q-surface extraction/deletion, DNA authority, execution, lineage, reuse, testing, and release.
+
+## 27. Fifth Compounding Change Chain
+
+This change chain corrects the rail's treatment of deletion and representation:
+
+1. The rail is organized around authority collapse, not named-object deletion.
+2. The first hard implementation commitment is the complete authority path: `RNA -> RNORM -> SSR -> CNORM -> DNA -> DNA_DECODE -> CNORM_RECONSTRUCTION`.
+3. Deletion begins only after that replacement authority path exists and can classify remaining systems mechanically.
+4. Remaining systems are classified as load-bearing obsolete beams, feeding the authority path, consuming it, bypassing it, extraction-only, leaf projections, or deletable.
+5. Bypassing and deletable mechanisms are removed; feeding and consuming mechanisms are reattached.
+6. Graphs, arenas, trees, DAGs, term structures, and opcode streams are implementation representations, not substrate authority.
+7. "Canonical topology" wording is replaced with "canonical structure" to avoid turning one mathematical representation into the substrate.
+
+## 28. Sixth Compounding Change Chain
+
+This change chain corrects the rail's extraction/deletion ordering:
+
+1. The rail now chooses extraction order by dependency pressure, not deletion convenience.
+2. Load-bearing obsolete authority beams are replaced before residual leaf projections are removed.
+3. The QC0-style bundle/import/certification flow is the current primary obsolete beam unless a fresh authority audit proves otherwise.
+4. The completed QK0 deletion is recorded as a valid isolated-leaf cut, not as the strategy template for the remaining work.
+5. Node 16A now requires a beam-rank table and a representative `.dna`, RNA/DNA, or lineage-native replacement seam before broad Q deletion.
+6. Fixture, command, sample, and certification migrations now prove the beam is collapsing before crate deletion is counted as progress.
+7. Naming-only leaf-first cleanup remains allowed only when it does not delay beam replacement.
+
+## 29. Seventh Compounding Change Chain
+
+This change chain incorporates the CKI registry proving-project lesson without changing the main task:
+
+1. External proving projects are permitted only when they strengthen the RNA/DNA authority path.
+2. The required external proving flow is `external authored structure -> RNA ingestion -> RNORM/SSR/CNORM -> DNA authority -> validation receipts -> derived projections`.
+3. Markdown, DOT, Julia objects, JSON, notebooks, and reports are projection or extraction material, not authority.
+4. CKI-style typed registries are recognized as useful pilot fixtures because they expose dependency closure, parent ordering, typed edges, proof dependencies, and open obligations.
+5. Node 16A may use one bounded CKI-style registry pilot only if it reduces primary-beam ambiguity and does not create a third public surface.
+6. Node 17 now carries the semantic rekeying requirements for registry-like structures.
+7. Mathematical-legitimacy gates now explicitly include dependency closure, parent-before-child constructive order, explicit open obligations, validation receipts, and projection/authority separation.
+
+## 30. Definition Of Done
 
 The rail is implemented when:
 
 - required DNA sections contain no semantic text needed for validation or execution
 - SSR cannot be serialized as authority
-- KGRAPH cannot become a public identity layer
+- structural-form representations cannot become public identity layers
 - CNORM identity is independent of presentation strings and source formatting
 - DNA validates from structural sections alone
-- execution traverses DNA or canonical topology directly
+- execution traverses DNA or canonical structure directly
 - every public CLI command maps to phase-engine transitions and ledger entries
 - semantic systems are lineage-keyed derived overlays
 - Q-surface crates are removed and no longer shape the architecture
-- public command/crate naming has migrated to `l64` or has a bounded transitional shim with deletion criteria
+- public command/crate naming does not mislead users, implementation, authority boundaries, or deletion sequencing
 - compatibility imports are removed unless backed by a concrete active requirement and deletion condition
 - conformance, fuzz, torture, replay, migration, and cross-platform determinism tests pass
+- external proving slices demonstrate that authored registry-like structures can be ingested through RNA/DNA and exported as projections without making the projection authoritative
+- mathematical-legitimacy gates include dependency closure, parent-before-child constructive order, explicit open obligations, validation receipts, and projection/authority separation
 
-## 27. Final System Definition
+## 31. Final System Definition
 
-Locus64 is a deterministic structural substrate in which symbolic interaction surfaces are normalized into canonical graph structure, encoded into reconstructive machine form, executed under lineage-preserving authority, and amortized through lawful structural reuse.
+Locus64 is a deterministic structural substrate in which symbolic interaction surfaces are normalized into canonical structure, encoded into reconstructive machine form, executed under lineage-preserving authority, and amortized through lawful structural reuse.
 
 Compact form:
 

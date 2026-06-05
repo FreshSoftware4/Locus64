@@ -1,26 +1,31 @@
 use l64_atlas::CompiledAtlas;
 use l64_core::{
-    ArtifactOrigin, AtlasDeficiencyClass, CalibrationPressureMap, CandidateAdequacyClause,
-    CandidateAtlasCell, CandidateCampaign, CandidateCheckerExtension, CandidatePayoffTask,
-    CandidateSemanticLeaf, CertificationCandidate, CertificationReport, CertificationVerdict,
-    CheckProofShape, CheckerReceipt, CheckerReceiptKind, CoverageDecision,
-    DeterministicExecutionEnvelope, DistressVector, EvidenceExactness, EvidencePreference,
-    ExecutionClosureReceipt, Frontier, FrontierLedger, GeneratedStatus, GenerationReceipt,
-    GeneratorContract, GenomeArtifactClass, GenomeSurface, HelpRequest, LocusCapabilityMask,
-    LocusOpcode, LocusPacket, LocusPacketHeader, LocusPacketKind, LocusSection, Obligation,
-    ObligationCacheShard, ObligationCollisionReport, ObligationConcurrencyClass, ObligationDagEdge,
-    ObligationDagNode, ObligationEvaluationMode, ObligationEvidenceReceipt, ObligationGroup,
-    ObligationKind, ObligationLaneRecord, ObligationMergeReceipt, ObligationNamespaceReceipt,
-    ObligationOrderingReceipt, ObligationPlan, ObligationStatus, ObligationWriteSet,
-    OptimizerPolicy, OverridePressureReceipt, PromotionCandidate, ProofCoverageDispatch,
-    ProofCoverageEnvelope, ProposalKind, RecipeDelta, RecipeRecord, RegistryLookup,
-    ReplayBarrierReceipt, ReplayDivergenceRecord, ReplayLegalityCheck, ReplayMergeReceipt,
+    ArtifactOrigin, AtlasDeficiency, AtlasDeficiencyClass, Budget, CalibrationPressureMap,
+    CandidateAdequacyClause, CandidateAtlasCell, CandidateCampaign, CandidateCheckerExtension,
+    CandidatePayoffTask, CandidateSemanticLeaf, Certificate, CertificationCandidate,
+    CertificationReport, CertificationVerdict, CheckProofShape, CheckerReceipt, CheckerReceiptKind,
+    CoverageDecision, DeterministicExecutionEnvelope, DistressVector, EvidenceExactness,
+    EvidencePreference, ExecutionClosureReceipt, FormatTransformReceipt, Frontier, FrontierLedger,
+    GeneratedStatus, GenerationReceipt, GeneratorContract, GenomeArtifactClass, GenomeSurface,
+    HelpRequest, LocusCapabilityMask, LocusOpcode, LocusPacket, LocusPacketHeader,
+    LocusPacketKind, LocusSection, Obligation, ObligationCacheShard, ObligationCollisionReport,
+    ObligationConcurrencyClass, ObligationDagEdge, ObligationDagNode, ObligationEvaluationMode,
+    ObligationEvidenceReceipt, ObligationGroup, ObligationKind, ObligationLaneRecord,
+    ObligationMergeReceipt, ObligationNamespaceReceipt, ObligationOrderingReceipt, ObligationPlan,
+    ObligationStatus, ObligationWriteSet, OptimizerPolicy, OverridePressureReceipt, PolicyVerdict,
+    PromotionCandidate, ProofCoverageDispatch, ProofCoverageEnvelope, ProposalKind, QaDocument,
+    QaEntry, RecipeDelta, RecipeRecord, RegistryLookup, ReplayBarrierReceipt,
+    ReplayDivergenceRecord, ReplayLegalityCheck, ReplayLockManifest, ReplayMergeReceipt,
     ReplayStatus, RequiredProofShapeFamily, ResidualVerificationReceipt, ReuseDecisionReceipt,
-    ReuseLegalityReceipt, RouteScoreVector, SearchCompartment, UnsupportedHandlingMode,
-    VerticalCompoundingBundle, ensure_cache_subdir,
+    ReuseLegalityReceipt, RouteLedger, RouteScoreVector, SearchCompartment, SurfaceKind,
+    TransformKind, TransformVerdict, UnsupportedHandlingMode, VerticalCompoundingBundle,
+    ensure_cache_subdir,
 };
 use l64_kernel::ConstitutionKernel;
-use l64_locus::{decode_section_payload, decode_summary as decode_locus_summary};
+use l64_locus::{
+    decode_section_payload, decode_summary as decode_locus_summary, load_bundle_lock,
+    load_execution_manifest,
+};
 use l64_policy::resolve_policy_graph;
 use l64_runtime::{
     HostExecutionResult, exec_ch_inh_type_witness, exec_ch_norm_type_witness,
@@ -5292,6 +5297,412 @@ pub fn decode_locus_packet_summary(
     decode_locus_summary(bytes).map_err(|err| CertError::Message(err.to_string()))
 }
 
+pub fn report_cache_root() -> Result<PathBuf, CertError> {
+    ensure_cache_subdir("reports").map_err(CertError::Message)
+}
+
+pub fn report_cache_path(id: &str) -> Result<PathBuf, CertError> {
+    Ok(report_cache_root()?.join(format!("{id}.dna")))
+}
+
+pub fn legacy_report_cache_path(id: &str) -> Result<PathBuf, CertError> {
+    Ok(report_cache_root()?.join(format!("{id}.locus")))
+}
+
+pub fn report_id(report: &CertificationReport) -> String {
+    format!(
+        "REPORT_{}_{}",
+        report.theorem_id,
+        report
+            .campaign_id
+            .clone()
+            .unwrap_or_else(|| "THEOREM".into())
+    )
+}
+
+pub fn persist_report_document(report: &CertificationReport) -> Result<(), CertError> {
+    let path = report_cache_path(&report_id(report))?;
+    let bytes = encode_locus_packet_for_report(report)?;
+    fs::write(path, bytes).map_err(|err| CertError::Message(err.to_string()))?;
+    Ok(())
+}
+
+pub fn report_related_entries(
+    registry: &dyn RegistryLookup,
+    report: &CertificationReport,
+) -> Vec<QaEntry> {
+    let mut entries = Vec::new();
+    for id in &report.burden_pack_ids {
+        if let Some(item) = registry.get_burden_pack(id) {
+            entries.push(QaEntry::BurdenPack(item));
+        }
+    }
+    for id in &report.claim_packet_ids {
+        if let Some(item) = registry.get_claim_packet(id) {
+            entries.push(QaEntry::ClaimPacket(item));
+        }
+    }
+    for id in &report.evidence_contract_ids {
+        if let Some(item) = registry.get_evidence_contract(id) {
+            entries.push(QaEntry::EvidenceContract(item));
+        }
+    }
+    for id in &report.benchmark_receipt_ids {
+        if let Some(item) = registry.get_benchmark_receipt(id) {
+            entries.push(QaEntry::BenchmarkReceipt(item));
+        }
+    }
+    for id in &report.challenge_receipt_ids {
+        if let Some(item) = registry.get_challenge_receipt(id) {
+            entries.push(QaEntry::ChallengeReceipt(item));
+        }
+    }
+    for id in &report.reproducibility_packet_ids {
+        if let Some(item) = registry.get_reproducibility_packet(id) {
+            entries.push(QaEntry::ReproducibilityPacket(item));
+        }
+    }
+    for record in &report.adequacy_records {
+        if let Some(item) = registry.get_adequacy_clause(&record.clause_id) {
+            entries.push(QaEntry::AdequacyClause(item));
+        }
+    }
+    entries
+}
+
+pub fn report_to_validation_bundle_with_registry(
+    report: &CertificationReport,
+    registry: &dyn RegistryLookup,
+) -> Result<QaDocument, CertError> {
+    let mut document = report_to_document_with_registry(report, registry)?;
+    let mut extra = Vec::new();
+    if let Some(theorem) = registry.get_theorem_spec(&report.theorem_id) {
+        for host in &theorem.hosts {
+            if let Some(regime) = registry.get_regime(host) {
+                extra.push(QaEntry::Regime(regime));
+            }
+        }
+        for shape_id in &theorem.proof_shapes {
+            if let Some(shape) = registry.get_proof_shape(shape_id) {
+                extra.push(QaEntry::ProofShape(shape));
+            }
+        }
+        extra.push(QaEntry::TheoremSpec(theorem));
+    }
+    if let Some(target) = registry.get_target_profile(&report.target_profile_id) {
+        extra.push(QaEntry::TargetProfile(target));
+    }
+    if let Some(campaign_id) = &report.campaign_id {
+        if let Some(campaign) = registry.get_campaign(campaign_id) {
+            for obligation_id in &campaign.obligations {
+                if let Some(obligation) = registry.get_obligation(obligation_id) {
+                    extra.push(QaEntry::Obligation(obligation));
+                }
+            }
+            extra.push(QaEntry::Campaign(campaign));
+        }
+    }
+    if let Some(route_class_id) = &report.route_class_id {
+        if let Some(route_class) = registry.get_route_class(route_class_id) {
+            extra.push(QaEntry::RouteClass(route_class));
+        }
+    }
+    for bridge_id in &report.selected_path {
+        if let Some(bridge) = registry.get_bridge(bridge_id) {
+            if let Some(source) = registry.get_regime(&bridge.src) {
+                extra.push(QaEntry::Regime(source));
+            }
+            if let Some(target) = registry.get_regime(&bridge.tgt) {
+                extra.push(QaEntry::Regime(target));
+            }
+            extra.push(QaEntry::Bridge(bridge));
+        }
+    }
+    if let Some(cell_id) = &report.selected_atlas_cell {
+        if let Some(cell) = registry.get_atlas_cell(cell_id) {
+            extra.push(QaEntry::AtlasCell(cell));
+        }
+    }
+    document.entries.extend(extra);
+    Ok(QaDocument {
+        entries: document
+            .entries
+            .into_iter()
+            .fold(Vec::new(), |mut acc, entry| {
+                let id = entry.id();
+                if !acc.iter().any(|existing: &QaEntry| existing.id() == id) {
+                    acc.push(entry);
+                }
+                acc
+            }),
+    })
+}
+
+pub fn report_to_document_with_registry(
+    report: &CertificationReport,
+    registry: &dyn RegistryLookup,
+) -> Result<QaDocument, CertError> {
+    let report_id = report_id(report);
+    let ledger = RouteLedger {
+        id: format!("TRL_{report_id}"),
+        theorem: report.theorem_id.clone(),
+        paths: vec![report.selected_path.clone()],
+        budget: Budget {
+            max_loss: report
+                .candidates
+                .first()
+                .map(|item| item.loss_count)
+                .unwrap_or_default(),
+            allow_lossy_supported: true,
+            require_proof: true,
+        },
+        losses: report
+            .candidates
+            .first()
+            .map(|item| vec![format!("loss-count={}", item.loss_count)])
+            .unwrap_or_default(),
+        receipts: Vec::new(),
+        normalized_path: report.selected_path.clone(),
+    };
+    let certificate = Certificate {
+        id: format!("CRT_{report_id}"),
+        theorem: report.theorem_id.clone(),
+        route_ledger: ledger.id.clone(),
+        proof_shapes: report
+            .candidates
+            .first()
+            .map(|item| item.proof_shapes.clone())
+            .unwrap_or_default(),
+        receipts: report
+            .reused_artifact_ids
+            .iter()
+            .cloned()
+            .chain(
+                report
+                    .adequacy_records
+                    .iter()
+                    .filter(|item| item.verdict == CertificationVerdict::Certified)
+                    .map(|item| item.id.clone()),
+            )
+            .chain(report.payoff_receipt_ids.iter().cloned())
+            .collect(),
+        verdict: report.verdict.clone(),
+    };
+    let mut entries = vec![
+        QaEntry::RouteLedger(ledger.clone()),
+        QaEntry::Certificate(certificate.clone()),
+    ];
+    entries.extend(report_related_entries(registry, report));
+    entries.extend(
+        report
+            .promotion_artifact_ids
+            .iter()
+            .map(|id| QaEntry::Object(promoted_operator_object(report, id))),
+    );
+    if let Some(policy_resolution) = &report.policy_resolution {
+        entries.push(QaEntry::PolicyResolution(policy_resolution.clone()));
+    }
+    if let Some(envelope) = &report.execution_envelope {
+        if let Some(manifest_id) = &envelope.manifest_id {
+            if let Ok(manifest) = load_execution_manifest(manifest_id) {
+                entries.push(QaEntry::ExecutionManifest(manifest));
+            }
+        }
+        if let Some(lock_id) = &envelope.lock_id {
+            if let Ok(lock) = load_bundle_lock(lock_id) {
+                entries.push(QaEntry::BundleLock(lock));
+            }
+        }
+        if let (Some(lock_id), Some(manifest_id)) = (&envelope.lock_id, &envelope.manifest_id) {
+            entries.push(QaEntry::ReplayLockManifest(ReplayLockManifest {
+                id: format!("RLM_{report_id}"),
+                report_id: report_id.clone(),
+                report_hash: envelope.report_hash.clone(),
+                route_winner_hash: envelope.route_winner_hash.clone(),
+                policy_hash: envelope.policy_hash.clone(),
+                bundle_hash: envelope.bundle_hash.clone(),
+            }));
+            entries.push(QaEntry::LockReceipt(l64_core::LockReceipt {
+                id: format!("LRC_{report_id}"),
+                lock_id: lock_id.clone(),
+                manifest_id: manifest_id.clone(),
+                bundle_id: envelope.bundle_hash.clone(),
+                receipt_ids: vec![format!("XFR_{report_id}")],
+                verdict: report
+                    .policy_resolution
+                    .as_ref()
+                    .map(|item| item.verdict.clone())
+                    .unwrap_or(PolicyVerdict::Applied),
+            }));
+        }
+        entries.push(QaEntry::TransformReceipt(FormatTransformReceipt {
+            id: format!("XFR_{report_id}"),
+            src_surface: SurfaceKind::Qc0,
+            dst_surface: SurfaceKind::Qc0,
+            object_ids: vec![ledger.id.clone(), certificate.id.clone()],
+            transform_kind: TransformKind::Export,
+            policy_id: envelope.policy_hash.clone(),
+            defaults_used: vec![format!("bundle_hash={}", envelope.bundle_hash)],
+            alias_expansions: Vec::new(),
+            loss_classes: Vec::new(),
+            hash_before: envelope.route_winner_hash.clone(),
+            hash_after: envelope.report_hash.clone(),
+            verdict: match envelope.replay_status {
+                ReplayStatus::Fresh | ReplayStatus::CacheHit | ReplayStatus::ReplayOnly => {
+                    TransformVerdict::Lossless
+                }
+                ReplayStatus::Invalidated => TransformVerdict::Invalid,
+            },
+            rollback_ref: None,
+            replay_ref: Some(format!("{:?}", envelope.replay_status)),
+        }));
+    }
+    entries.extend(
+        report
+            .deficiencies
+            .iter()
+            .cloned()
+            .map(QaEntry::AtlasDeficiency),
+    );
+    entries.extend(
+        report
+            .adequacy_records
+            .iter()
+            .enumerate()
+            .map(|(index, item)| {
+                QaEntry::AtlasDeficiency(l64_core::adequacy_record_deficiency(
+                    &report.theorem_id,
+                    report.selected_atlas_cell.as_deref(),
+                    format!("DGN_ADQ_{report_id}_{index}"),
+                    item,
+                ))
+            }),
+    );
+    entries.extend(
+        report
+            .diagnostics
+            .iter()
+            .enumerate()
+            .map(|(index, message)| {
+                QaEntry::AtlasDeficiency(AtlasDeficiency {
+                    id: format!("DGN_{report_id}_{index}"),
+                    class: AtlasDeficiencyClass::DNoCommutingProof,
+                    atlas_cell: report.selected_atlas_cell.clone(),
+                    theorem: Some(report.theorem_id.clone()),
+                    message: message.clone(),
+                    blocking_scope: None,
+                    control_effects: Vec::new(),
+                    suggested_seam: None,
+                })
+            }),
+    );
+    entries.extend(report.obligations.iter().enumerate().map(|(index, item)| {
+        QaEntry::AtlasDeficiency(l64_core::obligation_status_deficiency(
+            &report.theorem_id,
+            report.selected_atlas_cell.as_deref(),
+            format!("DGN_OBL_{report_id}_{index}"),
+            item,
+            false,
+            None,
+        ))
+    }));
+    if let Some(explanation) = &report.route_explanation {
+        entries.push(QaEntry::AtlasDeficiency(
+            l64_core::route_explanation_deficiency(
+                &report.theorem_id,
+                report.selected_atlas_cell.as_deref(),
+                format!("DGN_ROUTE_{report_id}"),
+                explanation,
+                false,
+            ),
+        ));
+    }
+    Ok(QaDocument { entries })
+}
+
+pub fn load_report_document_with_registry(
+    id: &str,
+    registry: &dyn RegistryLookup,
+) -> Result<QaDocument, CertError> {
+    let path = report_cache_path(id)?;
+    if path.exists() {
+        let bytes = fs::read(path).map_err(|err| CertError::Message(err.to_string()))?;
+        let report = decode_locus_packet_report(&bytes)?;
+        return report_to_document_with_registry(&report, registry);
+    }
+    let legacy_path = legacy_report_cache_path(id)?;
+    if legacy_path.exists() {
+        let bytes = fs::read(legacy_path).map_err(|err| CertError::Message(err.to_string()))?;
+        let report = decode_locus_packet_report(&bytes)?;
+        return report_to_document_with_registry(&report, registry);
+    }
+    Err(CertError::Message(format!("report packet not found: {id}")))
+}
+
+fn promoted_operator_object(report: &CertificationReport, id: &str) -> l64_core::QcObject {
+    let alias = if let Some(suffix) = id.strip_prefix("OPR_PROMOTED_") {
+        suffix.replace('_', ".")
+    } else {
+        id.replace('_', ".")
+    };
+    l64_core::QcObject {
+        id: id.to_string(),
+        identity: l64_core::IdentityFace {
+            tag: l64_core::ObjectTag::Opr,
+            cid: format!("cid:{id}"),
+            codebook: "QC0_CORE".into(),
+            remap: "none".into(),
+            lineage: format!("derived-from:{}", report.theorem_id),
+        },
+        structural: l64_core::StructuralFace {
+            head: "operator".into(),
+            args: vec![
+                report.theorem_id.clone(),
+                report
+                    .campaign_id
+                    .clone()
+                    .unwrap_or_else(|| "THEOREM".into()),
+            ],
+            local_sections: vec!["first-order derivative composition".into()],
+            morphism_hooks: report.selected_path.clone(),
+        },
+        constraint: l64_core::ConstraintFace {
+            regime: "R_CALC".into(),
+            contracts: vec!["chain-rule".into(), "first-order".into()],
+            invariants: vec!["jet-compose".into(), "reduction-exact".into()],
+            equivalence: "first-order jet equivalence".into(),
+            admissibility: "promoted after exact certified discharge".into(),
+        },
+        evidence: l64_core::EvidenceFace {
+            evidence_class: "DerivedPromotion".into(),
+            traces: vec![report.theorem_id.clone()],
+            receipts: vec![
+                report
+                    .certificate_id
+                    .clone()
+                    .unwrap_or_else(|| format!("CRT_{}", report_id(report))),
+                format!(
+                    "REPORT_{}_{}",
+                    report.theorem_id,
+                    report
+                        .campaign_id
+                        .clone()
+                        .unwrap_or_else(|| "THEOREM".into())
+                ),
+            ],
+            maturity: l64_core::EvidenceMaturity::Certified,
+            gate_verdict: l64_core::GateVerdict::Pass,
+        },
+        alias: l64_core::AliasFace {
+            aliases: vec![alias],
+            profile_pack: vec!["STD".into(), "chain-rule".into()],
+            qm_binding: "THS·ChainRule".into(),
+            qa_binding: "OPR.Chain1".into(),
+            projection_policy: "canonical-authored".into(),
+        },
+    }
+}
+
 fn encode_cached_report_packet(entry: &CachedCertificationReport) -> Result<Vec<u8>, CertError> {
     let coverage = derive_proof_coverage_envelope(&entry.report);
     let header_payload = CachedExecutionPacketHeader {
@@ -5400,6 +5811,7 @@ fn decode_cached_report_packet(bytes: &[u8]) -> Result<CachedCertificationReport
 mod tests {
     use super::*;
     use l64_bundle::import_bundle_file;
+    use l64_core::{QaDocument, QaEntry};
     use l64_registry::SeedRegistry;
     use serial_test::serial;
     use std::{
@@ -5416,6 +5828,40 @@ mod tests {
                 .unwrap()
                 .as_nanos()
         )
+    }
+
+    fn write_bundle(path: &PathBuf, content: &str) {
+        if path.extension().and_then(|ext| ext.to_str()) == Some("dna") {
+            let document = bundle_document_from_text(content);
+            let bytes = l64_locus::encode_section_packet(
+                LocusPacketKind::CanonicalTransfer,
+                LocusOpcode::CanonicalPayload,
+                "BND_CERT_TEST",
+                "bundle_document.v1",
+                &document,
+                LocusCapabilityMask::default(),
+                1,
+            )
+            .unwrap();
+            fs::write(path, bytes).unwrap();
+        } else {
+            fs::write(path, content).unwrap();
+        }
+    }
+
+    fn bundle_document_from_text(bundle: &str) -> QaDocument {
+        let entries = bundle
+            .lines()
+            .filter_map(|line| {
+                let line = line.trim();
+                if line.is_empty() || line.starts_with("!qc0") {
+                    return None;
+                }
+                let (kind, payload) = line.split_once(' ').unwrap();
+                Some(QaEntry::from_surface_json(kind, payload).unwrap())
+            })
+            .collect();
+        QaDocument { entries }
     }
 
     #[test]
@@ -5926,8 +6372,8 @@ mod tests {
                 .as_nanos()
         ));
         let _ = fs::create_dir_all(&dir);
-        let file = dir.join("bundle.qc0");
-        fs::write(
+        let file = dir.join("bundle.dna");
+        write_bundle(
             &file,
             r#"!qc0 {"surface_kind":"Qc0","version":"1","policy_id":"POL_QC0_CORE","capability_id":"CAP_QC0_CORE"}
 policy-object {"id":"MOP_BND_BUNDLE_TEST_SCHED","kind":"ReportExport","scope":{"Bundle":"BND_BUNDLE"},"extends":null,"optimizer":null,"evaluator":null,"replay_cache":null,"report":{"export_surfaces":["Qc0"],"include_policy_trace":true,"include_route_explanation":true,"include_obligation_logs":true},"scheduler":{"parallelization":"ParallelIndependent","max_workers":2,"allow_parallel_replay":true,"allow_parallel_certification":true,"allow_parallel_exports":true,"deterministic_ordering":true,"allow_parallel_obligations":true,"max_obligation_workers":2,"allow_parallel_obligation_replay":true,"serialize_canonicalization_sensitive":true},"canonicalizer_mode":null,"merge_policy":null,"notes":["test scheduler"]}
@@ -5939,8 +6385,7 @@ obligation {"id":"OBL_T","kind":"OblAdm","description":"adm","status":"Benchmark
 target {"id":"TGT_T","burden_class":"General","host_cluster":["R_TOP","R_CALC"],"target_equivalence":"eq","allowed_bridge_classes":["Enriching"],"loss_ceiling":1,"rollback_ceiling":1,"required_receipt_class":"RC","required_proof_shape_family":"Square","promotion_goal":"PromoteOperator","primary_zone":"PmzStructural","surface_requirement":null,"preferred_surface_target":null,"optimizer_policy":null,"policy_binding_ids":[]}
 ledger {"id":"TRL_T","theorem":"THS_T","paths":[["B_T"]],"budget":{"max_loss":1,"allow_lossy_supported":false,"require_proof":true},"losses":[],"receipts":[],"normalized_path":["B_T"]}
 campaign {"id":"CPG_T","theorem":"THS_T","target_profile":"TGT_T","route_ledger":"TRL_T","obligations":["OBL_T"],"certificates":[],"dependencies":[],"campaign_class":"CBasic","verdict":"Benchmarked","payoff":["test"]}"#,
-        )
-        .unwrap();
+        );
         let world =
             import_bundle_file(&file, None, l64_core::BundleConflictPolicy::Reject, None).unwrap();
         let atlas = CompiledAtlas::compile(&world.overlay).unwrap();
@@ -5969,8 +6414,8 @@ campaign {"id":"CPG_T","theorem":"THS_T","target_profile":"TGT_T","route_ledger"
         }
         let dir = std::env::temp_dir().join("l64_cert_bundle_test_multi");
         let _ = fs::create_dir_all(&dir);
-        let file = dir.join("bundle.qc0");
-        fs::write(
+        let file = dir.join("bundle.dna");
+        write_bundle(
             &file,
             r#"!qc0 {"surface_kind":"Qc0","version":"1","policy_id":"POL_QC0_CORE","capability_id":"CAP_QC0_CORE"}
 policy-object {"id":"MOP_BND_PAR_SCHED","kind":"ReportExport","scope":{"Bundle":"BND_MULTI"},"extends":null,"optimizer":null,"evaluator":null,"replay_cache":null,"report":{"export_surfaces":["Qc0"],"include_policy_trace":true,"include_route_explanation":true,"include_obligation_logs":true},"scheduler":{"parallelization":"ParallelIndependent","max_workers":2,"allow_parallel_replay":false,"allow_parallel_certification":true,"allow_parallel_exports":true,"deterministic_ordering":true,"allow_parallel_obligations":true,"max_obligation_workers":2,"allow_parallel_obligation_replay":false,"serialize_canonicalization_sensitive":true},"canonicalizer_mode":null,"merge_policy":null,"notes":["parallel scheduler policy"]}
@@ -5985,8 +6430,7 @@ ledger {"id":"TRL_PAR_A","theorem":"THS_PAR_A","paths":[["B_PAR"]],"budget":{"ma
 ledger {"id":"TRL_PAR_B","theorem":"THS_PAR_B","paths":[["B_PAR"]],"budget":{"max_loss":1,"allow_lossy_supported":false,"require_proof":true},"losses":[],"receipts":[],"normalized_path":["B_PAR"]}
 campaign {"id":"CPG_PAR_A","theorem":"THS_PAR_A","target_profile":"TGT_PAR","route_ledger":"TRL_PAR_A","obligations":["OBL_PAR"],"certificates":[],"dependencies":[],"campaign_class":"CBasic","verdict":"Benchmarked","payoff":["parallel"]}
 campaign {"id":"CPG_PAR_B","theorem":"THS_PAR_B","target_profile":"TGT_PAR","route_ledger":"TRL_PAR_B","obligations":["OBL_PAR"],"certificates":[],"dependencies":[],"campaign_class":"CBasic","verdict":"Benchmarked","payoff":["parallel"]}"#,
-        )
-        .unwrap();
+        );
         let world =
             import_bundle_file(&file, None, l64_core::BundleConflictPolicy::Reject, None).unwrap();
         let atlas = CompiledAtlas::compile(&world.overlay).unwrap();
@@ -6029,8 +6473,8 @@ campaign {"id":"CPG_PAR_B","theorem":"THS_PAR_B","target_profile":"TGT_PAR","rou
                 .as_nanos()
         ));
         let _ = fs::create_dir_all(&dir);
-        let file = dir.join("bundle.qc0");
-        fs::write(
+        let file = dir.join("bundle.dna");
+        write_bundle(
             &file,
             r#"!qc0 {"surface_kind":"Qc0","version":"1","policy_id":"POL_QC0_CORE","capability_id":"CAP_QC0_CORE"}
 proof {"id":"PS_G1","kind":"Square","nodes":["a","b","c","d"],"edges":[{"from":"a","to":"b","label":"f"},{"from":"b","to":"d","label":"g"},{"from":"a","to":"c","label":"h"},{"from":"c","to":"d","label":"i"}],"equations":["g∘f=i∘h"],"target_equivalence":"eq","receipts":["r"],"gate":"Pass"}
@@ -6052,8 +6496,7 @@ adequacy {"id":"ADQ_G1_EVID","kind":"EvidenceContractInterpretation","regime_ids
 adequacy {"id":"ADQ_G1_BENCH","kind":"BenchmarkInterpretation","regime_ids":["R_TOP","R_CALC"],"bridge_ids":[],"theorem_ids":["THS_G1"],"burden_pack_ids":["BPK_G1"],"claim_packet_ids":["CLM_G1"],"evidence_contract_ids":["ECT_G1"],"benchmark_receipt_ids":["BMR_G1_TARGET","BMR_G1_STRESS"],"challenge_receipt_ids":[],"reproducibility_packet_ids":["RPK_G1"],"description":"benchmark coverage present","blocking":true}
 adequacy {"id":"ADQ_G1_STRESS","kind":"StressInterpretation","regime_ids":["R_TOP","R_CALC"],"bridge_ids":[],"theorem_ids":["THS_G1"],"burden_pack_ids":["BPK_G1"],"claim_packet_ids":["CLM_G1"],"evidence_contract_ids":["ECT_G1"],"benchmark_receipt_ids":["BMR_G1_TARGET","BMR_G1_STRESS"],"challenge_receipt_ids":[],"reproducibility_packet_ids":["RPK_G1"],"description":"stress coverage present","blocking":true}
 adequacy {"id":"ADQ_G1_CHALLENGE","kind":"ChallengeInterpretation","regime_ids":["R_TOP","R_CALC"],"bridge_ids":[],"theorem_ids":["THS_G1"],"burden_pack_ids":["BPK_G1"],"claim_packet_ids":["CLM_G1"],"evidence_contract_ids":["ECT_G1"],"benchmark_receipt_ids":[],"challenge_receipt_ids":["CHR_G1"],"reproducibility_packet_ids":["RPK_G1"],"description":"challenge addressed","blocking":true}"#,
-        )
-        .unwrap();
+        );
         let world =
             import_bundle_file(&file, None, l64_core::BundleConflictPolicy::Reject, None).unwrap();
         let atlas = CompiledAtlas::compile(&world.overlay).unwrap();
@@ -6139,8 +6582,8 @@ adequacy {"id":"ADQ_G1_CHALLENGE","kind":"ChallengeInterpretation","regime_ids":
                 .as_nanos()
         ));
         let _ = fs::create_dir_all(&dir);
-        let file = dir.join("bundle.qc0");
-        fs::write(
+        let file = dir.join("bundle.dna");
+        write_bundle(
             &file,
             r#"!qc0 {"surface_kind":"Qc0","version":"1","policy_id":"POL_QC0_CORE","capability_id":"CAP_QC0_CORE"}
 proof {"id":"PS_G2","kind":"Square","nodes":["a","b","c","d"],"edges":[{"from":"a","to":"b","label":"f"},{"from":"b","to":"d","label":"g"},{"from":"a","to":"c","label":"h"},{"from":"c","to":"d","label":"i"}],"equations":["g∘f=i∘h"],"target_equivalence":"eq","receipts":["r"],"gate":"Pass"}
@@ -6157,8 +6600,7 @@ evidence-contract {"id":"ECT_G2","required_evidence_kinds":["kernel-claim"],"req
 benchmark-receipt {"id":"BMR_G2_TARGET","claim_packet_id":"CLM_G2","role":"TargetCase","verdict":"Certified","metrics":{"score":"1.0"},"reproducibility_ref":"RPK_G2"}
 reproducibility-packet {"id":"RPK_G2","claim_packet_id":"CLM_G2","derivation_path":["lab","bundle"],"code_refs":["src"],"benchmark_refs":["BMR_G2_TARGET"],"artifact_refs":["CLM_G2"]}
 adequacy {"id":"ADQ_G2_STRESS","kind":"StressInterpretation","regime_ids":["R_TOP","R_CALC"],"bridge_ids":[],"theorem_ids":["THS_G2"],"burden_pack_ids":["BPK_G2"],"claim_packet_ids":["CLM_G2"],"evidence_contract_ids":["ECT_G2"],"benchmark_receipt_ids":["BMR_G2_TARGET"],"challenge_receipt_ids":[],"reproducibility_packet_ids":["RPK_G2"],"description":"stress coverage required","blocking":true}"#,
-        )
-        .unwrap();
+        );
         let world =
             import_bundle_file(&file, None, l64_core::BundleConflictPolicy::Reject, None).unwrap();
         let atlas = CompiledAtlas::compile(&world.overlay).unwrap();

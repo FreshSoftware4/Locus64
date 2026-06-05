@@ -12,7 +12,6 @@ use l64_core::{
     SurfaceKind, SurfacePolicy, TargetProfile, TheoremSpec, ensure_cache_subdir,
 };
 use l64_registry::SeedRegistry;
-use l64_surfaces::import_file;
 use serde::{Deserialize, Serialize};
 use std::{
     collections::{HashMap, HashSet},
@@ -102,6 +101,28 @@ pub fn overlay_registry_from_document(
     }
 }
 
+pub fn bundle_document_from_entry_text(text: &str) -> Result<QaDocument> {
+    let entries = text
+        .lines()
+        .filter_map(|line| {
+            let line = line.trim();
+            if line.is_empty() || line.starts_with("!qc0") || line.starts_with("!qa0") {
+                None
+            } else {
+                Some(line)
+            }
+        })
+        .map(|line| {
+            let (kind, payload) = line
+                .split_once(' ')
+                .ok_or_else(|| anyhow!("bundle entry is missing JSON payload: `{line}`"))?;
+            QaEntry::from_surface_json(kind, payload)
+                .map_err(|err| anyhow!("invalid `{kind}` bundle entry: {err}"))
+        })
+        .collect::<Result<Vec<_>>>()?;
+    Ok(QaDocument { entries })
+}
+
 pub fn import_bundle_file(
     path: &Path,
     forced_kind: Option<SurfaceKind>,
@@ -109,19 +130,45 @@ pub fn import_bundle_file(
     namespace: Option<&str>,
 ) -> Result<BundleWorld> {
     let parent = SeedRegistry::load()?;
-    let (artifact, import_receipt) = import_file(path, forced_kind, &parent)?;
+    if forced_kind.is_some() {
+        return Err(anyhow!(
+            "explicit projection bundle import has been removed; compile bundle-entry text with `compile-bundle` without `--as`, then import the resulting .dna"
+        ));
+    }
+    if !matches!(
+        path.extension().and_then(|value| value.to_str()),
+        Some("dna")
+    ) {
+        return Err(anyhow!(
+            "bundle execution inputs must be .dna; compile bundle-entry text with `compile-bundle` first"
+        ));
+    }
+    let document: QaDocument =
+        l64_locus::decode_section_payload(&fs::read(path)?, l64_core::LocusOpcode::CanonicalPayload)
+            .map_err(anyhow::Error::msg)?;
     let bundle_id = path
         .file_stem()
         .and_then(|value| value.to_str())
         .map(|value| format!("BND_{}", value.to_ascii_uppercase().replace('-', "_")))
         .unwrap_or_else(|| "BND_IMPORTED".into());
+    import_bundle_document(parent, bundle_id, document, Vec::new(), policy, namespace)
+}
+
+pub fn import_bundle_document(
+    parent: SeedRegistry,
+    bundle_id: String,
+    document: QaDocument,
+    import_receipts: Vec<FormatTransformReceipt>,
+    policy: BundleConflictPolicy,
+    namespace: Option<&str>,
+) -> Result<BundleWorld> {
     let document = if policy == BundleConflictPolicy::NamespacedImport {
         namespace_document(
-            artifact.document,
+            document,
             namespace.unwrap_or(&bundle_id.to_ascii_lowercase().replace("bnd_", "bnd.")),
         )
     } else {
-        artifact.document
+        document
     };
     let local = bundle_from_document(&document);
     let merge_report = detect_conflicts(&parent, &local, &policy)?;
@@ -154,7 +201,10 @@ pub fn import_bundle_file(
                 .collect(),
             campaign_ids: local.campaigns.iter().map(|item| item.id.clone()).collect(),
             overlay_id: format!("BOVR_{bundle_id}"),
-            import_receipt_ids: vec![import_receipt.id.clone()],
+            import_receipt_ids: import_receipts
+                .iter()
+                .map(|receipt| receipt.id.clone())
+                .collect(),
             merge_report_id: format!("BMER_{bundle_id}"),
         },
     };
@@ -165,7 +215,7 @@ pub fn import_bundle_file(
             bundle_id,
             local,
             merge_report,
-            import_receipts: vec![import_receipt],
+            import_receipts,
         },
     };
     persist_bundle_world(&world)?;
@@ -1217,6 +1267,7 @@ impl_has_id!(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::time::{SystemTime, UNIX_EPOCH};
 
     #[test]
     fn overlay_prefers_local_theorem() {
@@ -1248,5 +1299,110 @@ mod tests {
         };
         assert!(overlay.get_theorem_spec("THS_LOCAL").is_some());
         assert!(overlay.get_theorem_spec("THS_CHAIN_RULE").is_some());
+    }
+
+    #[test]
+    fn bundle_document_import_does_not_require_surface_parser() {
+        let theorem = TheoremSpec {
+            id: "THS_DOC_NATIVE".into(),
+            statement: "native document import".into(),
+            hosts: vec!["R_SET".into()],
+            bridges: vec![],
+            operators: vec![],
+            target_equivalence: "eq".into(),
+            obligations: vec![],
+            primary_zone: l64_core::ProofMechanismZone::PmzSemantic,
+            verdict: l64_core::CertificationVerdict::RouteFound,
+            proof_shapes: vec![],
+        };
+        let document = QaDocument {
+            entries: vec![QaEntry::TheoremSpec(theorem)],
+        };
+        let world = import_bundle_document(
+            SeedRegistry::load().unwrap(),
+            "BND_DOC_NATIVE".into(),
+            document,
+            Vec::new(),
+            BundleConflictPolicy::Reject,
+            None,
+        )
+        .expect("native document import");
+        assert_eq!(world.manifest.id, "BND_DOC_NATIVE");
+        assert_eq!(world.manifest.entries.len(), 1);
+        assert!(world.overlay.get_theorem_spec("THS_DOC_NATIVE").is_some());
+        assert!(world.overlay.import_receipts.is_empty());
+    }
+
+    #[test]
+    fn bundle_dna_file_import_bypasses_surface_parser() {
+        let theorem = TheoremSpec {
+            id: "THS_DNA_NATIVE".into(),
+            statement: "dna-native document import".into(),
+            hosts: vec!["R_SET".into()],
+            bridges: vec![],
+            operators: vec![],
+            target_equivalence: "eq".into(),
+            obligations: vec![],
+            primary_zone: l64_core::ProofMechanismZone::PmzSemantic,
+            verdict: l64_core::CertificationVerdict::RouteFound,
+            proof_shapes: vec![],
+        };
+        let document = QaDocument {
+            entries: vec![QaEntry::TheoremSpec(theorem)],
+        };
+        let bytes = l64_locus::encode_section_packet(
+            l64_core::LocusPacketKind::CanonicalTransfer,
+            l64_core::LocusOpcode::CanonicalPayload,
+            "BND_DNA_NATIVE",
+            "bundle_document.v1",
+            &document,
+            l64_core::LocusCapabilityMask::default(),
+            1,
+        )
+        .expect("bundle dna packet");
+        let path = std::env::temp_dir().join(format!(
+            "l64_bundle_native_{}.dna",
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        fs::write(&path, bytes).expect("write bundle packet");
+        let world = import_bundle_file(&path, None, BundleConflictPolicy::Reject, None)
+            .expect("dna bundle import");
+        let _ = fs::remove_file(&path);
+        assert!(world.overlay.get_theorem_spec("THS_DNA_NATIVE").is_some());
+        assert!(world.overlay.import_receipts.is_empty());
+    }
+
+    #[test]
+    fn bundle_projection_import_is_rejected() {
+        let dir = std::env::temp_dir().join(format!(
+            "l64_bundle_projection_reject_{}",
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("bundle.qc0");
+        fs::write(
+            &path,
+            r#"!qc0 {"surface_kind":"Qc0","version":"1","policy_id":"POL_QC0_CORE","capability_id":"CAP_QC0_CORE"}
+theorem {"id":"THS_PROJECTION_ONLY","statement":"projection-only","hosts":["R_SET"],"bridges":[],"operators":[],"target_equivalence":"eq","obligations":[],"primary_zone":"PmzSemantic","verdict":"RouteFound","proof_shapes":[]}"#,
+        )
+        .unwrap();
+
+        let err = import_bundle_file(&path, None, BundleConflictPolicy::Reject, None).unwrap_err();
+        assert!(err.to_string().contains("compile-bundle"));
+
+        let err = import_bundle_file(
+            &path,
+            Some(SurfaceKind::Qc0),
+            BundleConflictPolicy::Reject,
+            None,
+        )
+        .unwrap_err();
+        assert!(err.to_string().contains("projection bundle import"));
     }
 }

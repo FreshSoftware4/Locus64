@@ -1108,25 +1108,16 @@
     {
       "id": "PROJ_QC0_CORE",
       "kind": "StrictAuthority",
-      "allow_qk0_export": false,
       "allow_qa0_downgrade": false
     },
     {
       "id": "PROJ_QM0_A",
       "kind": "CanonicalAuthored",
-      "allow_qk0_export": true,
       "allow_qa0_downgrade": true
-    },
-    {
-      "id": "PROJ_QK0_A",
-      "kind": "InputProjectionOnly",
-      "allow_qk0_export": true,
-      "allow_qa0_downgrade": false
     },
     {
       "id": "PROJ_QA0_A",
       "kind": "DebugMirrorOnly",
-      "allow_qk0_export": false,
       "allow_qa0_downgrade": true
     }
   ],
@@ -1164,16 +1155,6 @@
       "allowed_loss_classes": []
     },
     {
-      "id": "POL_QK0_PACK_A",
-      "codebook_pack": "CB_CORE",
-      "profile": "pack-a",
-      "projection_policy": "PROJ_QK0_A",
-      "combo_pack": "COMBO_PACK_A",
-      "glyph_pack": "GLYPH_PACK_A",
-      "alias_expansion_policy": "ALIAS_DECLARED",
-      "allowed_loss_classes": []
-    },
-    {
       "id": "POL_QA0_PACK_A",
       "codebook_pack": "CB_CORE",
       "profile": "pack-a",
@@ -1191,29 +1172,9 @@
       "supported_packs": ["Core"],
       "import_support": true,
       "export_support": true,
-      "transcode_support": ["Qa0","Qm0","Qk0"],
+      "transcode_support": ["Qa0"],
       "roundtrip_support": true,
       "known_limits": []
-    },
-    {
-      "id": "CAP_QM0_PACK_A",
-      "surface_kind": "Qm0",
-      "supported_packs": ["PackA"],
-      "import_support": true,
-      "export_support": true,
-      "transcode_support": ["Qc0","Qa0","Qk0"],
-      "roundtrip_support": true,
-      "known_limits": ["bundle entries outside object shell remain textual payloads"]
-    },
-    {
-      "id": "CAP_QK0_PACK_A",
-      "surface_kind": "Qk0",
-      "supported_packs": ["PackA"],
-      "import_support": true,
-      "export_support": true,
-      "transcode_support": ["Qm0","Qc0","Qa0"],
-      "roundtrip_support": true,
-      "known_limits": ["projection-only authority"]
     },
     {
       "id": "CAP_QA0_PACK_A",
@@ -1221,19 +1182,12 @@
       "supported_packs": ["PackA"],
       "import_support": true,
       "export_support": true,
-      "transcode_support": ["Qc0","Qm0","Qk0"],
+      "transcode_support": ["Qc0"],
       "roundtrip_support": true,
       "known_limits": ["ascii mirror can require receipted downgrade"]
     }
   ],
   "roundtrip_reports": [],
   "transform_receipts": [],
-  "surface_deficiencies": [
-    {
-      "id": "SBD_ROUNDTRIP_UNVERIFIED",
-      "kind": "RoundtripUnverified",
-      "surface_kind": "Qk0",
-      "message": "surface routes require explicit round-trip evidence"
-    }
-  ]
+  "surface_deficiencies": []
 }

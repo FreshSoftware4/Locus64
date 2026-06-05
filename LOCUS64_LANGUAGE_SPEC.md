@@ -1,16 +1,16 @@
 # Locus64 Interaction Language Specification
 
-Status note: this file is now transitional. The active rail in `LINEAR_EXECUTION_RAIL.md` makes RNA/DNA the target language model and treats QC0/QA0/QK0/QM0 as extraction-and-deletion targets, not compatibility commitments or final public languages. Use this document to understand existing commands and records while migrating them into RNA/DNA-backed lineage or native Rust records.
+Status note: RNA and DNA are the active public surfaces. Bundle-entry text remains an authoring convenience for generating `.dna` bundle packets, but QC0/QA0/QM0/QK0 are no longer public interaction languages or workspace crates.
 
 This is the concrete syntax and record-shape specification for interacting with Locus64.
 
-There are three practical languages/surfaces:
+There are three practical interaction forms:
 
 1. **Command language**: shell commands accepted by `l64`.
 2. **RNA language**: small symbolic input compiled into DNA.
-3. **QC0 bundle language**: line-oriented semantic/certification records.
+3. **Bundle-entry text**: one record-kind plus one JSON object per line, compiled into `.dna`.
 
-If you are driving Locus64 indirectly from ChatGPT or another system, prefer RNA/DNA-backed lineage. Existing QC0 examples document the current transitional implementation only and should be treated as migration material, not the target language.
+If you are driving Locus64 indirectly from ChatGPT or another system, generate RNA or bundle-entry text, compile it into DNA, and then use the `.dna` artifact for certification/execution.
 
 ## 1. Command Language
 
@@ -29,12 +29,12 @@ l64 normalize-rna <file>
 l64 compile-rna <file> [--out <file.dna>] [--artifact-class gene|haplotype|chromosome|genome] [--persist-lineage]
 l64 sequence-dna <file.dna>
 
-l64 certify-bundle --file <file.qc0> --conflict-policy exact-match
+l64 compile-bundle <file.locus.rna|file.dna> [--out <file.dna>]
+l64 certify-bundle --file <file.dna> --conflict-policy exact-match
 l64 certify-derived --campaign <campaign-id>
 l64 observe-run --report <report-id>
-l64 export-report --id <report-id> --to qc0|qa0|qm0|qk0
-l64 export-validation-bundle --id <report-id> --to qc0
-l64 validate <file> --as qc0
+l64 export-report-dna --report-id <report-id> --out <report-id>.dna
+l64 export-validation-dna-bundle --id <report-id> --out <report-id>.validation.dna
 
 l64 research-derive-from-report --report-id <report-id> --persist
 l64 research-promotion-readiness <report-id>
@@ -135,7 +135,7 @@ Rules:
 - Each later non-empty line must contain one entry kind, one space, and one JSON object.
 - JSON must be valid on a single line.
 - Entry order can matter operationally for readability, but parsing accepts entries by kind.
-- Comments are not part of QC0. Do not emit comments inside `.qc0`.
+- Comments are not part of bundle-entry projection syntax. Do not emit comments inside projection entry files.
 
 Header:
 
@@ -564,7 +564,8 @@ adequacy {"id":"ADQ_COSMO_CHALLENGE","kind":"ChallengeInterpretation","regime_id
 Run it:
 
 ```powershell
-l64 certify-bundle --file .\cosmo.qc0 --conflict-policy exact-match
+l64 compile-bundle .\cosmo.locus.rna --out .\cosmo.dna
+l64 certify-bundle --file .\cosmo.dna --conflict-policy exact-match
 ```
 
 Then inspect the generated report id:
@@ -581,35 +582,37 @@ When asking ChatGPT to generate something for Locus64, ask for exactly one of:
 
 ```text
 1. A .gene.rna file body.
-2. A complete .qc0 bundle.
-3. A single QC0 entry line.
-4. A patch to an existing QC0 bundle.
+2. A complete bundle-entry text body that can be compiled with `l64 compile-bundle`.
+3. A single bundle entry line.
+4. A patch to an existing bundle-entry text body.
 ```
 
 For semantic claims, prefer:
 
 ```text
-Generate a complete QC0 bundle using Locus64 QC0 syntax.
+Generate a complete Locus64 bundle-entry text body.
 Do not include comments.
 Use one JSON object per line.
 Include claim-packet, evidence-contract, benchmark-receipt, challenge-receipt, reproducibility-packet, adequacy, theorem, obligation, target, ledger, campaign, bridge, proof, and atlas entries.
 ```
 
-Do not ask ChatGPT for “Locus64 prose.” Ask for valid QC0 lines.
+Do not ask ChatGPT for “Locus64 prose.” Ask for valid bundle entry lines, compile them with `l64 compile-bundle`, and certify the resulting `.dna`.
 
 ## 8. Validation Loop
 
-After generating QC0:
+After generating bundle entry text:
 
 ```powershell
-l64 validate .\file.qc0 --as qc0
-l64 certify-bundle --file .\file.qc0 --conflict-policy exact-match
+l64 compile-bundle .\file.locus.rna --out .\file.dna
+l64 certify-bundle --file .\file.dna --conflict-policy exact-match
+l64 import-bundle .\file.dna --conflict-policy exact-match
 ```
 
 If validation fails:
 
-- fix JSON syntax first
-- then fix enum casing
+- fix projection syntax first
+- then regenerate the `.dna`
+- then re-run certification/import checks
 - then fix missing referenced ids
 - then fix adequacy/evidence gaps
 
@@ -622,7 +625,7 @@ If validation fails:
 - Claim has `requires_stress: true` but no `Stress` benchmark receipt.
 - Claim has `requires_challenge: true` but no addressed/open challenge receipt.
 - `metrics` values are not strings.
-- Comments inserted into `.qc0`.
+- Comments inserted into projection entry files.
 
 ## 10. Practical Rule
 

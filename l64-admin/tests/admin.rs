@@ -1,4 +1,5 @@
 use assert_cmd::cargo::cargo_bin;
+use l64_core::{LocusCapabilityMask, LocusOpcode, LocusPacketKind, QaDocument, QaEntry};
 use serde_json::Value;
 use serial_test::serial;
 use std::{
@@ -49,7 +50,37 @@ fn temp_dir() -> PathBuf {
 }
 
 fn write_bundle(path: &PathBuf, content: &str) {
-    fs::write(path, content).unwrap();
+    if path.extension().and_then(|ext| ext.to_str()) == Some("dna") {
+        let document = bundle_document_from_text(content);
+        let bytes = l64_locus::encode_section_packet(
+            LocusPacketKind::CanonicalTransfer,
+            LocusOpcode::CanonicalPayload,
+            "BND_ADMIN_TEST",
+            "bundle_document.v1",
+            &document,
+            LocusCapabilityMask::default(),
+            1,
+        )
+        .unwrap();
+        fs::write(path, bytes).unwrap();
+    } else {
+        fs::write(path, content).unwrap();
+    }
+}
+
+fn bundle_document_from_text(bundle: &str) -> QaDocument {
+    let entries = bundle
+        .lines()
+        .filter_map(|line| {
+            let line = line.trim();
+            if line.is_empty() || line.starts_with("!qc0") {
+                return None;
+            }
+            let (kind, payload) = line.split_once(' ').unwrap();
+            Some(QaEntry::from_surface_json(kind, payload).unwrap())
+        })
+        .collect();
+    QaDocument { entries }
 }
 
 fn run_json(bin: &str, args: &[&str]) -> Value {
@@ -65,21 +96,6 @@ fn run_json(bin: &str, args: &[&str]) -> Value {
         String::from_utf8_lossy(&output.stderr)
     );
     serde_json::from_slice(&output.stdout).unwrap()
-}
-
-fn run_text(bin: &str, args: &[&str]) -> String {
-    let output = Command::new(cargo_bin(bin))
-        .current_dir(workspace_root())
-        .env("MF_CACHE_NAMESPACE", test_namespace())
-        .args(args)
-        .output()
-        .unwrap();
-    assert!(
-        output.status.success(),
-        "stderr={}",
-        String::from_utf8_lossy(&output.stderr)
-    );
-    String::from_utf8(output.stdout).unwrap()
 }
 
 fn run_json_ns(namespace: &str, bin: &str, args: &[&str]) -> Value {
@@ -309,8 +325,8 @@ diagnostic {{"id":"DGN_CHAIN_RULE_ADEQUACY","class":"DNoAdequacy","atlas_cell":"
 fn authored_optimizer_policy_changes_route_winner() {
     clear_cache();
     let dir = temp_dir();
-    let exec_bundle = dir.join("opt_exec.qc0");
-    let sym_bundle = dir.join("opt_symbolic.qc0");
+    let exec_bundle = dir.join("opt_exec.dna");
+    let sym_bundle = dir.join("opt_symbolic.dna");
     write_bundle(&exec_bundle, &route_bundle("opt_exec", "ExecutionFirst"));
     write_bundle(
         &sym_bundle,
@@ -341,8 +357,8 @@ fn authored_optimizer_policy_changes_route_winner() {
 fn authored_evaluator_policy_changes_verdict() {
     clear_cache();
     let dir = temp_dir();
-    let base_bundle = dir.join("eval_base.qc0");
-    let strict_bundle = dir.join("eval_strict.qc0");
+    let base_bundle = dir.join("eval_base.dna");
+    let strict_bundle = dir.join("eval_strict.dna");
     write_bundle(&base_bundle, &evaluator_bundle("eval_base", false));
     write_bundle(&strict_bundle, &evaluator_bundle("eval_strict", true));
 
@@ -363,8 +379,8 @@ fn authored_evaluator_policy_changes_verdict() {
 fn authored_replay_policy_changes_cache_behavior() {
     clear_cache();
     let dir = temp_dir();
-    let cache_bundle = dir.join("replay_cache.qc0");
-    let nocache_bundle = dir.join("replay_nocache.qc0");
+    let cache_bundle = dir.join("replay_cache.dna");
+    let nocache_bundle = dir.join("replay_nocache.dna");
     write_bundle(&cache_bundle, &replay_bundle("replay_cache", true));
     write_bundle(&nocache_bundle, &replay_bundle("replay_nocache", false));
 
@@ -394,8 +410,8 @@ fn authored_replay_policy_changes_cache_behavior() {
 fn lock_manifest_and_replay_flow_work() {
     clear_cache();
     let dir = temp_dir();
-    let bundle = dir.join("opt_exec.qc0");
-    let other = dir.join("opt_symbolic.qc0");
+    let bundle = dir.join("opt_exec.dna");
+    let other = dir.join("opt_symbolic.dna");
     write_bundle(&bundle, &route_bundle("opt_exec", "ExecutionFirst"));
     write_bundle(
         &other,
@@ -420,22 +436,25 @@ fn lock_manifest_and_replay_flow_work() {
     let replay = run_json("l64-admin", &["replay-with-lock", &lock_id]);
     assert_eq!(replay[0]["selected_atlas_cell"], "A_FAST");
 
-    let exported = run_text(
-        "l64-admin",
-        &["export-artifact", "--id", &manifest_id, "--to", "qc0"],
-    );
-    let exported_path = dir.join("manifest.qc0");
-    fs::write(&exported_path, exported).unwrap();
-    let import_output = Command::new(cargo_bin("l64-cli"))
+    let removed_projection_export = Command::new(cargo_bin("l64-admin"))
         .current_dir(workspace_root())
-        .args(["import", exported_path.to_str().unwrap(), "--as", "qc0"])
+        .args([
+            "export-artifact-projection",
+            "--id",
+            &manifest_id,
+            "--to",
+            "qc0",
+        ])
         .output()
         .unwrap();
-    assert!(
-        import_output.status.success(),
-        "stderr={}",
-        String::from_utf8_lossy(&import_output.stderr)
-    );
+    assert!(!removed_projection_export.status.success());
+
+    let removed_primary_export = Command::new(cargo_bin("l64-admin"))
+        .current_dir(workspace_root())
+        .args(["export-artifact", "--id", &manifest_id, "--to", "qc0"])
+        .output()
+        .unwrap();
+    assert!(!removed_primary_export.status.success());
 
     let locked_other = run_json(
         "l64-admin",
@@ -463,8 +482,8 @@ fn lock_manifest_and_replay_flow_work() {
 fn observe_predict_plan_and_assess_route_drift_workflow() {
     clear_cache();
     let dir = temp_dir();
-    let exec_bundle = dir.join("predict_exec.qc0");
-    let sym_bundle = dir.join("predict_sym.qc0");
+    let exec_bundle = dir.join("predict_exec.dna");
+    let sym_bundle = dir.join("predict_sym.dna");
     write_bundle(
         &exec_bundle,
         &route_bundle_named(
@@ -556,8 +575,8 @@ fn observe_predict_plan_and_assess_route_drift_workflow() {
 fn surface_only_bundle_change_predicts_no_semantic_impact() {
     clear_cache();
     let dir = temp_dir();
-    let base_bundle = dir.join("surface_base.qc0");
-    let same_bundle = dir.join("surface_same.qc0");
+    let base_bundle = dir.join("surface_base.dna");
+    let same_bundle = dir.join("surface_same.dna");
     let content = evaluator_bundle("surface_base", false)
         .replace("THS_LOCAL_EVAL", "THS_SURFACE")
         .replace("CPG_LOCAL_EVAL", "CPG_SURFACE")
@@ -589,8 +608,8 @@ fn surface_only_bundle_change_predicts_no_semantic_impact() {
 fn execute_plan_reconciles_predicted_route_drift() {
     clear_cache();
     let dir = temp_dir();
-    let exec_bundle = dir.join("sched_exec.qc0");
-    let sym_bundle = dir.join("sched_sym.qc0");
+    let exec_bundle = dir.join("sched_exec.dna");
+    let sym_bundle = dir.join("sched_sym.dna");
     write_bundle(
         &exec_bundle,
         &route_bundle_named(
@@ -654,7 +673,7 @@ fn execute_plan_reconciles_predicted_route_drift() {
 fn runtime_roots_and_artifact_resolution_use_workspace_root() {
     clear_cache();
     let dir = temp_dir();
-    let bundle = dir.join("root_exec.qc0");
+    let bundle = dir.join("root_exec.dna");
     write_bundle(&bundle, &route_bundle("root_exec", "ExecutionFirst"));
 
     let locked = run_json(
@@ -696,8 +715,8 @@ fn runtime_roots_and_artifact_resolution_use_workspace_root() {
 fn compare_executions_and_reconcile_run_are_live() {
     clear_cache();
     let dir = temp_dir();
-    let exec_bundle = dir.join("cmp_exec.qc0");
-    let sym_bundle = dir.join("cmp_sym.qc0");
+    let exec_bundle = dir.join("cmp_exec.dna");
+    let sym_bundle = dir.join("cmp_sym.dna");
     write_bundle(
         &exec_bundle,
         &route_bundle_named(
@@ -797,8 +816,8 @@ fn parallel_execute_plan_uses_multiple_lanes_under_namespace_isolation() {
             .as_nanos()
     );
     let dir = temp_dir();
-    let baseline_bundle = dir.join("parallel_base.qc0");
-    let proposed_bundle = dir.join("parallel_proposed.qc0");
+    let baseline_bundle = dir.join("parallel_base.dna");
+    let proposed_bundle = dir.join("parallel_proposed.dna");
     write_bundle(&baseline_bundle, &parallel_campaign_bundle("parallel_base"));
     write_bundle(
         &proposed_bundle,
@@ -860,8 +879,8 @@ fn schedule_and_namespace_tools_work_without_global_serialization() {
             .as_nanos()
     );
     let dir = temp_dir();
-    let baseline_bundle = dir.join("parallel_tools_base.qc0");
-    let proposed_bundle = dir.join("parallel_tools_proposed.qc0");
+    let baseline_bundle = dir.join("parallel_tools_base.dna");
+    let proposed_bundle = dir.join("parallel_tools_proposed.dna");
     write_bundle(
         &baseline_bundle,
         &parallel_campaign_bundle("parallel_tools_base"),
@@ -925,8 +944,8 @@ fn obligation_parallel_groups_are_visible_in_reports_and_execution() {
             .as_nanos()
     );
     let dir = temp_dir();
-    let baseline_bundle = dir.join("obl_serial.qc0");
-    let parallel_bundle = dir.join("obl_parallel.qc0");
+    let baseline_bundle = dir.join("obl_serial.dna");
+    let parallel_bundle = dir.join("obl_parallel.dna");
     write_bundle(
         &baseline_bundle,
         &obligation_parallel_bundle("obl_serial", false),
@@ -975,7 +994,7 @@ fn replay_with_lock_exposes_obligation_parallel_replay_structure() {
             .as_nanos()
     );
     let dir = temp_dir();
-    let bundle = dir.join("obl_replay.qc0");
+    let bundle = dir.join("obl_replay.dna");
     write_bundle(&bundle, &obligation_parallel_bundle("obl_replay", true));
 
     let lock_output = run_json_ns(
@@ -1026,7 +1045,7 @@ fn flagship_chain_rule_bundle_uses_scheduler_and_surfaces_deficiencies() {
             .as_nanos()
     );
     let dir = temp_dir();
-    let bundle = dir.join("chain_rule_parallel.qc0");
+    let bundle = dir.join("chain_rule_parallel.dna");
     write_bundle(
         &bundle,
         &chain_rule_bundle("chain_rule_parallel", true, false, false),
@@ -1127,8 +1146,8 @@ fn flagship_chain_rule_lock_replay_and_obligation_comparison_are_deterministic()
             .as_nanos()
     );
     let dir = temp_dir();
-    let baseline_bundle = dir.join("chain_rule_serial.qc0");
-    let proposed_bundle = dir.join("chain_rule_parallel.qc0");
+    let baseline_bundle = dir.join("chain_rule_serial.dna");
+    let proposed_bundle = dir.join("chain_rule_parallel.dna");
     write_bundle(
         &baseline_bundle,
         &chain_rule_bundle("chain_rule_serial", false, false, false),
@@ -1292,7 +1311,7 @@ fn flagship_chain_rule_strict_evaluator_emits_structured_blockers() {
             .as_nanos()
     );
     let dir = temp_dir();
-    let bundle = dir.join("chain_rule_strict.qc0");
+    let bundle = dir.join("chain_rule_strict.dna");
     write_bundle(
         &bundle,
         &chain_rule_bundle("chain_rule_strict", true, true, false),
@@ -1350,8 +1369,8 @@ fn flagship_chain_rule_promoted_operator_is_reused_and_integrated() {
             .as_nanos()
     );
     let dir = temp_dir();
-    let baseline_bundle = dir.join("chain_rule_integrated_base.qc0");
-    let integrated_bundle = dir.join("chain_rule_integrated.qc0");
+    let baseline_bundle = dir.join("chain_rule_integrated_base.dna");
+    let integrated_bundle = dir.join("chain_rule_integrated.dna");
     write_bundle(
         &baseline_bundle,
         &chain_rule_bundle("chain_rule_integrated_base", true, false, false),
@@ -1853,7 +1872,7 @@ fn replay_with_lock_preserves_active_adequacy_records() {
         "l64-admin",
         &[
             "lock-bundle",
-            "samples/chain_rule_integrated_bundle.qc0",
+            "samples/chain_rule_integrated_bundle.dna",
             "--optimizer-policy",
             "conservative",
             "--conflict-policy",

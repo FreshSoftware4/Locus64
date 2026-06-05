@@ -11,14 +11,12 @@ l64-locus = { path = "../l64-locus" }
 l64-research = { path = "../l64-research" }
 l64-kernel = { path = "../l64-kernel" }
 l64-command = { path = "../l64-command" }
-l64-qa0 = { path = "../l64-qa0" }
 l64-registry = { path = "../l64-registry" }
 l64-selector = { path = "../l64-selector" }
 l64-runtime = { path = "../l64-runtime" }
 l64-canon = { path = "../l64-canon" }
 l64-atlas = { path = "../l64-atlas" }
 l64-cert = { path = "../l64-cert" }
-l64-surfaces = { path = "../l64-surfaces" }
 l64-bundle = { path = "../l64-bundle" }
 l64-policy = { path = "../l64-policy" }
 serde_json = { workspace = true }

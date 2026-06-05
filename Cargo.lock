@@ -296,7 +296,6 @@ dependencies = [
  "l64-observe",
  "l64-policy",
  "l64-registry",
- "l64-surfaces",
  "serde_json",
  "serial_test",
 ]
@@ -319,8 +318,8 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "l64-core",
+ "l64-locus",
  "l64-registry",
- "l64-surfaces",
  "serde",
  "serde_json",
  "thiserror",
@@ -373,12 +372,10 @@ dependencies = [
  "l64-kernel",
  "l64-locus",
  "l64-policy",
- "l64-qa0",
  "l64-registry",
  "l64-research",
  "l64-runtime",
  "l64-selector",
- "l64-surfaces",
  "serde_json",
 ]
 
@@ -394,6 +391,7 @@ dependencies = [
 name = "l64-core"
 version = "0.1.0"
 dependencies = [
+ "bincode",
  "blake3",
  "serde",
  "serde_json",
@@ -447,48 +445,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "l64-qa0"
-version = "0.1.0"
-dependencies = [
- "l64-core",
- "serde_json",
- "thiserror",
-]
-
-[[package]]
-name = "l64-qc0"
-version = "0.1.0"
-dependencies = [
- "l64-core",
- "serde",
- "serde_json",
- "thiserror",
-]
-
-[[package]]
-name = "l64-qk0"
-version = "0.1.0"
-dependencies = [
- "hex",
- "l64-core",
- "l64-qm0",
- "serde",
- "serde_json",
- "thiserror",
-]
-
-[[package]]
-name = "l64-qm0"
-version = "0.1.0"
-dependencies = [
- "l64-core",
- "l64-qc0",
- "serde",
- "serde_json",
- "thiserror",
-]
-
-[[package]]
 name = "l64-registry"
 version = "0.1.0"
 dependencies = [
@@ -528,28 +484,6 @@ dependencies = [
  "l64-core",
  "l64-kernel",
  "l64-testkit",
-]
-
-[[package]]
-name = "l64-surfaces"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "bincode",
- "l64-atlas",
- "l64-canon",
- "l64-cert",
- "l64-core",
- "l64-locus",
- "l64-qa0",
- "l64-qc0",
- "l64-qk0",
- "l64-qm0",
- "l64-registry",
- "l64-runtime",
- "serde",
- "serde_json",
- "thiserror",
 ]
 
 [[package]]

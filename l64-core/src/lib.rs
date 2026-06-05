@@ -292,7 +292,6 @@ pub enum SurfaceKind {
     As0,
     Qc0,
     Qm0,
-    Qk0,
     Qa0,
 }
 
@@ -474,7 +473,6 @@ pub struct ComboPack {
 pub struct ProjectionPolicy {
     pub id: ProjectionPolicyId,
     pub kind: ProjectionPolicyKind,
-    pub allow_qk0_export: bool,
     pub allow_qa0_downgrade: bool,
 }
 
@@ -3062,6 +3060,69 @@ pub trait RegistryLookup {
     fn atlas_cells(&self) -> Vec<AtlasCell>;
 }
 
+pub fn document_for_registry_id(registry: &dyn RegistryLookup, id: &str) -> Option<QaDocument> {
+    let entry = if let Some(item) = registry.get_object(id) {
+        QaEntry::Object(item)
+    } else if let Some(item) = registry.get_regime(id) {
+        QaEntry::Regime(item)
+    } else if let Some(item) = registry.get_bridge(id) {
+        QaEntry::Bridge(item)
+    } else if let Some(item) = registry.get_proof_shape(id) {
+        QaEntry::ProofShape(item)
+    } else if let Some(item) = registry.get_atlas_cell(id) {
+        QaEntry::AtlasCell(item)
+    } else if let Some(item) = registry.get_mechanization_package(id) {
+        QaEntry::MechanizationPackage(item)
+    } else if let Some(item) = registry.get_theorem_spec(id) {
+        QaEntry::TheoremSpec(item)
+    } else if let Some(item) = registry.get_obligation(id) {
+        QaEntry::Obligation(item)
+    } else if let Some(item) = registry.get_target_profile(id) {
+        QaEntry::TargetProfile(item)
+    } else if let Some(item) = registry.get_route_ledger(id) {
+        QaEntry::RouteLedger(item)
+    } else if let Some(item) = registry.get_certificate(id) {
+        QaEntry::Certificate(item)
+    } else if let Some(item) = registry.get_campaign(id) {
+        QaEntry::Campaign(item)
+    } else if let Some(item) = registry.get_campaign_portfolio(id) {
+        QaEntry::CampaignPortfolio(item)
+    } else if let Some(item) = registry.get_route_class(id) {
+        QaEntry::RouteClass(item)
+    } else if let Some(item) = registry.get_atlas_deficiency(id) {
+        QaEntry::AtlasDeficiency(item)
+    } else if let Some(item) = registry.get_adequacy_clause(id) {
+        QaEntry::AdequacyClause(item)
+    } else if let Some(item) = registry.get_burden_pack(id) {
+        QaEntry::BurdenPack(item)
+    } else if let Some(item) = registry.get_claim_packet(id) {
+        QaEntry::ClaimPacket(item)
+    } else if let Some(item) = registry.get_evidence_contract(id) {
+        QaEntry::EvidenceContract(item)
+    } else if let Some(item) = registry.get_benchmark_receipt(id) {
+        QaEntry::BenchmarkReceipt(item)
+    } else if let Some(item) = registry.get_challenge_receipt(id) {
+        QaEntry::ChallengeReceipt(item)
+    } else if let Some(item) = registry.get_reproducibility_packet(id) {
+        QaEntry::ReproducibilityPacket(item)
+    } else if let Some(item) = registry.get_surface_policy(id) {
+        QaEntry::SurfacePolicy(item)
+    } else if let Some(item) = registry.get_transform_receipt(id) {
+        QaEntry::TransformReceipt(item)
+    } else if let Some(item) = registry.get_roundtrip_report(id) {
+        QaEntry::RoundTripReport(item)
+    } else if let Some(item) = registry.get_capability_matrix(id) {
+        QaEntry::CapabilityMatrix(item)
+    } else if let Some(item) = registry.get_policy_object(id) {
+        QaEntry::PolicyObject(item)
+    } else {
+        return None;
+    };
+    Some(QaDocument {
+        entries: vec![entry],
+    })
+}
+
 pub fn resolve_project_root() -> Result<ProjectRoot, String> {
     if let Ok(explicit) = std::env::var("MF_PROJECT_ROOT") {
         let path = canonicalize_or_clean(PathBuf::from(&explicit))?;
@@ -3430,6 +3491,8 @@ pub struct DnaValidationReport {
     pub id: String,
     pub reversible: bool,
     pub header_truth_complete: bool,
+    #[serde(default)]
+    pub canonical_payload_digest_valid: bool,
     pub symbol_table_semantic_authority: bool,
     #[serde(default)]
     pub failures: Vec<String>,
@@ -3772,14 +3835,6 @@ pub struct SsrTransitionSpec {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct CanonicalGraph {
-    pub root_id: String,
-    pub canonical_text: String,
-    #[serde(default)]
-    pub canonical_nodes: Vec<SsrNode>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct CnormReceipt {
     pub id: String,
     pub root_id: String,
@@ -3797,6 +3852,44 @@ pub struct CanonicalRuleSpec {
     pub description: String,
     pub deterministic: bool,
     pub semantic_lookup_required: bool,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
+pub enum StructuralRelationKind {
+    OrderedSequence,
+    UnorderedSet,
+    AssociativeGroup,
+    CommutativeGroup,
+    ReferenceIdentity,
+    NonCollapsible,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct EquivalenceLawSpec {
+    pub id: String,
+    pub relation: StructuralRelationKind,
+    pub ordering_significant: bool,
+    pub grouping_significant: bool,
+    pub flattening_allowed: bool,
+    pub sorting_allowed: bool,
+    pub reference_identity_preserved: bool,
+    pub minimal_invariants: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct CanonicalStructureItem {
+    pub kind: SsrNodeKind,
+    pub structural_value: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct CanonicalStructure {
+    pub root_id: String,
+    pub canonical_id: CanonicalId,
+    pub canonical_hash: String,
+    pub canonical_bytes: Vec<u8>,
+    #[serde(default)]
+    pub items: Vec<CanonicalStructureItem>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -3990,7 +4083,7 @@ pub struct LowerChainExecution {
     pub rn_receipt: RnaNormalizationReceipt,
     pub kernel_graph: KernelGraph,
     pub ssr_receipt: SsrReceipt,
-    pub canonical_graph: CanonicalGraph,
+    pub canonical_structure: CanonicalStructure,
     pub cnorm_receipt: CnormReceipt,
     #[serde(default)]
     pub ledger_entries: Vec<ChangeLedgerEntry>,
@@ -4861,6 +4954,7 @@ pub fn dna_header_receipt(packet: &LocusPacket) -> DnaHeaderReceipt {
 pub fn validate_dna_packet(packet: &LocusPacket) -> DnaValidationReport {
     let mut failures = Vec::new();
     let header = dna_header_receipt(packet);
+    let mut canonical_payload_digest_valid = packet.header.schema_hash != "canonical_structure.v1";
     if !header.header_truth_complete {
         failures.push("header truth is incomplete".into());
     }
@@ -4877,6 +4971,32 @@ pub fn validate_dna_packet(packet: &LocusPacket) -> DnaValidationReport {
     if packet.sections.is_empty() {
         failures.push("packet has no structural sections".into());
     }
+    if packet.header.schema_hash == "canonical_structure.v1" {
+        match packet
+            .sections
+            .iter()
+            .find(|section| section.opcode == LocusOpcode::CanonicalPayload)
+        {
+            Some(section) => match bincode::deserialize::<CanonicalStructure>(&section.payload) {
+                Ok(structure) => {
+                    canonical_payload_digest_valid = structure.canonical_hash
+                        == packet.header.integrity_hash
+                        && structure.canonical_id.0 == structure.canonical_hash
+                        && canonical_id_from_binary_structure(&structure.canonical_bytes)
+                            == structure.canonical_id;
+                    if !canonical_payload_digest_valid {
+                        failures.push(
+                            "canonical structure payload digest does not match header".into(),
+                        );
+                    }
+                }
+                Err(err) => failures.push(format!(
+                    "canonical structure payload failed to decode: {err}"
+                )),
+            },
+            None => failures.push("canonical structure packet missing canonical payload".into()),
+        }
+    }
     let structural_opcode_table = structural_opcode_specs();
     if !structural_opcode_table
         .iter()
@@ -4888,6 +5008,7 @@ pub fn validate_dna_packet(packet: &LocusPacket) -> DnaValidationReport {
         id: format!("DNA_VAL_{:x}", stable_hash_u64(&hash_serialized(packet))),
         reversible: failures.is_empty(),
         header_truth_complete: header.header_truth_complete,
+        canonical_payload_digest_valid,
         symbol_table_semantic_authority: packet.sections.iter().any(|section| {
             section.opcode == LocusOpcode::SymbolTable && section.flags & 0x0001 != 0
         }),
@@ -5332,6 +5453,35 @@ pub fn canonical_rule_specs() -> Vec<CanonicalRuleSpec> {
     ]
 }
 
+pub fn structural_equivalence_law_specs() -> Vec<EquivalenceLawSpec> {
+    vec![
+        EquivalenceLawSpec {
+            id: "EQ_SEQ_ORDERED_V1".into(),
+            relation: StructuralRelationKind::OrderedSequence,
+            ordering_significant: true,
+            grouping_significant: true,
+            flattening_allowed: false,
+            sorting_allowed: false,
+            reference_identity_preserved: true,
+            minimal_invariants: vec![
+                "item-kind".into(),
+                "item-structural-value".into(),
+                "item-position".into(),
+            ],
+        },
+        EquivalenceLawSpec {
+            id: "EQ_FORMAT_ERASED_V1".into(),
+            relation: StructuralRelationKind::NonCollapsible,
+            ordering_significant: false,
+            grouping_significant: false,
+            flattening_allowed: false,
+            sorting_allowed: false,
+            reference_identity_preserved: true,
+            minimal_invariants: vec!["normalized-token-sequence".into()],
+        },
+    ]
+}
+
 pub fn token_map_entries() -> Vec<TokenMapEntry> {
     vec![
         TokenMapEntry {
@@ -5671,34 +5821,68 @@ pub fn resolve_spliced_rna(normalized: &NormalizedRna) -> Result<(SsrGraph, SsrR
     Ok((graph, receipt))
 }
 
-pub fn canonicalize_ssr_graph(graph: &SsrGraph) -> Result<(CanonicalGraph, CnormReceipt), String> {
-    let mut canonical_nodes = graph.nodes.clone();
-    canonical_nodes.sort_by(|left, right| {
-        left.text
-            .cmp(&right.text)
-            .then_with(|| left.id.cmp(&right.id))
-    });
-    let canonical_text = canonical_nodes
+pub fn canonicalize_structural_form(
+    graph: &SsrGraph,
+) -> Result<(CanonicalStructure, CnormReceipt), String> {
+    let law_specs = structural_equivalence_law_specs();
+    if law_specs.iter().any(|law| {
+        matches!(law.relation, StructuralRelationKind::OrderedSequence) && law.sorting_allowed
+    }) {
+        return Err("ordered sequence equivalence law cannot permit sorting".into());
+    }
+
+    let root = graph
+        .nodes
         .iter()
-        .filter(|node| !matches!(node.kind, SsrNodeKind::Root))
-        .map(|node| node.text.clone())
-        .collect::<Vec<_>>()
-        .join(" ");
-    let canonical_hash = format!("{:x}", stable_hash_u64(&canonical_text));
-    let graph = CanonicalGraph {
+        .find(|node| node.id == graph.root_id)
+        .ok_or_else(|| "structural form missing root".to_string())?;
+    let mut items = Vec::new();
+    let mut canonical_bytes = Vec::new();
+    canonical_bytes.extend_from_slice(b"L64CS1");
+    canonical_bytes.extend_from_slice(&(root.children.len() as u64).to_le_bytes());
+
+    for child_id in &root.children {
+        let node = graph
+            .nodes
+            .iter()
+            .find(|candidate| &candidate.id == child_id)
+            .ok_or_else(|| format!("structural form missing child `{child_id}`"))?;
+        let kind_byte = match node.kind {
+            SsrNodeKind::Root => 0,
+            SsrNodeKind::Atom => 1,
+            SsrNodeKind::Group => 2,
+            SsrNodeKind::Splice => 3,
+        };
+        let structural_value = stable_hash_u64(&node.text);
+        canonical_bytes.push(kind_byte);
+        canonical_bytes.extend_from_slice(&structural_value.to_le_bytes());
+        items.push(CanonicalStructureItem {
+            kind: node.kind,
+            structural_value,
+        });
+    }
+
+    let canonical_id = canonical_id_from_binary_structure(&canonical_bytes);
+    let canonical_hash = canonical_id.0.clone();
+    let structure = CanonicalStructure {
         root_id: graph.root_id.clone(),
-        canonical_text,
-        canonical_nodes,
+        canonical_id,
+        canonical_hash: canonical_hash.clone(),
+        canonical_bytes,
+        items,
     };
     let receipt = CnormReceipt {
-        id: format!("CNR_{:x}", stable_hash_u64(&graph.root_id)),
-        root_id: graph.root_id.clone(),
+        id: format!(
+            "CNR_STRUCT_{:x}",
+            stable_hash_u64(&structure.canonical_hash)
+        ),
+        root_id: structure.root_id.clone(),
         canonical_hash,
-        rule_table_hash: hash_serialized(&canonical_rule_specs()),
+        rule_table_hash: hash_serialized(&law_specs),
         idempotent: true,
-        erased_variations: vec!["formatting".into(), "splice-layout".into()],
+        erased_variations: vec!["formatting".into()],
     };
-    Ok((graph, receipt))
+    Ok((structure, receipt))
 }
 
 pub fn execute_lower_chain(rna: &str) -> Result<LowerChainExecution, SystemFailureState> {
@@ -5817,35 +6001,35 @@ pub fn execute_lower_chain(rna: &str) -> Result<LowerChainExecution, SystemFailu
         graph_hash,
         vec![ssr_receipt.id.clone()],
         Some("retain SSR receipt and reject unstable canonical output".into()),
-        || canonicalize_ssr_graph(&kernel_graph),
-        |(graph, receipt)| {
+        || {
+            let (structure, receipt) = canonicalize_structural_form(&kernel_graph)?;
+            Ok::<_, String>((structure, receipt))
+        },
+        |(structure, receipt)| {
             vec![
                 InvariantCheck {
                     name: "canonical_hash_matches".into(),
-                    passed: receipt.canonical_hash
-                        == format!("{:x}", stable_hash_u64(&graph.canonical_text)),
-                    detail: "canonical hash must match canonical text".into(),
+                    passed: receipt.canonical_hash == structure.canonical_id.0,
+                    detail: "canonical hash must match canonical structure identity".into(),
                 },
                 InvariantCheck {
-                    name: "canonical_nodes_sorted".into(),
-                    passed: graph.canonical_nodes.windows(2).all(|window| {
-                        window[0].text < window[1].text
-                            || (window[0].text == window[1].text && window[0].id <= window[1].id)
-                    }),
-                    detail: "canonical node ordering must be stable".into(),
+                    name: "canonical_bytes_non_empty".into(),
+                    passed: !structure.canonical_bytes.is_empty(),
+                    detail: "canonical structure must have deterministic binary identity input"
+                        .into(),
                 },
                 InvariantCheck {
-                    name: "canonical_rules_lookup_free".into(),
+                    name: "equivalence_law_explicit".into(),
                     passed: receipt.idempotent
-                        && canonical_rule_specs()
+                        && structural_equivalence_law_specs()
                             .iter()
-                            .all(|spec| spec.deterministic && !spec.semantic_lookup_required),
-                    detail: "CNORM rules must be deterministic, idempotent, and lookup-free".into(),
+                            .all(|spec| !spec.minimal_invariants.is_empty()),
+                    detail: "CNORM must derive identity from explicit equivalence laws".into(),
                 },
             ]
         },
     )?;
-    let (canonical_graph, cnorm_receipt) = cnorm_out;
+    let (canonical_structure, cnorm_receipt) = cnorm_out;
 
     Ok(LowerChainExecution {
         token_stream,
@@ -5854,7 +6038,7 @@ pub fn execute_lower_chain(rna: &str) -> Result<LowerChainExecution, SystemFailu
         rn_receipt,
         kernel_graph,
         ssr_receipt,
-        canonical_graph,
+        canonical_structure,
         cnorm_receipt,
         ledger_entries: kernel.entries().to_vec(),
     })
@@ -5933,20 +6117,48 @@ mod genome_foundation_tests {
     }
 
     #[test]
-    fn canonicalization_erases_spacing_after_ssr() {
-        let (left_norm, _) = normalize_rna("ι   ≔   σ   ‖   κ").expect("left normalization");
-        let (right_norm, _) = normalize_rna("ι ≔ σ ‖ κ").expect("right normalization");
+    fn equivalence_law_makes_ordering_explicit_before_cnorm() {
+        let laws = structural_equivalence_law_specs();
+        let ordered = laws
+            .iter()
+            .find(|law| matches!(law.relation, StructuralRelationKind::OrderedSequence))
+            .expect("ordered sequence law");
+        assert!(ordered.ordering_significant);
+        assert!(!ordered.sorting_allowed);
+        assert!(ordered.reference_identity_preserved);
+        assert!(
+            ordered
+                .minimal_invariants
+                .iter()
+                .any(|item| item == "item-position")
+        );
+    }
+
+    #[test]
+    fn canonical_structure_erases_spacing_but_preserves_order() {
+        let (left_norm, _) = normalize_rna("ι   ≔   σ").expect("left normalization");
+        let (right_norm, _) = normalize_rna("ι ≔ σ").expect("right normalization");
+        let (reordered_norm, _) = normalize_rna("σ ≔ ι").expect("reordered normalization");
         let (left_graph, _) = resolve_spliced_rna(&left_norm).expect("left ssr");
         let (right_graph, _) = resolve_spliced_rna(&right_norm).expect("right ssr");
-        let (left_canon, left_receipt) = canonicalize_ssr_graph(&left_graph).expect("left cnorm");
-        let (right_canon, right_receipt) =
-            canonicalize_ssr_graph(&right_graph).expect("right cnorm");
-        assert_eq!(left_canon.canonical_text, right_canon.canonical_text);
+        let (reordered_graph, _) = resolve_spliced_rna(&reordered_norm).expect("reordered ssr");
+        let (left_structure, left_receipt) =
+            canonicalize_structural_form(&left_graph).expect("left structural cnorm");
+        let (right_structure, right_receipt) =
+            canonicalize_structural_form(&right_graph).expect("right structural cnorm");
+        let (reordered_structure, _) =
+            canonicalize_structural_form(&reordered_graph).expect("reordered structural cnorm");
+
+        assert_eq!(left_structure.canonical_id, right_structure.canonical_id);
         assert_eq!(left_receipt.canonical_hash, right_receipt.canonical_hash);
-        assert!(left_receipt.idempotent);
+        assert_ne!(
+            left_structure.canonical_id,
+            reordered_structure.canonical_id
+        );
+        assert!(!left_structure.canonical_bytes.is_empty());
         assert_eq!(
             left_receipt.rule_table_hash,
-            hash_serialized(&canonical_rule_specs())
+            hash_serialized(&structural_equivalence_law_specs())
         );
     }
 
@@ -5982,7 +6194,7 @@ mod genome_foundation_tests {
                 authority_tier: 1,
                 capabilities: LocusCapabilityMask::default(),
                 grammar_id: "rna.v1".into(),
-                schema_hash: "canonical_graph.v1".into(),
+                schema_hash: "legacy_graph_projection.v1".into(),
                 integrity_hash: "abc".into(),
                 strand_manifest: vec!["core".into()],
                 feature_flags: 0,
@@ -5998,6 +6210,50 @@ mod genome_foundation_tests {
         let report = validate_dna_packet(&packet);
         assert!(report.symbol_table_semantic_authority);
         assert!(!report.failures.is_empty());
+    }
+
+    #[test]
+    fn dna_packet_validation_checks_canonical_structure_digest() {
+        let (normalized, _) = normalize_rna("ι ≔ σ").expect("normalization");
+        let (graph, _) = resolve_spliced_rna(&normalized).expect("ssr");
+        let (structure, _) = canonicalize_structural_form(&graph).expect("canonical structure");
+        let payload = bincode::serialize(&structure).expect("payload");
+        let mut packet = LocusPacket {
+            header: LocusPacketHeader {
+                artifact_class: GenomeArtifactClass::Gene,
+                surface: GenomeSurface::Dna,
+                kind: LocusPacketKind::CanonicalTransfer,
+                version_major: 1,
+                version_minor: 0,
+                authority_tier: 1,
+                capabilities: LocusCapabilityMask::default(),
+                grammar_id: "rna.v1".into(),
+                schema_hash: "canonical_structure.v1".into(),
+                integrity_hash: structure.canonical_hash.clone(),
+                strand_manifest: vec!["core".into()],
+                feature_flags: 0,
+                root_subject_id: "SUBJ".into(),
+            },
+            sections: vec![LocusSection {
+                opcode: LocusOpcode::CanonicalPayload,
+                flags: 0,
+                subject_id: "SUBJ".into(),
+                payload,
+            }],
+        };
+        let valid = validate_dna_packet(&packet);
+        assert!(valid.canonical_payload_digest_valid);
+        assert!(valid.failures.is_empty());
+
+        packet.header.integrity_hash = "not-the-structure-hash".into();
+        let invalid = validate_dna_packet(&packet);
+        assert!(!invalid.canonical_payload_digest_valid);
+        assert!(
+            invalid
+                .failures
+                .iter()
+                .any(|failure| failure.contains("canonical structure payload digest"))
+        );
     }
 
     #[test]

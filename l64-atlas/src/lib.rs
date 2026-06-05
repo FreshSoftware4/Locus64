@@ -248,7 +248,7 @@ impl CompiledAtlas {
                 trust_class: l64_core::ReplayTrustClass::ExactPolicyOnly,
             },
             report: l64_core::ReportPolicyConfig {
-                export_surfaces: vec![SurfaceKind::Qc0, SurfaceKind::Qm0, SurfaceKind::Qa0],
+                export_surfaces: vec![SurfaceKind::Qc0, SurfaceKind::Qa0],
                 include_policy_trace: true,
                 include_route_explanation: true,
                 include_obligation_logs: true,
@@ -552,11 +552,6 @@ fn score_surface_penalty(
 ) -> usize {
     let mut penalty = edge.surface_penalty;
     if let Some(requirement) = requirement {
-        if requirement.keyboard_projection_ingress_only
-            && matches!(requirement.preferred_output, Some(SurfaceKind::Qk0))
-        {
-            penalty += 8;
-        }
         if requirement.require_symbolic_fidelity
             && matches!(
                 edge.surface_transition
@@ -574,18 +569,7 @@ fn score_surface_penalty(
             penalty += 3;
         }
     }
-    if let Some(preferred) = preferred_target {
-        if preferred.surface_kind == SurfaceKind::Qm0
-            && matches!(
-                edge.surface_transition
-                    .as_ref()
-                    .map(|item| &item.compatibility),
-                Some(SurfaceCompatibilityClass::DebugMirrorOnly)
-            )
-        {
-            penalty += 5;
-        }
-    }
+    let _ = preferred_target;
     penalty
 }
 

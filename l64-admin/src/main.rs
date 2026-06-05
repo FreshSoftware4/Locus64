@@ -3,14 +3,18 @@ use clap::{Parser, Subcommand, ValueEnum};
 use l64_bundle::{BundleWorld, import_bundle_file, load_bundle_world};
 use l64_cert::{
     CertificationOptions, certify_derived_campaign_with_options,
-    certify_derived_theorem_with_options, encode_locus_packet_for_report, replay_report,
+    certify_derived_theorem_with_options, encode_locus_packet_for_report,
+    legacy_report_cache_path, replay_report, report_cache_path, report_cache_root, report_id,
 };
-use l64_command::{AdminSurfaceArg as SurfaceArg, BundlePolicyArg, OptimizerPolicyArg};
+use l64_command::{BundlePolicyArg, OptimizerPolicyArg};
 use l64_core::{
     ArtifactContract, ArtifactKind, ArtifactLocator, BundleLock, CapabilityReadiness,
     CertificationReport, CommandContract, LockDiff, LockReceipt, MechanizationPolicyObject,
-    NamespaceScope, OptimizerPolicy, QaDocument, QaEntry, RegistryLookup, locate_artifact,
-    runtime_root_report,
+    NamespaceScope, OptimizerPolicy, RegistryLookup, locate_artifact, runtime_root_report,
+};
+use l64_locus::{
+    load_bundle_lock, load_execution_manifest, manifest_cache_root, persist_bundle_lock,
+    persist_execution_manifest,
 };
 use l64_observe::{
     ExecutePlanOptions, assess_prediction, compare_executions, compare_locks, compare_manifests,
@@ -21,12 +25,6 @@ use l64_observe::{
 };
 use l64_policy::{build_execution_manifest, build_replay_lock_manifest, resolve_policy_graph};
 use l64_registry::SeedRegistry;
-use l64_surfaces::{
-    default_policy_for, document_for_registry_id, export_document, load_bundle_lock,
-    load_execution_manifest, load_report_document_with_registry, manifest_cache_root,
-    persist_bundle_lock, persist_execution_manifest, report_cache_path, report_cache_root,
-    report_id,
-};
 use std::{fs, path::Path};
 
 #[derive(Debug, Clone, ValueEnum)]
@@ -47,8 +45,6 @@ struct Cli {
 enum Command {
     LockBundle {
         file: String,
-        #[arg(long = "as", value_enum)]
-        as_kind: Option<SurfaceArg>,
         #[arg(long, value_enum, default_value = "reject")]
         conflict_policy: BundlePolicyArg,
         #[arg(long, value_enum, default_value = "conservative")]
@@ -102,8 +98,6 @@ enum Command {
         bundle_file: Option<String>,
         #[arg(long)]
         policy: Option<String>,
-        #[arg(long = "as", value_enum)]
-        as_kind: Option<SurfaceArg>,
         #[arg(long, value_enum, default_value = "reject")]
         conflict_policy: BundlePolicyArg,
     },
@@ -196,12 +190,6 @@ enum Command {
         #[arg(long)]
         policy: Option<String>,
     },
-    ExportArtifact {
-        #[arg(long)]
-        id: String,
-        #[arg(long = "to", value_enum)]
-        to_kind: SurfaceArg,
-    },
     ResolveArtifactPath {
         id: String,
     },
@@ -236,7 +224,6 @@ fn real_main() -> Result<()> {
     match cli.command {
         Command::LockBundle {
             file,
-            as_kind,
             conflict_policy,
             optimizer_policy,
             evaluator_policy,
@@ -245,7 +232,7 @@ fn real_main() -> Result<()> {
         } => {
             let world = import_bundle_file(
                 Path::new(&file),
-                as_kind.map(Into::into),
+                None,
                 conflict_policy.into(),
                 None,
             )?;
@@ -457,7 +444,6 @@ fn real_main() -> Result<()> {
             lock,
             bundle_file,
             policy,
-            as_kind,
             conflict_policy,
         } => {
             if report.is_some() && lock.is_some() {
@@ -487,7 +473,7 @@ fn real_main() -> Result<()> {
             let prediction = if let Some(bundle_file) = bundle_file {
                 let proposed = import_bundle_file(
                     Path::new(&bundle_file),
-                    as_kind.map(Into::into),
+                    None,
                     conflict_policy.into(),
                     None,
                 )?;
@@ -903,14 +889,6 @@ fn real_main() -> Result<()> {
             };
             println!("{}", serde_json::to_string_pretty(&output)?);
         }
-        Command::ExportArtifact { id, to_kind } => {
-            let document = document_for_id(&registry, &id)?;
-            let policy = default_policy_for(to_kind.clone().into(), &registry)?;
-            let (rendered, receipt) =
-                export_document(&document, to_kind.into(), &policy, &registry)?;
-            println!("{rendered}");
-            eprintln!("{}", serde_json::to_string(&receipt)?);
-        }
         Command::ResolveArtifactPath { id } => {
             let locator = locate_known_artifact(&id)?;
             println!("{}", serde_json::to_string_pretty(&locator)?);
@@ -987,10 +965,10 @@ fn build_cert_options(
     cache_policy: Option<String>,
     strict_policy: bool,
 ) -> Result<CertificationOptions> {
-    let input = fs::read_to_string(file).with_context(|| format!("failed to read `{file}`"))?;
+    let input = fs::read(file).with_context(|| format!("failed to read `{file}`"))?;
     Ok(CertificationOptions {
         optimizer_policy: optimizer_policy.clone(),
-        bundle_hash: format!("{:x}", fxhash(&input)),
+        bundle_hash: format!("{:x}", fxhash_bytes(&input)),
         policy_hash: format!(
             "{:x}",
             fxhash(&format!(
@@ -1110,26 +1088,6 @@ fn predict_from_policy_object(
     predict_from_policy_override(baseline_report, &policy.id, kind, policy.notes.clone())
 }
 
-fn document_for_id(registry: &SeedRegistry, id: &str) -> Result<QaDocument> {
-    if let Some(document) = document_for_registry_id(registry, id) {
-        return Ok(document);
-    }
-    if let Ok(manifest) = load_execution_manifest(id) {
-        return Ok(QaDocument {
-            entries: vec![QaEntry::ExecutionManifest(manifest)],
-        });
-    }
-    if let Ok(lock) = load_bundle_lock(id) {
-        return Ok(QaDocument {
-            entries: vec![QaEntry::BundleLock(lock)],
-        });
-    }
-    if let Ok(document) = load_report_document_with_registry(id, registry) {
-        return Ok(document);
-    }
-    Err(anyhow!("no lock/manifest/report artifact found for `{id}`"))
-}
-
 fn locate_known_artifact(id: &str) -> Result<ArtifactLocator> {
     let manifest = manifest_cache_root()?.join(format!("{id}.locus"));
     if manifest.exists() {
@@ -1150,6 +1108,12 @@ fn locate_known_artifact(id: &str) -> Result<ArtifactLocator> {
     let report = report_cache_path(id)?;
     if report.exists() {
         return Ok(locate_artifact(id, "report", &report).map_err(anyhow::Error::msg)?);
+    }
+    let legacy_packet_report = legacy_report_cache_path(id)?;
+    if legacy_packet_report.exists() {
+        return Ok(
+            locate_artifact(id, "report", &legacy_packet_report).map_err(anyhow::Error::msg)?
+        );
     }
     let legacy_report = report_cache_root()?.join(format!("{id}.json"));
     if legacy_report.exists() {
@@ -1589,6 +1553,15 @@ fn dump_cache_namespaces() -> Result<Vec<String>> {
 fn fxhash(input: &str) -> u64 {
     let mut hash: u64 = 0xcbf29ce484222325;
     for byte in input.as_bytes() {
+        hash ^= u64::from(*byte);
+        hash = hash.wrapping_mul(0x100000001b3);
+    }
+    hash
+}
+
+fn fxhash_bytes(input: &[u8]) -> u64 {
+    let mut hash: u64 = 0xcbf29ce484222325;
+    for byte in input {
         hash ^= u64::from(*byte);
         hash = hash.wrapping_mul(0x100000001b3);
     }

@@ -1,4 +1,5 @@
 use assert_cmd::Command;
+use l64_core::{LocusCapabilityMask, LocusOpcode, LocusPacketKind, QaDocument, QaEntry};
 use std::{
     fs,
     path::PathBuf,
@@ -25,6 +26,41 @@ fn write_fixture(name: &str, content: &str) -> PathBuf {
     ));
     fs::write(&path, content).unwrap();
     path
+}
+
+fn write_bundle_dna_fixture(name: &str, document: &QaDocument) -> PathBuf {
+    let bytes = l64_locus::encode_section_packet(
+        LocusPacketKind::CanonicalTransfer,
+        LocusOpcode::CanonicalPayload,
+        "BND_TEST",
+        "bundle_document.v1",
+        document,
+        LocusCapabilityMask::default(),
+        1,
+    )
+    .unwrap();
+    let path = write_fixture(name, "");
+    fs::write(&path, bytes).unwrap();
+    path
+}
+
+fn qa_entry(kind: &str, payload: &str) -> QaEntry {
+    QaEntry::from_surface_json(kind, payload).unwrap()
+}
+
+fn bundle_document_from_text(bundle: &str) -> QaDocument {
+    let entries = bundle
+        .lines()
+        .filter_map(|line| {
+            let line = line.trim();
+            if line.is_empty() || line.starts_with("!qc0") {
+                return None;
+            }
+            let (kind, payload) = line.split_once(' ').unwrap();
+            Some(qa_entry(kind, payload))
+        })
+        .collect();
+    QaDocument { entries }
 }
 
 fn chain_rule_bundle() -> &'static str {
@@ -89,18 +125,21 @@ fn test_namespace(prefix: &str) -> String {
 }
 
 #[test]
-fn normalize_round_trips_object_shell() {
+fn standalone_projection_leaf_commands_are_removed() {
     let path = write_fixture(
-        "sample.qa0",
+        "sample.projection",
         "object [tag=CTX;cid=OBJ_CTX_SET;codebook=GEN1;remap=none;lineage=seed]<head=carrier;args=set;locals=base;hooks=identity>[regime=R_SET;contracts=carrier-total;invariants=extensional-stable;equivalence=eq-set;admissibility=admit-basic]{evidence_class=Seed;traces=T_set;receipts=RC_set;maturity=Validated;gate_verdict=Pass}<<aliases=ctx_set;profiles=STD;qm_binding=reserved;qa_binding=ctx_set;projection_policy=qa-first>>\n",
     );
 
-    Command::cargo_bin("l64-cli")
+    let output = Command::cargo_bin("l64-cli")
         .unwrap()
         .current_dir(workspace_root())
-        .args(["normalize", path.to_str().unwrap()])
-        .assert()
-        .success();
+        .args(["normalize", path.to_str().unwrap(), "--as", "qa0"])
+        .output()
+        .unwrap();
+    assert!(!output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("unrecognized subcommand"));
 }
 
 #[test]
@@ -152,88 +191,80 @@ fn compile_atlas_succeeds() {
 }
 
 #[test]
-fn surface_import_and_roundtrip_commands_work() {
-    let qc0_path = write_fixture("surface_obj.qc0", "");
-    let export = Command::cargo_bin("l64-cli")
-        .unwrap()
-        .current_dir(workspace_root())
-        .args(["export", "--id", "OBJ_CTX_SET", "--to", "qc0"])
-        .output()
-        .unwrap();
-    assert!(export.status.success());
-    fs::write(&qc0_path, export.stdout).unwrap();
+fn rna_dna_primary_authority_commands_work() {
+    let rna_path = write_fixture("primary.gene.rna", "ι ≔ σ ‖ κ\n");
+    let dna_path = rna_path.with_extension("gene.dna");
 
     Command::cargo_bin("l64-cli")
         .unwrap()
         .current_dir(workspace_root())
-        .args(["import", qc0_path.to_str().unwrap()])
+        .args([
+            "compile-rna",
+            rna_path.to_str().unwrap(),
+            "--out",
+            dna_path.to_str().unwrap(),
+        ])
         .assert()
         .success();
 
-    Command::cargo_bin("l64-cli")
-        .unwrap()
-        .current_dir(workspace_root())
-        .args(["roundtrip-check", qc0_path.to_str().unwrap()])
-        .assert()
-        .success();
-}
-
-#[test]
-fn qk0_expand_and_surface_capabilities_work() {
-    let qk0_path = write_fixture("surface_obj.qk0", "");
-    let export = Command::cargo_bin("l64-cli")
-        .unwrap()
-        .current_dir(workspace_root())
-        .args(["export", "--id", "OBJ_CTX_SET", "--to", "qk0"])
-        .output()
-        .unwrap();
-    assert!(export.status.success());
-    fs::write(&qk0_path, export.stdout).unwrap();
+    assert!(dna_path.exists());
+    assert!(!fs::read(&dna_path).unwrap().is_empty());
 
     Command::cargo_bin("l64-cli")
         .unwrap()
         .current_dir(workspace_root())
-        .args(["expand-qk0", qk0_path.to_str().unwrap()])
-        .assert()
-        .success();
-
-    Command::cargo_bin("l64-cli")
-        .unwrap()
-        .current_dir(workspace_root())
-        .args(["surface-capabilities"])
+        .args(["sequence-dna", dna_path.to_str().unwrap()])
         .assert()
         .success();
 }
 
 #[test]
-fn theorem_and_campaign_surface_execution_work() {
-    let theorem_path = write_fixture("theorem.qc0", "");
-    let campaign_path = write_fixture("campaign.qc0", "");
+fn compile_bundle_moves_projection_fixture_to_dna() {
+    let namespace = test_namespace("cli_compile_bundle");
+    let source_path = write_fixture("chain_rule_bundle.locus.rna", chain_rule_bundle());
+    let dna_path = source_path.with_extension("dna");
+
+    Command::cargo_bin("l64-cli")
+        .unwrap()
+        .current_dir(workspace_root())
+        .args([
+            "compile-bundle",
+            source_path.to_str().unwrap(),
+            "--out",
+            dna_path.to_str().unwrap(),
+        ])
+        .assert()
+        .success();
+
+    assert!(dna_path.exists());
+    assert!(!fs::read(&dna_path).unwrap().is_empty());
+
+    Command::cargo_bin("l64-cli")
+        .unwrap()
+        .current_dir(workspace_root())
+        .env("MF_CACHE_NAMESPACE", &namespace)
+        .args([
+            "certify-bundle",
+            "--file",
+            dna_path.to_str().unwrap(),
+            "--conflict-policy",
+            "exact-match",
+        ])
+        .assert()
+        .success();
+}
+
+#[test]
+fn theorem_and_campaign_dna_bundle_execution_work() {
     let namespace = test_namespace("cli_theorem_campaign");
-
-    let theorem_export = Command::cargo_bin("l64-cli")
-        .unwrap()
-        .current_dir(workspace_root())
-        .args(["export", "--id", "THS_CHAIN_RULE", "--to", "qc0"])
-        .output()
-        .unwrap();
-    assert!(theorem_export.status.success());
-    fs::write(&theorem_path, theorem_export.stdout).unwrap();
-
-    let campaign_export = Command::cargo_bin("l64-cli")
-        .unwrap()
-        .current_dir(workspace_root())
-        .args(["export", "--id", "CPG_CHAIN_RULE", "--to", "qc0"])
-        .output()
-        .unwrap();
-    assert!(campaign_export.status.success());
-    fs::write(&campaign_path, campaign_export.stdout).unwrap();
+    let document = bundle_document_from_text(chain_rule_bundle());
+    let bundle_path = write_bundle_dna_fixture("theorem_campaign.dna", &document);
 
     Command::cargo_bin("l64-cli")
         .unwrap()
         .current_dir(workspace_root())
         .env("MF_CACHE_NAMESPACE", &namespace)
-        .args(["run-theorem", "--file", theorem_path.to_str().unwrap()])
+        .args(["run-theorem", "--file", bundle_path.to_str().unwrap()])
         .assert()
         .success();
 
@@ -241,7 +272,7 @@ fn theorem_and_campaign_surface_execution_work() {
         .unwrap()
         .current_dir(workspace_root())
         .env("MF_CACHE_NAMESPACE", &namespace)
-        .args(["certify-derived", "--file", campaign_path.to_str().unwrap()])
+        .args(["certify-derived", "--file", bundle_path.to_str().unwrap()])
         .assert()
         .success();
 }
@@ -249,21 +280,47 @@ fn theorem_and_campaign_surface_execution_work() {
 #[test]
 fn bundle_commands_work_for_overlay_bundle() {
     let namespace = test_namespace("cli_overlay_bundle");
-    let bundle_path = write_fixture(
-        "overlay_bundle.qc0",
-        concat!(
-            "!qc0 {\"surface_kind\":\"Qc0\",\"version\":\"1\",\"policy_id\":\"POL_QC0_CORE\",\"capability_id\":\"CAP_QC0_CORE\"}\n",
-            "regime {\"id\":\"R_TOP\",\"ctx_law\":\"ctx\",\"cut_law\":\"cut\",\"thr_law\":\"thr\",\"brc_law\":\"brc\",\"slk_law\":\"slk\",\"tol_law\":\"tol\",\"knt_law\":\"knt\",\"eq_law\":\"eq\",\"adm_law\":\"adm\",\"promoted_ops\":[]}\n",
-            "regime {\"id\":\"R_CALC\",\"ctx_law\":\"ctx\",\"cut_law\":\"cut\",\"thr_law\":\"thr\",\"brc_law\":\"brc\",\"slk_law\":\"slk\",\"tol_law\":\"tol\",\"knt_law\":\"knt\",\"eq_law\":\"eq\",\"adm_law\":\"adm\",\"promoted_ops\":[]}\n",
-            "bridge {\"id\":\"B_LOCAL_TOP_TO_CALC\",\"src\":\"R_TOP\",\"tgt\":\"R_CALC\",\"id_pres\":\"local-identity\",\"eq_pres\":\"local-eq\",\"forget\":[],\"enrich\":[\"derivative witness\"],\"loss\":[],\"reversibility\":\"Enriching\",\"receipts\":[\"RC_LOCAL\"],\"rollback\":\"allowed\"}\n",
-            "proof {\"id\":\"PS_LOCAL_SQUARE\",\"kind\":\"Square\",\"nodes\":[\"top\",\"calc\"],\"edges\":[{\"from\":\"top\",\"to\":\"calc\",\"label\":\"derive\"}],\"equations\":[\"derive=derive\"],\"target_equivalence\":\"eq\",\"receipts\":[\"RC_LOCAL\"],\"gate\":\"Pass\"}\n",
-            "theorem {\"id\":\"THS_LOCAL_BUNDLE\",\"statement\":\"local overlay theorem\",\"hosts\":[\"R_TOP\",\"R_CALC\"],\"bridges\":[\"B_LOCAL_TOP_TO_CALC\"],\"operators\":[\"OPR.Local\"],\"target_equivalence\":\"eq\",\"obligations\":[\"OblLoc\"],\"primary_zone\":\"PmzStructural\",\"verdict\":\"RouteFound\",\"proof_shapes\":[\"PS_LOCAL_SQUARE\"]}\n",
-            "obligation {\"id\":\"OBL_LOCAL_LOC\",\"kind\":\"OblLoc\",\"description\":\"local compatibility\",\"status\":\"RouteFound\"}\n",
-            "target {\"id\":\"TGT_LOCAL_BUNDLE\",\"burden_class\":\"DerivativeLocalWitnessExtraction\",\"host_cluster\":[\"R_TOP\",\"R_CALC\"],\"target_equivalence\":\"eq\",\"allowed_bridge_classes\":[\"Enriching\"],\"loss_ceiling\":1,\"rollback_ceiling\":1,\"required_receipt_class\":\"RC\",\"required_proof_shape_family\":\"Square\",\"promotion_goal\":\"PromoteOperator\",\"primary_zone\":\"PmzStructural\",\"surface_requirement\":{\"required_input\":\"Qc0\",\"preferred_output\":\"Qm0\",\"require_symbolic_fidelity\":true,\"keyboard_projection_ingress_only\":true,\"transform_receipts_mandatory\":true},\"preferred_surface_target\":{\"surface_kind\":\"Qm0\"}}\n",
-            "atlas {\"id\":\"A_LOCAL_BUNDLE\",\"source_regime\":\"R_TOP\",\"target_regime\":\"R_CALC\",\"burden_class\":\"DerivativeLocalWitnessExtraction\",\"proof_target\":\"local derivative witness extraction\",\"candidate_paths\":[[\"B_LOCAL_TOP_TO_CALC\"]],\"normalized_winner\":[\"B_LOCAL_TOP_TO_CALC\"],\"winner_state\":\"Candidate\",\"loss_profile\":{\"items\":[]},\"proof_shapes_checked\":[\"PS_LOCAL_SQUARE\"],\"recipe_maturity\":\"Stable\",\"failure_signatures\":[],\"side_conditions\":[\"surface-preserving\"],\"surface_transition\":{\"compatibility\":\"SymbolicFidelityPreserving\",\"penalties\":[],\"total_penalty\":0}}\n",
-            "campaign {\"id\":\"CPG_LOCAL_BUNDLE\",\"theorem\":\"THS_LOCAL_BUNDLE\",\"target_profile\":\"TGT_LOCAL_BUNDLE\",\"route_ledger\":\"TRL_LOCAL_BUNDLE\",\"obligations\":[\"OBL_LOCAL_LOC\"],\"certificates\":[],\"dependencies\":[],\"campaign_class\":\"CBridge\",\"verdict\":\"RouteFound\",\"payoff\":[\"portable-overlay\"]}\n"
-        ),
-    );
+    let overlay_document = QaDocument {
+        entries: vec![
+            qa_entry(
+                "regime",
+                r#"{"id":"R_TOP","ctx_law":"ctx","cut_law":"cut","thr_law":"thr","brc_law":"brc","slk_law":"slk","tol_law":"tol","knt_law":"knt","eq_law":"eq","adm_law":"adm","promoted_ops":[]}"#,
+            ),
+            qa_entry(
+                "regime",
+                r#"{"id":"R_CALC","ctx_law":"ctx","cut_law":"cut","thr_law":"thr","brc_law":"brc","slk_law":"slk","tol_law":"tol","knt_law":"knt","eq_law":"eq","adm_law":"adm","promoted_ops":[]}"#,
+            ),
+            qa_entry(
+                "bridge",
+                r#"{"id":"B_LOCAL_TOP_TO_CALC","src":"R_TOP","tgt":"R_CALC","id_pres":"local-identity","eq_pres":"local-eq","forget":[],"enrich":["derivative witness"],"loss":[],"reversibility":"Enriching","receipts":["RC_LOCAL"],"rollback":"allowed"}"#,
+            ),
+            qa_entry(
+                "proof",
+                r#"{"id":"PS_LOCAL_SQUARE","kind":"Square","nodes":["top","calc"],"edges":[{"from":"top","to":"calc","label":"derive"}],"equations":["derive=derive"],"target_equivalence":"eq","receipts":["RC_LOCAL"],"gate":"Pass"}"#,
+            ),
+            qa_entry(
+                "theorem",
+                r#"{"id":"THS_LOCAL_BUNDLE","statement":"local overlay theorem","hosts":["R_TOP","R_CALC"],"bridges":["B_LOCAL_TOP_TO_CALC"],"operators":["OPR.Local"],"target_equivalence":"eq","obligations":["OblLoc"],"primary_zone":"PmzStructural","verdict":"RouteFound","proof_shapes":["PS_LOCAL_SQUARE"]}"#,
+            ),
+            qa_entry(
+                "obligation",
+                r#"{"id":"OBL_LOCAL_LOC","kind":"OblLoc","description":"local compatibility","status":"RouteFound"}"#,
+            ),
+            qa_entry(
+                "target",
+                r#"{"id":"TGT_LOCAL_BUNDLE","burden_class":"DerivativeLocalWitnessExtraction","host_cluster":["R_TOP","R_CALC"],"target_equivalence":"eq","allowed_bridge_classes":["Enriching"],"loss_ceiling":1,"rollback_ceiling":1,"required_receipt_class":"RC","required_proof_shape_family":"Square","promotion_goal":"PromoteOperator","primary_zone":"PmzStructural","surface_requirement":{"required_input":"Qc0","preferred_output":"Qa0","require_symbolic_fidelity":true,"keyboard_projection_ingress_only":true,"transform_receipts_mandatory":true},"preferred_surface_target":{"surface_kind":"Qa0"}}"#,
+            ),
+            qa_entry(
+                "atlas",
+                r#"{"id":"A_LOCAL_BUNDLE","source_regime":"R_TOP","target_regime":"R_CALC","burden_class":"DerivativeLocalWitnessExtraction","proof_target":"local derivative witness extraction","candidate_paths":[["B_LOCAL_TOP_TO_CALC"]],"normalized_winner":["B_LOCAL_TOP_TO_CALC"],"winner_state":"Candidate","loss_profile":{"items":[]},"proof_shapes_checked":["PS_LOCAL_SQUARE"],"recipe_maturity":"Stable","failure_signatures":[],"side_conditions":["surface-preserving"],"surface_transition":{"compatibility":"SymbolicFidelityPreserving","penalties":[],"total_penalty":0}}"#,
+            ),
+            qa_entry(
+                "campaign",
+                r#"{"id":"CPG_LOCAL_BUNDLE","theorem":"THS_LOCAL_BUNDLE","target_profile":"TGT_LOCAL_BUNDLE","route_ledger":"TRL_LOCAL_BUNDLE","obligations":["OBL_LOCAL_LOC"],"certificates":[],"dependencies":[],"campaign_class":"CBridge","verdict":"RouteFound","payoff":["portable-overlay"]}"#,
+            ),
+        ],
+    };
+    let bundle_path = write_bundle_dna_fixture("overlay_bundle.dna", &overlay_document);
 
     Command::cargo_bin("l64-cli")
         .unwrap()
@@ -298,7 +355,8 @@ fn bundle_commands_work_for_overlay_bundle() {
 
 #[test]
 fn surfaced_chain_rule_bundle_certifies_through_cli() {
-    let bundle_path = write_fixture("chain_rule_cli.qc0", chain_rule_bundle());
+    let document = bundle_document_from_text(chain_rule_bundle());
+    let bundle_path = write_bundle_dna_fixture("chain_rule_cli.dna", &document);
     let output = Command::cargo_bin("l64-cli")
         .unwrap()
         .current_dir(workspace_root())
@@ -370,10 +428,8 @@ fn surfaced_chain_rule_bundle_certifies_through_cli() {
 
 #[test]
 fn integrated_chain_rule_bundle_reuses_promoted_operator_through_cli() {
-    let bundle_path = write_fixture(
-        "chain_rule_integrated_cli.qc0",
-        &integrated_chain_rule_bundle(),
-    );
+    let document = bundle_document_from_text(&integrated_chain_rule_bundle());
+    let bundle_path = write_bundle_dna_fixture("chain_rule_integrated_cli.dna", &document);
     let output = Command::cargo_bin("l64-cli")
         .unwrap()
         .current_dir(workspace_root())
@@ -805,10 +861,8 @@ fn chain_rule_reports_active_adequacy_records() {
 
 #[test]
 fn broken_bridge_adequacy_blocks_campaign_and_promotion() {
-    let bundle_path = write_fixture(
-        "chain_rule_broken_bridge.qc0",
-        broken_chain_rule_bridge_bundle(),
-    );
+    let document = bundle_document_from_text(broken_chain_rule_bridge_bundle());
+    let bundle_path = write_bundle_dna_fixture("chain_rule_broken_bridge.dna", &document);
     let output = Command::cargo_bin("l64-cli")
         .unwrap()
         .current_dir(workspace_root())
@@ -851,7 +905,7 @@ fn broken_bridge_adequacy_blocks_campaign_and_promotion() {
 }
 
 #[test]
-fn export_report_carries_adequacy_receipts() {
+fn validation_dna_bundle_carries_certification_artifacts() {
     let namespace = test_namespace("cli_chain_rule_export_adequacy");
     let _ = Command::cargo_bin("l64-cli")
         .unwrap()
@@ -860,10 +914,122 @@ fn export_report_carries_adequacy_receipts() {
         .args(["certify-derived", "--campaign", "CPG_CHAIN_RULE"])
         .output()
         .unwrap();
+    let report_id = "REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE";
+    let report_dir = workspace_root()
+        .join(".l64-cache")
+        .join("namespaces")
+        .join(&namespace)
+        .join("reports");
+    assert!(report_dir.join(format!("{report_id}.dna")).exists());
+    assert!(!report_dir.join(format!("{report_id}.locus")).exists());
+    let out = std::env::temp_dir()
+        .join("l64_cli_tests")
+        .join(format!("{namespace}.adequacy.validation.dna"));
     let output = Command::cargo_bin("l64-cli")
         .unwrap()
         .current_dir(workspace_root())
         .env("MF_CACHE_NAMESPACE", &namespace)
+        .args([
+            "export-validation-dna-bundle",
+            "--id",
+            report_id,
+            "--out",
+            out.to_str().unwrap(),
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let bytes = fs::read(out).unwrap();
+    let document: QaDocument =
+        l64_locus::decode_section_payload(&bytes, LocusOpcode::CanonicalPayload).unwrap();
+    for id in [
+        "THS_CHAIN_RULE",
+        "CPG_CHAIN_RULE",
+        "CRT_REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE",
+        "TRL_REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE",
+    ] {
+        assert!(document.entries.iter().any(|entry| entry.id() == id));
+    }
+}
+
+#[test]
+fn export_validation_dna_bundle_imports_without_projection_surface() {
+    let namespace = test_namespace("cli_validation_dna_bundle");
+    let report_id = "REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE";
+    let out = std::env::temp_dir()
+        .join("l64_cli_tests")
+        .join(format!("{namespace}.validation.dna"));
+    let _ = Command::cargo_bin("l64-cli")
+        .unwrap()
+        .current_dir(workspace_root())
+        .env("MF_CACHE_NAMESPACE", &namespace)
+        .args(["certify-derived", "--campaign", "CPG_CHAIN_RULE"])
+        .output()
+        .unwrap();
+    let export = Command::cargo_bin("l64-cli")
+        .unwrap()
+        .current_dir(workspace_root())
+        .env("MF_CACHE_NAMESPACE", &namespace)
+        .args([
+            "export-validation-dna-bundle",
+            "--id",
+            report_id,
+            "--out",
+            out.to_str().unwrap(),
+        ])
+        .output()
+        .unwrap();
+    assert!(export.status.success());
+    assert!(out.exists());
+    let bytes = fs::read(&out).unwrap();
+    let document: QaDocument =
+        l64_locus::decode_section_payload(&bytes, LocusOpcode::CanonicalPayload).unwrap();
+    assert!(
+        document
+            .entries
+            .iter()
+            .any(|entry| entry.id() == "THS_CHAIN_RULE")
+    );
+
+    let import = Command::cargo_bin("l64-cli")
+        .unwrap()
+        .current_dir(workspace_root())
+        .env("MF_CACHE_NAMESPACE", &namespace)
+        .args([
+            "import-bundle",
+            out.to_str().unwrap(),
+            "--conflict-policy",
+            "exact-match",
+        ])
+        .output()
+        .unwrap();
+    assert!(import.status.success());
+}
+
+#[test]
+fn textual_validation_bundle_export_command_is_removed() {
+    let output = Command::cargo_bin("l64-cli")
+        .unwrap()
+        .current_dir(workspace_root())
+        .args([
+            "export-validation-bundle",
+            "--id",
+            "REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE",
+            "--to",
+            "qc0",
+        ])
+        .output()
+        .unwrap();
+    assert!(!output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("export-validation-dna-bundle"));
+}
+
+#[test]
+fn textual_report_projection_commands_are_removed() {
+    let output = Command::cargo_bin("l64-cli")
+        .unwrap()
+        .current_dir(workspace_root())
         .args([
             "export-report",
             "--id",
@@ -873,17 +1039,31 @@ fn export_report_carries_adequacy_receipts() {
         ])
         .output()
         .unwrap();
-    assert!(output.status.success());
-    let text = String::from_utf8(output.stdout).unwrap();
-    assert!(text.contains("ADR_THS_CHAIN_RULE_ADQ_CHAIN_TOP_CALC_BRIDGE"));
+    assert!(!output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("export-report-dna"));
+
+    let output = Command::cargo_bin("l64-cli")
+        .unwrap()
+        .current_dir(workspace_root())
+        .args([
+            "export-report-projection",
+            "--id",
+            "REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE",
+            "--to",
+            "qc0",
+        ])
+        .output()
+        .unwrap();
+    assert!(!output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("export-report-dna"));
 }
 
 #[test]
-fn exported_report_surfaces_imported_claim_entries() {
+fn validation_dna_bundle_surfaces_imported_claim_entries() {
     let namespace = test_namespace("cli_export_imported_claim");
-    let bundle_path = write_fixture(
-        "imported_claim.qc0",
-        r#"!qc0 {"surface_kind":"Qc0","version":"1","policy_id":"POL_QC0_CORE","capability_id":"CAP_QC0_CORE"}
+    let imported_claim_bundle = r#"!qc0 {"surface_kind":"Qc0","version":"1","policy_id":"POL_QC0_CORE","capability_id":"CAP_QC0_CORE"}
 proof {"id":"PS_X","kind":"Square","nodes":["a","b","c","d"],"edges":[{"from":"a","to":"b","label":"f"},{"from":"b","to":"d","label":"g"},{"from":"a","to":"c","label":"h"},{"from":"c","to":"d","label":"i"}],"equations":["g∘f=i∘h"],"target_equivalence":"eq","receipts":["r"],"gate":"Pass"}
 bridge {"id":"B_X","src":"R_TOP","tgt":"R_CALC","id_pres":"pres","eq_pres":"eq","forget":[],"enrich":["der"],"loss":[],"reversibility":"Enriching","receipts":["r"],"rollback":"allowed"}
 atlas {"id":"A_X","source_regime":"R_TOP","target_regime":"R_CALC","burden_class":"ImportedKernelClaim","proof_target":"kernel-claim","candidate_paths":[["B_X"]],"normalized_winner":["B_X"],"winner_state":"Candidate","loss_profile":{"items":[]},"proof_shapes_checked":["PS_X"],"recipe_maturity":"Stable","failure_signatures":[],"side_conditions":[],"surface_transition":{"compatibility":"AuthorityPreserving","penalties":[],"total_penalty":0}}
@@ -897,8 +1077,9 @@ claim-packet {"id":"CLM_X","claim_class":"Kernel","authority_state":"Evidence","
 evidence-contract {"id":"ECT_X","required_evidence_kinds":["kernel-claim"],"required_benchmark_roles":["TargetCase"],"requires_stress":false,"requires_challenge":false,"admissibility_thresholds":["stable"],"promotion_ceiling":"Certified"}
 benchmark-receipt {"id":"BMR_X","claim_packet_id":"CLM_X","role":"TargetCase","verdict":"Certified","metrics":{"score":"1.0"},"reproducibility_ref":"RPK_X"}
 reproducibility-packet {"id":"RPK_X","claim_packet_id":"CLM_X","derivation_path":["lab"],"code_refs":["src"],"benchmark_refs":["BMR_X"],"artifact_refs":["CLM_X"]}
-adequacy {"id":"ADQ_X_EVID","kind":"EvidenceContractInterpretation","regime_ids":["R_TOP","R_CALC"],"bridge_ids":[],"theorem_ids":["THS_X"],"burden_pack_ids":["BPK_X"],"claim_packet_ids":["CLM_X"],"evidence_contract_ids":["ECT_X"],"benchmark_receipt_ids":["BMR_X"],"challenge_receipt_ids":[],"reproducibility_packet_ids":["RPK_X"],"description":"evidence contract present","blocking":true}"#,
-    );
+adequacy {"id":"ADQ_X_EVID","kind":"EvidenceContractInterpretation","regime_ids":["R_TOP","R_CALC"],"bridge_ids":[],"theorem_ids":["THS_X"],"burden_pack_ids":["BPK_X"],"claim_packet_ids":["CLM_X"],"evidence_contract_ids":["ECT_X"],"benchmark_receipt_ids":["BMR_X"],"challenge_receipt_ids":[],"reproducibility_packet_ids":["RPK_X"],"description":"evidence contract present","blocking":true}"#;
+    let document = bundle_document_from_text(imported_claim_bundle);
+    let bundle_path = write_bundle_dna_fixture("imported_claim.dna", &document);
 
     let certify = Command::cargo_bin("l64-cli")
         .unwrap()
@@ -915,19 +1096,27 @@ adequacy {"id":"ADQ_X_EVID","kind":"EvidenceContractInterpretation","regime_ids"
         .unwrap();
     assert!(certify.status.success());
 
+    let out = std::env::temp_dir()
+        .join("l64_cli_tests")
+        .join(format!("{namespace}.imported.validation.dna"));
     let export = Command::cargo_bin("l64-cli")
         .unwrap()
         .current_dir(workspace_root())
         .env("MF_CACHE_NAMESPACE", &namespace)
-        .args(["export-report", "--id", "REPORT_THS_X_CPG_X", "--to", "qc0"])
+        .args([
+            "export-validation-dna-bundle",
+            "--id",
+            "REPORT_THS_X_CPG_X",
+            "--out",
+            out.to_str().unwrap(),
+        ])
         .output()
         .unwrap();
     assert!(export.status.success());
-    let text = String::from_utf8(export.stdout).unwrap();
-    assert!(text.contains("burden-pack"));
-    assert!(text.contains("claim-packet"));
-    assert!(text.contains("evidence-contract"));
-    assert!(text.contains("benchmark-receipt"));
-    assert!(text.contains("reproducibility-packet"));
-    assert!(text.contains("adequacy"));
+    let bytes = fs::read(out).unwrap();
+    let document: QaDocument =
+        l64_locus::decode_section_payload(&bytes, LocusOpcode::CanonicalPayload).unwrap();
+    for id in ["BPK_X", "CLM_X", "ECT_X", "BMR_X", "RPK_X", "ADQ_X_EVID"] {
+        assert!(document.entries.iter().any(|entry| entry.id() == id));
+    }
 }

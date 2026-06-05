@@ -5,7 +5,6 @@ Use `l64` as the primary command. On Windows release bundles, run `l64.exe` from
 ## Verify Installation
 
 ```powershell
-l64 surface-capabilities
 l64 dump-runtime-roots
 l64 clear-cache --scope all
 ```
@@ -14,7 +13,7 @@ If running from source on Windows:
 
 ```powershell
 cargo build --release -p l64 -p l64-cli -p l64-admin
-.\target\release\l64.exe surface-capabilities
+.\target\release\l64.exe dump-runtime-roots
 ```
 
 ## Campaign Certification
@@ -40,10 +39,10 @@ l64 observe-run --report REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE
 ## Bundle Certification
 
 ```powershell
-l64 certify-bundle --file samples/chain_rule_bundle.qc0 --conflict-policy exact-match
-l64 certify-bundle --file samples/chain_rule_integrated_bundle.qc0 --conflict-policy exact-match
-l64 certify-bundle --file samples/imported_claim_bundle.qc0 --conflict-policy exact-match
-l64 certify-bundle --file samples/imported_claim_stress_gap_bundle.qc0 --conflict-policy exact-match
+l64 certify-bundle --file samples/chain_rule_bundle.dna --conflict-policy exact-match
+l64 certify-bundle --file samples/chain_rule_integrated_bundle.dna --conflict-policy exact-match
+l64 certify-bundle --file samples/imported_claim_bundle.dna --conflict-policy exact-match
+l64 certify-bundle --file samples/imported_claim_stress_gap_bundle.dna --conflict-policy exact-match
 ```
 
 ## RNA/DNA Commands
@@ -65,16 +64,16 @@ DNA emission validates header truth, structural opcode law, and symbol-table non
 ## Export, Import, Validate
 
 ```powershell
-l64 export-report --id REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE --to qc0
-l64 export-validation-bundle --id REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE --to qc0
-l64 export-locus-packet --report-id REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE --out chain-rule.dna
-l64 import-locus-packet chain-rule.dna
+l64 export-validation-dna-bundle --id REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE --out chain-rule.validation.dna
+l64 import-bundle chain-rule.validation.dna
+l64 export-report-dna --report-id REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE --out chain-rule.dna
+l64 import-report-dna chain-rule.dna
 ```
 
 ## Lock and Replay
 
 ```powershell
-l64 lock-bundle samples/chain_rule_integrated_bundle.qc0 --optimizer-policy conservative --conflict-policy exact-match
+l64 lock-bundle samples/chain_rule_integrated_bundle.dna --optimizer-policy conservative --conflict-policy exact-match
 l64 replay-with-lock <LOCK_ID> --parallel-obligations --max-obligation-workers 3
 ```
 

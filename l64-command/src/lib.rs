@@ -4,8 +4,6 @@ use l64_core::{BundleConflictPolicy, OptimizerPolicy, SurfaceKind};
 #[derive(Debug, Clone, ValueEnum)]
 pub enum SurfaceArg {
     Qc0,
-    Qm0,
-    Qk0,
     Qa0,
 }
 
@@ -13,8 +11,6 @@ impl From<SurfaceArg> for SurfaceKind {
     fn from(value: SurfaceArg) -> Self {
         match value {
             SurfaceArg::Qc0 => SurfaceKind::Qc0,
-            SurfaceArg::Qm0 => SurfaceKind::Qm0,
-            SurfaceArg::Qk0 => SurfaceKind::Qk0,
             SurfaceArg::Qa0 => SurfaceKind::Qa0,
         }
     }
@@ -23,7 +19,6 @@ impl From<SurfaceArg> for SurfaceKind {
 #[derive(Debug, Clone, ValueEnum)]
 pub enum AdminSurfaceArg {
     Qc0,
-    Qm0,
     Qa0,
 }
 
@@ -31,7 +26,6 @@ impl From<AdminSurfaceArg> for SurfaceKind {
     fn from(value: AdminSurfaceArg) -> Self {
         match value {
             AdminSurfaceArg::Qc0 => SurfaceKind::Qc0,
-            AdminSurfaceArg::Qm0 => SurfaceKind::Qm0,
             AdminSurfaceArg::Qa0 => SurfaceKind::Qa0,
         }
     }

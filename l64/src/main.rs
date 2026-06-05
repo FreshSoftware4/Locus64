@@ -120,8 +120,9 @@ fn print_authority_audit() {
     println!("Locus64 authority audit");
     println!("substrate_authority: RNA,DNA,lower-chain receipts");
     println!("derived_semantic: certification,research,coverage,tower reports");
-    println!("extraction_sources: QC0,QA0,QK0,QM0,JSON report imports");
-    println!("deletion_targets: l64-qc0,l64-qa0,l64-qk0,l64-qm0,l64-surfaces");
+    println!("extraction_sources: bundle-entry text,governed research imports");
+    println!("deleted_projection_paths: l64-qk0");
+    println!("deleted_projection_crates: l64-qc0,l64-qa0,l64-qk0,l64-qm0,l64-surfaces");
     println!("public_surface_target: RNA,DNA");
     println!("public_command_target: l64");
 }

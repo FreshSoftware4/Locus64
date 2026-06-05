@@ -344,7 +344,7 @@ fn default_replay_cache() -> ReplayCachePolicyConfig {
 
 fn default_report() -> ReportPolicyConfig {
     ReportPolicyConfig {
-        export_surfaces: vec![SurfaceKind::Qc0, SurfaceKind::Qm0, SurfaceKind::Qa0],
+        export_surfaces: vec![SurfaceKind::Qc0, SurfaceKind::Qa0],
         include_policy_trace: true,
         include_route_explanation: true,
         include_obligation_logs: true,

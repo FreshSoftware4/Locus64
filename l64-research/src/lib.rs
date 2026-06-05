@@ -11,7 +11,7 @@ use l64_core::{
     ResponseClass, ReviewDecision, ReviewReceipt, ReviewStatus, RouteAssignment, RouteScore,
     StrengtheningArtifact, TaskEnvelope, VerticalCompoundingBundle,
 };
-use l64_locus::{read_section_packet_or_json, write_section_packet};
+use l64_locus::{decode_section_payload, write_section_packet};
 use serde::{Serialize, de::DeserializeOwned};
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -36,12 +36,6 @@ fn kind_dir(kind: &str) -> Result<PathBuf> {
 fn dna_path(kind: &str, id: &str) -> Result<PathBuf> {
     Ok(kind_dir(kind)?.join(format!("{id}.dna")))
 }
-fn locus_path(kind: &str, id: &str) -> Result<PathBuf> {
-    Ok(kind_dir(kind)?.join(format!("{id}.locus")))
-}
-fn legacy_path(kind: &str, id: &str) -> Result<PathBuf> {
-    Ok(kind_dir(kind)?.join(format!("{id}.json")))
-}
 
 fn store_payload<T: Serialize>(
     kind: &str,
@@ -65,18 +59,12 @@ fn store_payload<T: Serialize>(
         1,
     )
     .map_err(anyhow::Error::msg)?;
-    fs::copy(&path, locus_path(kind, id)?).map_err(anyhow::Error::msg)?;
     Ok(())
 }
 
 fn load_payload<T: DeserializeOwned>(kind: &str, id: &str, opcode: LocusOpcode) -> Result<T> {
     let packet = dna_path(kind, id)?;
-    let legacy = legacy_path(kind, id)?;
-    if packet.exists() {
-        return read_section_packet_or_json(&packet, &legacy, opcode).map_err(anyhow::Error::msg);
-    }
-    let locus = locus_path(kind, id)?;
-    read_section_packet_or_json(&locus, &legacy, opcode).map_err(anyhow::Error::msg)
+    decode_section_payload(&fs::read(packet)?, opcode).map_err(anyhow::Error::msg)
 }
 
 fn list_ids(kind: &str) -> Result<Vec<String>> {
@@ -89,7 +77,7 @@ fn list_ids(kind: &str) -> Result<Vec<String>> {
             path.file_stem().and_then(|s| s.to_str()),
             path.extension().and_then(|s| s.to_str()),
         ) {
-            if ext == "locus" || ext == "dna" || ext == "json" {
+            if ext == "dna" {
                 out.push(stem.to_string());
             }
         }

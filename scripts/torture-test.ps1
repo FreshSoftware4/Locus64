@@ -27,10 +27,10 @@ $campaigns = @(
 )
 
 $bundleSamples = @(
-    "samples/chain_rule_bundle.qc0",
-    "samples/chain_rule_integrated_bundle.qc0",
-    "samples/imported_claim_bundle.qc0",
-    "samples/imported_claim_stress_gap_bundle.qc0"
+    "samples/chain_rule_bundle.dna",
+    "samples/chain_rule_integrated_bundle.dna",
+    "samples/imported_claim_bundle.dna",
+    "samples/imported_claim_stress_gap_bundle.dna"
 )
 
 New-Item -ItemType Directory -Force -Path $OutputRoot | Out-Null
@@ -141,9 +141,7 @@ try {
             New-Item -ItemType Directory -Force -Path $nsDir | Out-Null
 
             Invoke-Mf -Namespace $ns -CommandArgs @("clear-cache", "--scope", "all") -CapturePath (Join-Path $nsDir "clear-cache.json") | Out-Null
-            Invoke-Mf -Namespace $ns -CommandArgs @("surface-capabilities") -CapturePath (Join-Path $nsDir "surface-capabilities.json") | Out-Null
             Invoke-Mf -Namespace $ns -CommandArgs @("dump-runtime-roots") -CapturePath (Join-Path $nsDir "dump-runtime-roots.json") | Out-Null
-            $summary.surface_runs++
             $summary.runtime_root_runs++
 
             Invoke-Mf -Namespace $ns -CommandArgs @("research-seed-export-remediation", "--persist") -CapturePath (Join-Path $nsDir "research-seed-export-remediation.json") | Out-Null
@@ -156,10 +154,6 @@ try {
                 Invoke-Mf -Namespace $ns -CommandArgs @("certify-bundle", "--file", $bundle, "--conflict-policy", "exact-match") -CapturePath $bundleOut | Out-Null
                 $summary.bundle_runs++
             }
-
-            Invoke-Mf -Namespace $ns -CommandArgs @("roundtrip-check", "samples/chain_rule_bundle.qc0") -CapturePath (Join-Path $nsDir "roundtrip-chain-rule.json") | Out-Null
-            Invoke-Mf -Namespace $ns -CommandArgs @("roundtrip-check", "samples/imported_claim_bundle.qc0") -CapturePath (Join-Path $nsDir "roundtrip-imported-claim.json") | Out-Null
-            $summary.roundtrip_runs += 2
 
             $rnaPath = Join-Path $nsDir "lower-chain.gene.rna"
             $dnaPath = Join-Path $nsDir "lower-chain.gene.dna"
@@ -206,20 +200,16 @@ try {
                 $summary.explain_execution_runs++
                 $summary.artifact_resolution_runs++
 
-                $exportPath = Join-Path $sampleDir "$ns-$campaign.qc0"
-                $export = Invoke-Mf -Namespace $ns -CommandArgs @("export-report", "--id", $reportId, "--to", "qc0") -CapturePath (Join-Path $nsDir "$campaign-export.json")
-                Write-Utf8NoBom -Path $exportPath -Content $export
-                $summary.export_runs++
                 $summary.reports += $reportId
 
-                $validationPath = Join-Path $sampleDir "$ns-$campaign-validation.qc0"
-                $validation = Invoke-Mf -Namespace $ns -CommandArgs @("export-validation-bundle", "--id", $reportId, "--to", "qc0") -CapturePath (Join-Path $nsDir "$campaign-export-validation.json")
-                Write-Utf8NoBom -Path $validationPath -Content $validation
-                Invoke-Mf -Namespace $ns -CommandArgs @("validate", $validationPath, "--as", "qc0") -CapturePath (Join-Path $nsDir "$campaign-validate-validation-bundle.json") | Out-Null
+                $validationPath = Join-Path $sampleDir "$ns-$campaign-validation.dna"
+                Invoke-Mf -Namespace $ns -CommandArgs @("export-validation-dna-bundle", "--id", $reportId, "--out", $validationPath) -CapturePath (Join-Path $nsDir "$campaign-export-validation-dna.json") | Out-Null
+                Invoke-Mf -Namespace $ns -CommandArgs @("import-bundle", $validationPath, "--conflict-policy", "exact-match") -CapturePath (Join-Path $nsDir "$campaign-import-validation-dna.json") | Out-Null
+                $summary.export_runs++
 
-                $packetPath = Join-Path $nsDir "$campaign.locus"
-                Invoke-Mf -Namespace $ns -CommandArgs @("export-locus-packet", "--report-id", $reportId, "--out", $packetPath) -CapturePath (Join-Path $nsDir "$campaign-export-locus.json") | Out-Null
-                Invoke-Mf -Namespace $ns -CommandArgs @("import-locus-packet", $packetPath) -CapturePath (Join-Path $nsDir "$campaign-import-locus.json") | Out-Null
+                $packetPath = Join-Path $nsDir "$campaign.dna"
+                Invoke-Mf -Namespace $ns -CommandArgs @("export-report-dna", "--report-id", $reportId, "--out", $packetPath) -CapturePath (Join-Path $nsDir "$campaign-export-dna.json") | Out-Null
+                Invoke-Mf -Namespace $ns -CommandArgs @("import-report-dna", $packetPath) -CapturePath (Join-Path $nsDir "$campaign-import-dna.json") | Out-Null
                 $summary.locus_packet_exports++
                 $summary.locus_packet_imports++
 
@@ -234,7 +224,7 @@ try {
             Invoke-Mf -Namespace $ns -CommandArgs @("research-status") -CapturePath (Join-Path $nsDir "research-status.json") | Out-Null
             $summary.research_status_runs++
 
-            $lockStdout = Invoke-Mf -Namespace $ns -CommandArgs @("lock-bundle", "samples/chain_rule_integrated_bundle.qc0", "--optimizer-policy", "conservative", "--conflict-policy", "exact-match") -CapturePath (Join-Path $nsDir "lock-bundle.json")
+            $lockStdout = Invoke-Mf -Namespace $ns -CommandArgs @("lock-bundle", "samples/chain_rule_integrated_bundle.dna", "--optimizer-policy", "conservative", "--conflict-policy", "exact-match") -CapturePath (Join-Path $nsDir "lock-bundle.json")
             $summary.lock_runs++
             try {
                 $lockParsed = $lockStdout | ConvertFrom-Json

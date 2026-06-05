@@ -1,0 +1,346 @@
+{
+  "manifest": {
+    "id": "BND_REPLAY_NOCACHE",
+    "entries": [
+      {
+        "id": "B_REPLAY",
+        "kind": "bridge"
+      },
+      {
+        "id": "PS_REPLAY",
+        "kind": "proof"
+      },
+      {
+        "id": "A_REPLAY",
+        "kind": "atlas"
+      },
+      {
+        "id": "THS_LOCAL_REPLAY",
+        "kind": "theorem"
+      },
+      {
+        "id": "OBL_LOCAL_REPLAY",
+        "kind": "obligation"
+      },
+      {
+        "id": "TGT_LOCAL_REPLAY",
+        "kind": "target"
+      },
+      {
+        "id": "TRL_LOCAL_REPLAY",
+        "kind": "ledger"
+      },
+      {
+        "id": "CPG_LOCAL_REPLAY",
+        "kind": "campaign"
+      },
+      {
+        "id": "MOP_BND_REPLAY_NOCACHE_REPLAY",
+        "kind": "policy-object"
+      }
+    ],
+    "dependencies": [
+      {
+        "id": "THS_LOCAL_REPLAY",
+        "depends_on": [
+          "B_REPLAY"
+        ]
+      },
+      {
+        "id": "CPG_LOCAL_REPLAY",
+        "depends_on": [
+          "THS_LOCAL_REPLAY",
+          "TGT_LOCAL_REPLAY",
+          "TRL_LOCAL_REPLAY",
+          "OBL_LOCAL_REPLAY"
+        ]
+      }
+    ],
+    "merge_report": {
+      "id": "BMER_IMPORTED",
+      "policy": "Reject",
+      "imported_entries": 9,
+      "namespaced_entries": 0,
+      "conflicts": []
+    },
+    "overlay": {
+      "id": "BOVR_BND_REPLAY_NOCACHE",
+      "parent": "seed",
+      "bundle_id": "BND_REPLAY_NOCACHE",
+      "local_entries": 9,
+      "shadowed_entries": []
+    },
+    "execution_receipt": {
+      "id": "BREC_BND_REPLAY_NOCACHE",
+      "bundle_id": "BND_REPLAY_NOCACHE",
+      "theorem_ids": [
+        "THS_LOCAL_REPLAY"
+      ],
+      "campaign_ids": [
+        "CPG_LOCAL_REPLAY"
+      ],
+      "overlay_id": "BOVR_BND_REPLAY_NOCACHE",
+      "import_receipt_ids": [],
+      "merge_report_id": "BMER_BND_REPLAY_NOCACHE"
+    }
+  },
+  "bundle_id": "BND_REPLAY_NOCACHE",
+  "local": {
+    "version": "",
+    "objects": [],
+    "regimes": [],
+    "bridges": [
+      {
+        "id": "B_REPLAY",
+        "src": "R_TOP",
+        "tgt": "R_CALC",
+        "id_pres": "pres",
+        "eq_pres": "eq",
+        "forget": [],
+        "enrich": [
+          "der"
+        ],
+        "loss": [],
+        "reversibility": "Enriching",
+        "receipts": [
+          "r"
+        ],
+        "rollback": "allowed"
+      }
+    ],
+    "proof_shapes": [
+      {
+        "id": "PS_REPLAY",
+        "kind": "Square",
+        "nodes": [
+          "a",
+          "b",
+          "c",
+          "d"
+        ],
+        "edges": [
+          {
+            "from": "a",
+            "to": "b",
+            "label": "f"
+          },
+          {
+            "from": "b",
+            "to": "d",
+            "label": "g"
+          },
+          {
+            "from": "a",
+            "to": "c",
+            "label": "h"
+          },
+          {
+            "from": "c",
+            "to": "d",
+            "label": "i"
+          }
+        ],
+        "equations": [
+          "g∘f=i∘h"
+        ],
+        "target_equivalence": "eq",
+        "receipts": [
+          "r"
+        ],
+        "gate": "Pass"
+      }
+    ],
+    "atlas_cells": [
+      {
+        "id": "A_REPLAY",
+        "source_regime": "R_TOP",
+        "target_regime": "R_CALC",
+        "burden_class": "General",
+        "proof_target": "replay",
+        "candidate_paths": [
+          [
+            "B_REPLAY"
+          ]
+        ],
+        "normalized_winner": [
+          "B_REPLAY"
+        ],
+        "winner_state": "Candidate",
+        "loss_profile": {
+          "items": []
+        },
+        "proof_shapes_checked": [
+          "PS_REPLAY"
+        ],
+        "recipe_maturity": "Stable",
+        "failure_signatures": [],
+        "side_conditions": [],
+        "surface_transition": {
+          "compatibility": "AuthorityPreserving",
+          "penalties": [],
+          "total_penalty": 0
+        }
+      }
+    ],
+    "mechanization_packages": [],
+    "equivalence_classes": [],
+    "theorem_specs": [
+      {
+        "id": "THS_LOCAL_REPLAY",
+        "statement": "local replay",
+        "hosts": [
+          "R_TOP",
+          "R_CALC"
+        ],
+        "bridges": [
+          "B_REPLAY"
+        ],
+        "operators": [
+          "OPR.Local"
+        ],
+        "target_equivalence": "eq",
+        "obligations": [
+          "OblAdm"
+        ],
+        "primary_zone": "PmzStructural",
+        "verdict": "Benchmarked",
+        "proof_shapes": [
+          "PS_REPLAY"
+        ]
+      }
+    ],
+    "obligations": [
+      {
+        "id": "OBL_LOCAL_REPLAY",
+        "kind": "OblAdm",
+        "description": "adm",
+        "status": "Benchmarked"
+      }
+    ],
+    "target_profiles": [
+      {
+        "id": "TGT_LOCAL_REPLAY",
+        "burden_class": "General",
+        "host_cluster": [
+          "R_TOP",
+          "R_CALC"
+        ],
+        "target_equivalence": "eq",
+        "allowed_bridge_classes": [
+          "Enriching"
+        ],
+        "loss_ceiling": 1,
+        "rollback_ceiling": 1,
+        "required_receipt_class": "RC",
+        "required_proof_shape_family": "Square",
+        "promotion_goal": "PromoteOperator",
+        "primary_zone": "PmzStructural",
+        "surface_requirement": null,
+        "preferred_surface_target": null,
+        "optimizer_policy": null,
+        "policy_binding_ids": []
+      }
+    ],
+    "route_ledgers": [
+      {
+        "id": "TRL_LOCAL_REPLAY",
+        "theorem": "THS_LOCAL_REPLAY",
+        "paths": [
+          [
+            "B_REPLAY"
+          ]
+        ],
+        "budget": {
+          "max_loss": 1,
+          "allow_lossy_supported": false,
+          "require_proof": true
+        },
+        "losses": [],
+        "receipts": [],
+        "normalized_path": [
+          "B_REPLAY"
+        ]
+      }
+    ],
+    "certificates": [],
+    "campaigns": [
+      {
+        "id": "CPG_LOCAL_REPLAY",
+        "theorem": "THS_LOCAL_REPLAY",
+        "target_profile": "TGT_LOCAL_REPLAY",
+        "route_ledger": "TRL_LOCAL_REPLAY",
+        "obligations": [
+          "OBL_LOCAL_REPLAY"
+        ],
+        "certificates": [],
+        "dependencies": [],
+        "campaign_class": "CBasic",
+        "verdict": "Benchmarked",
+        "payoff": [
+          "replay"
+        ]
+      }
+    ],
+    "campaign_portfolios": [],
+    "route_classes": [],
+    "atlas_deficiencies": [],
+    "adequacy_clauses": [],
+    "burden_packs": [],
+    "claim_packets": [],
+    "evidence_contracts": [],
+    "benchmark_receipts": [],
+    "challenge_receipts": [],
+    "reproducibility_packets": [],
+    "codebook_packs": [],
+    "glyph_packs": [],
+    "combo_packs": [],
+    "projection_policies": [],
+    "alias_expansion_policies": [],
+    "surface_policies": [],
+    "capability_matrices": [],
+    "roundtrip_reports": [],
+    "transform_receipts": [],
+    "surface_deficiencies": [],
+    "policy_objects": [
+      {
+        "id": "MOP_BND_REPLAY_NOCACHE_REPLAY",
+        "kind": "ReplayCache",
+        "scope": {
+          "Bundle": "BND_REPLAY_NOCACHE"
+        },
+        "extends": null,
+        "optimizer": null,
+        "evaluator": null,
+        "replay_cache": {
+          "replay_allowed": false,
+          "exact_policy_match_required": true,
+          "survive_surface_only_changes": false,
+          "reuse_approximate_results": true,
+          "optimizer_change_invalidates": true,
+          "surface_pack_change_invalidates": true,
+          "trust_class": "ExactPolicyOnly"
+        },
+        "report": null,
+        "scheduler": null,
+        "canonicalizer_mode": null,
+        "merge_policy": null,
+        "notes": [
+          "replay policy"
+        ]
+      }
+    ],
+    "policy_bindings": [],
+    "policy_resolutions": [],
+    "bundle_locks": [],
+    "execution_manifests": [],
+    "replay_lock_manifests": []
+  },
+  "merge_report": {
+    "id": "BMER_IMPORTED",
+    "policy": "Reject",
+    "imported_entries": 9,
+    "namespaced_entries": 0,
+    "conflicts": []
+  },
+  "import_receipts": []
+}

@@ -2,26 +2,29 @@ use anyhow::{Context, Result, anyhow};
 use clap::{Parser, Subcommand};
 use l64_atlas::{CompiledAtlas, run_seed_theorem};
 use l64_bundle::{
-    BundleWorld, import_bundle_file, load_bundle_world, overlay_registry_from_document,
+    BundleWorld, bundle_document_from_entry_text, import_bundle_file, load_bundle_world,
 };
 use l64_canon::CanonEngine;
 use l64_cert::{
     CertificationOptions, build_vertical_compounding_bundle, cache_stats as cert_cache_stats,
     certify_derived_campaign_with_options, certify_derived_theorem_with_options,
-    clear_cache as clear_cert_cache, decode_locus_packet_report, decode_locus_packet_summary,
-    derive_distress_vector, derive_help_request, dispatch_proof_coverage,
-    encode_locus_packet_for_report, explain_invalidation as cert_explain_invalidation,
-    replay_report as cert_replay_report,
+    clear_cache as clear_cert_cache, decode_locus_packet_summary, derive_distress_vector,
+    derive_help_request, dispatch_proof_coverage, encode_locus_packet_for_report,
+    explain_invalidation as cert_explain_invalidation, load_report_document_with_registry,
+    persist_report_document, replay_report as cert_replay_report,
+    report_to_validation_bundle_with_registry,
 };
-use l64_command::{BundlePolicyArg, OptimizerPolicyArg, SurfaceArg};
+use l64_command::{BundlePolicyArg, OptimizerPolicyArg};
 use l64_core::{
-    Budget, BundleConflictPolicy, Canonicalize, CheckProofShape, GenomeArtifactClass,
-    GenomeSurface, OptimizerPolicy, Promote, QaDocument, QaEntry, RegistryLookup, ReplayStatus,
-    ResearchLineageRecord, SelectRoute, SurfaceKind, decode_locus_packet, locus_packet_summary,
+    Budget, BundleConflictPolicy, Canonicalize, GenomeArtifactClass, GenomeSurface,
+    LocusCapabilityMask, LocusOpcode, LocusPacketKind, OptimizerPolicy, QaDocument, QaEntry,
+    RegistryLookup, ResearchLineageRecord, SelectRoute, decode_locus_packet,
+    document_for_registry_id, locus_packet_summary,
 };
 use l64_kernel::ConstitutionKernel;
-use l64_locus::{compile_rna_to_dna_packet, sequence_dna_to_rna};
-use l64_qa0::{normalize_document as normalize_qa0_document, parse_document as parse_qa0_document};
+use l64_locus::{
+    compile_rna_to_dna_packet, load_bundle_lock, load_execution_manifest, sequence_dna_to_rna,
+};
 use l64_registry::SeedRegistry;
 use l64_research::{
     derive_governed_complete_research_bundle_from_report,
@@ -52,14 +55,6 @@ use l64_research::{
 };
 use l64_runtime::{RuntimeWorld, exec_host};
 use l64_selector::{AtlasSelector, CampaignCertifier};
-use l64_surfaces::{
-    default_policy_for, document_for_registry_id, dump_transform_receipt, expand_qk0_file,
-    export_document, import_file, load_bundle_lock, load_execution_manifest,
-    load_report_document_with_registry, normalize_surface, persist_report_document,
-    report_cache_path, report_cache_root, report_id, report_to_document_with_registry,
-    report_to_validation_bundle_with_registry, roundtrip_check, surface_capabilities,
-    surface_extension, transcode_text,
-};
 use std::{fs, path::Path};
 
 #[derive(Debug, Parser)]
@@ -127,64 +122,12 @@ impl ResearchKindArg {
 
 #[derive(Debug, Subcommand)]
 enum Command {
-    Parse {
-        file: String,
-        #[arg(long = "as", value_enum)]
-        as_kind: Option<SurfaceArg>,
-    },
-    Normalize {
-        file: String,
-        #[arg(long = "as", value_enum)]
-        as_kind: Option<SurfaceArg>,
-    },
-    Validate {
-        file: String,
-        #[arg(long = "as", value_enum)]
-        as_kind: Option<SurfaceArg>,
-    },
-    Import {
-        file: String,
-        #[arg(long = "as", value_enum)]
-        as_kind: Option<SurfaceArg>,
-    },
     ImportBundle {
         file: String,
-        #[arg(long = "as", value_enum)]
-        as_kind: Option<SurfaceArg>,
         #[arg(long, value_enum, default_value = "reject")]
         conflict_policy: BundlePolicyArg,
         #[arg(long)]
         namespace: Option<String>,
-    },
-    Export {
-        #[arg(long)]
-        id: String,
-        #[arg(long = "to", value_enum)]
-        to_kind: SurfaceArg,
-    },
-    Transcode {
-        input_file: String,
-        #[arg(long = "to", value_enum)]
-        to_kind: SurfaceArg,
-        #[arg(long = "as", value_enum)]
-        as_kind: Option<SurfaceArg>,
-    },
-    NormalizeSurface {
-        file: String,
-        #[arg(long = "as", value_enum)]
-        as_kind: Option<SurfaceArg>,
-    },
-    RoundtripCheck {
-        file: String,
-        #[arg(long = "as", value_enum)]
-        as_kind: Option<SurfaceArg>,
-    },
-    ExpandQk0 {
-        file: String,
-    },
-    SurfaceCapabilities,
-    DumpTransformReceipt {
-        id: String,
     },
     ReplayReport {
         report_id: String,
@@ -230,8 +173,6 @@ enum Command {
         target_profile: Option<String>,
         #[arg(long)]
         file: Option<String>,
-        #[arg(long = "as", value_enum)]
-        as_kind: Option<SurfaceArg>,
     },
     CertifyDerived {
         #[arg(long)]
@@ -264,24 +205,16 @@ enum Command {
         cache_policy: Option<String>,
         #[arg(long, default_value_t = false)]
         strict_policy: bool,
-        #[arg(long = "report-surface", value_enum)]
-        report_surface: Option<SurfaceArg>,
-        #[arg(long = "as", value_enum)]
-        as_kind: Option<SurfaceArg>,
     },
     RunBundle {
         #[arg(long)]
         file: String,
-        #[arg(long = "as", value_enum)]
-        as_kind: Option<SurfaceArg>,
         #[arg(long, default_value_t = false)]
         overlay_only: bool,
         #[arg(long, default_value_t = false)]
         explain_route: bool,
         #[arg(long, value_enum, default_value = "conservative")]
         optimizer_policy: OptimizerPolicyArg,
-        #[arg(long = "report-surface", value_enum)]
-        report_surface: Option<SurfaceArg>,
         #[arg(long, default_value_t = false)]
         replay_only: bool,
         #[arg(long, default_value_t = false)]
@@ -298,16 +231,12 @@ enum Command {
     CertifyBundle {
         #[arg(long)]
         file: String,
-        #[arg(long = "as", value_enum)]
-        as_kind: Option<SurfaceArg>,
         #[arg(long, default_value_t = false)]
         overlay_only: bool,
         #[arg(long, default_value_t = false)]
         explain_route: bool,
         #[arg(long, value_enum, default_value = "conservative")]
         optimizer_policy: OptimizerPolicyArg,
-        #[arg(long = "report-surface", value_enum)]
-        report_surface: Option<SurfaceArg>,
         #[arg(long, default_value_t = false)]
         strict_derived: bool,
         #[arg(long, default_value_t = false)]
@@ -325,23 +254,11 @@ enum Command {
         #[arg(long, default_value_t = false)]
         strict_surface: bool,
     },
-    ExportReport {
+    ExportValidationDnaBundle {
         #[arg(long)]
         id: String,
-        #[arg(long = "to", value_enum)]
-        to_kind: SurfaceArg,
-    },
-    ExportValidationBundle {
         #[arg(long)]
-        id: String,
-        #[arg(long = "to", value_enum)]
-        to_kind: SurfaceArg,
-    },
-    ExportBundleReport {
-        #[arg(long)]
-        bundle: String,
-        #[arg(long = "to", value_enum)]
-        to_kind: SurfaceArg,
+        out: Option<String>,
     },
     CompileAtlas,
     Canonize {
@@ -374,21 +291,17 @@ enum Command {
         replay_only: bool,
         #[arg(long, default_value_t = false)]
         no_cache: bool,
-        #[arg(long = "report-surface", value_enum)]
-        report_surface: Option<SurfaceArg>,
-        #[arg(long = "as", value_enum)]
-        as_kind: Option<SurfaceArg>,
     },
     DumpCanonical {
         id: String,
     },
-    ExportLocusPacket {
+    ExportReportDna {
         #[arg(long)]
         report_id: String,
         #[arg(long)]
         out: Option<String>,
     },
-    ImportLocusPacket {
+    ImportReportDna {
         file: String,
     },
     NormalizeRna {
@@ -402,6 +315,11 @@ enum Command {
         artifact_class: String,
         #[arg(long, default_value_t = false)]
         persist_lineage: bool,
+    },
+    CompileBundle {
+        file: String,
+        #[arg(long)]
+        out: Option<String>,
     },
     SequenceDna {
         file: String,
@@ -481,112 +399,18 @@ fn real_main() -> Result<()> {
     let kernel = ConstitutionKernel;
 
     match cli.command {
-        Command::Parse { file, as_kind } => {
-            let (document, receipt) = load_document(&file, as_kind, &registry)?;
-            println!(
-                "{}",
-                serde_json::to_string_pretty(&serde_json::json!({
-                    "document": describe_document(&document),
-                    "receipt": receipt
-                }))?
-            );
-        }
-        Command::Normalize { file, as_kind } => {
-            let (text, receipt) = normalize_file(&file, as_kind, &registry)?;
-            println!("{text}");
-            eprintln!("{}", serde_json::to_string(&receipt)?);
-        }
-        Command::Validate { file, as_kind } => {
-            let (document, _) = load_document(&file, as_kind, &registry)?;
-            let overlay = overlay_registry_from_document(registry.clone(), &document);
-            validate_document(&kernel, &overlay, &document)
-                .with_context(|| "validation failed; if this surface came from export-report, use export-validation-bundle for a self-contained validation/replay artifact")?;
-            println!("validation passed");
-        }
-        Command::Import { file, as_kind } => {
-            let (artifact, receipt) =
-                import_file(Path::new(&file), as_kind.map(Into::into), &registry)?;
-            println!(
-                "{}",
-                serde_json::to_string_pretty(&serde_json::json!({
-                    "header": artifact.header,
-                    "document": describe_document(&artifact.document),
-                    "receipt": receipt
-                }))?
-            );
-        }
         Command::ImportBundle {
             file,
-            as_kind,
             conflict_policy,
             namespace,
         } => {
             let world = import_bundle_file(
                 Path::new(&file),
-                as_kind.map(Into::into),
+                None,
                 conflict_policy.into(),
                 namespace.as_deref(),
             )?;
             println!("{}", serde_json::to_string_pretty(&world.manifest)?);
-        }
-        Command::Export { id, to_kind } => {
-            let document = document_for_id(&registry, &id)?;
-            let policy = default_policy_for(to_kind.clone().into(), &registry)?;
-            let (rendered, receipt) =
-                export_document(&document, to_kind.into(), &policy, &registry)?;
-            println!("{rendered}");
-            eprintln!("{}", serde_json::to_string(&receipt)?);
-            eprintln!(
-                "{}",
-                serde_json::to_string(
-                    &serde_json::json!({"artifact_class":"InspectionReport","standalone_validation_complete":false,"hint":"use export-validation-bundle for self-contained validation"})
-                )?
-            );
-        }
-        Command::Transcode {
-            input_file,
-            to_kind,
-            as_kind,
-        } => {
-            let source_kind = infer_surface_kind(&input_file, as_kind)?;
-            let input = fs::read_to_string(&input_file)
-                .with_context(|| format!("failed to read `{input_file}`"))?;
-            let (rendered, receipt) =
-                transcode_text(&input, source_kind, to_kind.into(), &registry)?;
-            println!("{rendered}");
-            eprintln!("{}", serde_json::to_string(&receipt)?);
-        }
-        Command::NormalizeSurface { file, as_kind } => {
-            let (text, receipt) = normalize_file(&file, as_kind, &registry)?;
-            println!("{text}");
-            eprintln!("{}", serde_json::to_string(&receipt)?);
-        }
-        Command::RoundtripCheck { file, as_kind } => {
-            let source_kind = infer_surface_kind(&file, as_kind)?;
-            let input =
-                fs::read_to_string(&file).with_context(|| format!("failed to read `{file}`"))?;
-            let (report, receipts) = roundtrip_check(&input, source_kind, &registry)?;
-            println!(
-                "{}",
-                serde_json::to_string_pretty(&serde_json::json!({
-                    "report": report,
-                    "receipts": receipts
-                }))?
-            );
-        }
-        Command::ExpandQk0 { file } => {
-            let expanded = expand_qk0_file(Path::new(&file), &registry)?;
-            println!("{expanded}");
-        }
-        Command::SurfaceCapabilities => {
-            println!(
-                "{}",
-                serde_json::to_string_pretty(&surface_capabilities(&registry))?
-            );
-        }
-        Command::DumpTransformReceipt { id } => {
-            let receipt = dump_transform_receipt(&id)?;
-            println!("{}", serde_json::to_string_pretty(&receipt)?);
         }
         Command::ReplayReport { report_id } => {
             let report = cert_replay_report(&report_id).map_err(anyhow::Error::msg)?;
@@ -648,16 +472,14 @@ fn real_main() -> Result<()> {
             theorem,
             target_profile,
             file,
-            as_kind,
         } => {
             let certifier = CampaignCertifier::new(registry.clone());
-            let (campaign, theorem, target_profile) = resolve_surface_cert_args(
+            let (campaign, theorem, target_profile) = resolve_surface_cert_args_registry(
                 &registry,
                 campaign,
                 theorem,
                 target_profile,
                 file,
-                as_kind,
             )?;
             let report = match (campaign.as_deref(), theorem.as_deref(), target_profile.as_deref()) {
                 (Some(campaign_id), _, _) => certifier.certify_campaign(campaign_id),
@@ -685,8 +507,6 @@ fn real_main() -> Result<()> {
             evaluator_policy,
             cache_policy,
             strict_policy,
-            report_surface,
-            as_kind,
         } => {
             let options = build_cert_options(
                 optimizer_policy.into(),
@@ -734,7 +554,7 @@ fn real_main() -> Result<()> {
             } else if let Some(file) = file {
                 let world = import_bundle_file(
                     Path::new(&file),
-                    as_kind.map(Into::into),
+                    None,
                     BundleConflictPolicy::ExactMatch,
                     None,
                 )?;
@@ -787,18 +607,13 @@ fn real_main() -> Result<()> {
                 ));
             }
             persist_report_document(&report)?;
-            if let Some(surface) = report_surface {
-                export_report_sidecar(&report, surface.into(), &registry)?;
-            }
             println!("{}", serde_json::to_string_pretty(&report)?);
         }
         Command::RunBundle {
             file,
-            as_kind,
             overlay_only,
             explain_route,
             optimizer_policy,
-            report_surface,
             replay_only,
             no_cache,
             evaluator_policy,
@@ -808,7 +623,7 @@ fn real_main() -> Result<()> {
         } => {
             let world = import_bundle_file(
                 Path::new(&file),
-                as_kind.map(Into::into),
+                None,
                 conflict_policy.into(),
                 None,
             )?;
@@ -828,24 +643,13 @@ fn real_main() -> Result<()> {
             if explain_route {
                 eprintln!("route explanation requested for bundle execution");
             }
-            if let Some(surface) = report_surface {
-                for value in &result {
-                    if let Some(report) = value.get("theorem_id").and_then(|_| {
-                        serde_json::from_value::<l64_core::CertificationReport>(value.clone()).ok()
-                    }) {
-                        export_report_sidecar(&report, surface.clone().into(), &registry)?;
-                    }
-                }
-            }
             println!("{}", serde_json::to_string_pretty(&result)?);
         }
         Command::CertifyBundle {
             file,
-            as_kind,
             overlay_only,
             explain_route,
             optimizer_policy,
-            report_surface,
             strict_derived,
             replay_only,
             no_cache,
@@ -857,7 +661,7 @@ fn real_main() -> Result<()> {
         } => {
             let world = import_bundle_file(
                 Path::new(&file),
-                as_kind.map(Into::into),
+                None,
                 conflict_policy.into(),
                 None,
             )?;
@@ -881,78 +685,39 @@ fn real_main() -> Result<()> {
             }
             for report in &reports {
                 persist_report_document(report)?;
-                if let Some(surface) = report_surface.clone() {
-                    export_report_sidecar(report, surface.into(), &registry)?;
-                }
             }
             if explain_route {
                 eprintln!("route explanation requested for certify-bundle");
             }
             println!("{}", serde_json::to_string_pretty(&reports)?);
         }
-        Command::ExportReport { id, to_kind } => {
+        Command::ExportValidationDnaBundle { id, out } => {
             let registry = SeedRegistry::load()?;
-            let document = load_report_document_for_export(&id, &registry)?;
-            let policy = default_policy_for(to_kind.clone().into(), &registry)?;
-            let (rendered, receipt) =
-                export_document(&document, to_kind.into(), &policy, &registry)?;
-            println!("{rendered}");
-            eprintln!("{}", serde_json::to_string(&receipt)?);
-            eprintln!(
+            let document = validation_bundle_document(&id, &registry)?;
+            let bytes = l64_locus::encode_section_packet(
+                LocusPacketKind::CanonicalTransfer,
+                LocusOpcode::CanonicalPayload,
+                &id,
+                "bundle_document.v1",
+                &document,
+                LocusCapabilityMask::default(),
+                2,
+            )
+            .map_err(anyhow::Error::msg)?;
+            let out_path = out.unwrap_or_else(|| format!("{id}.validation.dna"));
+            fs::write(&out_path, &bytes)
+                .with_context(|| format!("failed to write `{out_path}`"))?;
+            let packet = decode_locus_packet(&bytes).map_err(anyhow::Error::msg)?;
+            println!(
                 "{}",
-                serde_json::to_string(&serde_json::json!({
-                    "artifact_class": "InspectionReport",
-                    "standalone_validation_complete": false,
-                    "hint": "use export-validation-bundle for self-contained validation"
+                serde_json::to_string_pretty(&serde_json::json!({
+                    "report_id": id,
+                    "out": out_path,
+                    "bytes": bytes.len(),
+                    "entry_count": document.entries.len(),
+                    "summary": locus_packet_summary(&packet)
                 }))?
             );
-        }
-        Command::ExportValidationBundle { id, to_kind } => {
-            let registry = SeedRegistry::load()?;
-            let report = cert_replay_report(&id).map_err(anyhow::Error::msg)?;
-            let document = if let Some(bundle_id) = report
-                .execution_envelope
-                .as_ref()
-                .and_then(|item| item.bundle_id.clone())
-            {
-                if let Ok(world) = load_bundle_world(&bundle_id) {
-                    report_to_validation_bundle_with_registry(&report, &world.overlay)?
-                } else {
-                    report_to_validation_bundle_with_registry(&report, &registry)?
-                }
-            } else {
-                report_to_validation_bundle_with_registry(&report, &registry)?
-            };
-            let policy = default_policy_for(to_kind.clone().into(), &registry)?;
-            let (rendered, receipt) =
-                export_document(&document, to_kind.into(), &policy, &registry)?;
-            println!("{rendered}");
-            eprintln!("{}", serde_json::to_string(&receipt)?);
-        }
-        Command::ExportBundleReport { bundle, to_kind } => {
-            let world = load_bundle_world(&bundle)?;
-            let report_id = world
-                .overlay
-                .local
-                .campaigns
-                .first()
-                .map(|item| format!("REPORT_{}_{}", item.theorem, item.id))
-                .or_else(|| {
-                    world
-                        .overlay
-                        .local
-                        .theorem_specs
-                        .first()
-                        .map(|item| format!("REPORT_{}_THEOREM", item.id))
-                })
-                .ok_or_else(|| anyhow!("bundle has no reportable theorem/campaign"))?;
-            let registry = SeedRegistry::load()?;
-            let document = load_report_document_for_export(&report_id, &registry)?;
-            let policy = default_policy_for(to_kind.clone().into(), &registry)?;
-            let (rendered, receipt) =
-                export_document(&document, to_kind.into(), &policy, &registry)?;
-            println!("{rendered}");
-            eprintln!("{}", serde_json::to_string(&receipt)?);
         }
         Command::CompileAtlas => {
             let atlas = CompiledAtlas::compile(&registry).map_err(anyhow::Error::msg)?;
@@ -999,8 +764,6 @@ fn real_main() -> Result<()> {
             strict_surface,
             replay_only,
             no_cache,
-            report_surface,
-            as_kind,
         } => {
             let options = build_cert_options(
                 optimizer_policy.into(),
@@ -1037,7 +800,7 @@ fn real_main() -> Result<()> {
             } else if let Some(file) = file {
                 let world = import_bundle_file(
                     Path::new(&file),
-                    as_kind.map(Into::into),
+                    None,
                     BundleConflictPolicy::ExactMatch,
                     None,
                 )?;
@@ -1075,73 +838,9 @@ fn real_main() -> Result<()> {
             if explain_route {
                 eprintln!("optimizer policy: {:?}", options.optimizer_policy);
             }
-            if let Some(surface) = report_surface {
-                let report_id = format!("REPORT_{}_THEOREM", result.theorem_id);
-                let theorem_report = l64_core::CertificationReport {
-                    theorem_id: result.theorem_id.clone(),
-                    campaign_id: None,
-                    target_profile_id: "THEOREM_RUN".into(),
-                    verdict: result.verdict.clone(),
-                    selected_atlas_cell: None,
-                    selected_path: result.selected_route.clone(),
-                    route_class_id: None,
-                    certificate_id: None,
-                    candidates: Vec::new(),
-                    obligations: Vec::new(),
-                    reasons: vec!["theorem execution export".into()],
-                    diagnostics: Vec::new(),
-                    deficiencies: Vec::new(),
-                    adequacy_records: Vec::new(),
-                    checker_receipts: Vec::new(),
-                    burden_pack_ids: Vec::new(),
-                    claim_packet_ids: Vec::new(),
-                    evidence_contract_ids: Vec::new(),
-                    benchmark_receipt_ids: Vec::new(),
-                    challenge_receipt_ids: Vec::new(),
-                    reproducibility_packet_ids: Vec::new(),
-                    promotion_artifact_ids: Vec::new(),
-                    reused_artifact_ids: Vec::new(),
-                    default_selected_artifact_ids: Vec::new(),
-                    payoff_receipt_ids: Vec::new(),
-                    policy_resolution: None,
-                    route_explanation: None,
-                    execution_envelope: Some(l64_core::DeterministicExecutionEnvelope {
-                        bundle_hash: options.bundle_hash.clone(),
-                        bundle_id: options.bundle_id.clone(),
-                        policy_hash: options.policy_hash.clone(),
-                        policy_resolution_id: None,
-                        manifest_id: None,
-                        lock_id: None,
-                        route_winner_hash: fxhash(&result.selected_route.join("->")).to_string(),
-                        obligation_replay_keys: Vec::new(),
-                        report_hash: fxhash(&report_id).to_string(),
-                        replay_status: ReplayStatus::Fresh,
-                        executed_plan_id: None,
-                        reconciliation_id: None,
-                    }),
-                    reconciliation_summary: Vec::new(),
-                    obligation_plan: None,
-                    obligation_lanes: Vec::new(),
-                    obligation_ordering_receipt: None,
-                    obligation_merge_receipt: None,
-                    replay_legality_checks: Vec::new(),
-                    replay_barrier_receipts: Vec::new(),
-                    replay_merge_receipt: None,
-                    replay_divergence_records: Vec::new(),
-                    obligation_cache_shards: Vec::new(),
-                    reuse_legality_receipts: Vec::new(),
-                    reuse_decision_receipts: Vec::new(),
-                    residual_verification_receipts: Vec::new(),
-                    obligation_write_sets: Vec::new(),
-                    obligation_collision_reports: Vec::new(),
-                    obligation_namespace_receipt: None,
-                };
-                persist_report_document(&theorem_report)?;
-                export_report_sidecar(&theorem_report, surface.into(), &registry)?;
-            }
             println!("{}", serde_json::to_string_pretty(&result)?);
         }
-        Command::ExportLocusPacket { report_id, out } => {
+        Command::ExportReportDna { report_id, out } => {
             let report = cert_replay_report(&report_id).map_err(anyhow::Error::msg)?;
             let bytes = encode_locus_packet_for_report(&report).map_err(anyhow::Error::msg)?;
             if let Some(path) = out {
@@ -1159,7 +858,7 @@ fn real_main() -> Result<()> {
                 println!("{}", hex::encode(bytes));
             }
         }
-        Command::ImportLocusPacket { file } => {
+        Command::ImportReportDna { file } => {
             let bytes = fs::read(&file).with_context(|| format!("failed to read `{file}`"))?;
             let summary = decode_locus_packet_summary(&bytes).map_err(anyhow::Error::msg)?;
             println!("{}", serde_json::to_string_pretty(&summary)?);
@@ -1229,6 +928,51 @@ fn real_main() -> Result<()> {
                     "artifact": artifact,
                     "lineage": lineage,
                     "persisted_lineage": persist_lineage
+                }))?
+            );
+        }
+        Command::CompileBundle { file, out } => {
+            let subject_id = Path::new(&file)
+                .file_stem()
+                .and_then(|item| item.to_str())
+                .unwrap_or("BUNDLE_ARTIFACT");
+            let document = if Path::new(&file).extension().and_then(|ext| ext.to_str()) == Some("dna")
+            {
+                let bytes = fs::read(&file).with_context(|| format!("failed to read `{file}`"))?;
+                l64_locus::decode_section_payload::<QaDocument>(
+                    &bytes,
+                    LocusOpcode::CanonicalPayload,
+                )
+                .map_err(anyhow::Error::msg)?
+            } else {
+                let text =
+                    fs::read_to_string(&file).with_context(|| format!("failed to read `{file}`"))?;
+                bundle_document_from_entry_text(&text)?
+            };
+            let bytes = l64_locus::encode_section_packet(
+                LocusPacketKind::CanonicalTransfer,
+                LocusOpcode::CanonicalPayload,
+                subject_id,
+                "bundle_document.v1",
+                &document,
+                LocusCapabilityMask::default(),
+                1,
+            )
+            .map_err(anyhow::Error::msg)?;
+            let out_path = out.unwrap_or_else(|| {
+                Path::new(&file)
+                    .with_extension("dna")
+                    .to_string_lossy()
+                    .into_owned()
+            });
+            fs::write(&out_path, &bytes)
+                .with_context(|| format!("failed to write `{out_path}`"))?;
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&serde_json::json!({
+                    "out": out_path,
+                    "bytes": bytes.len(),
+                    "entries": document.entries.len()
                 }))?
             );
         }
@@ -1593,346 +1337,6 @@ fn real_main() -> Result<()> {
     Ok(())
 }
 
-fn infer_surface_kind(file: &str, as_kind: Option<SurfaceArg>) -> Result<SurfaceKind> {
-    if let Some(kind) = as_kind {
-        return Ok(kind.into());
-    }
-    match Path::new(file)
-        .extension()
-        .and_then(|ext| ext.to_str())
-        .unwrap_or_default()
-    {
-        "qc0" => Ok(SurfaceKind::Qc0),
-        "qm0" => Ok(SurfaceKind::Qm0),
-        "qk0" => Ok(SurfaceKind::Qk0),
-        "qa0" => Ok(SurfaceKind::Qa0),
-        other => Err(anyhow!(
-            "unsupported or missing surface extension `{other}`"
-        )),
-    }
-}
-
-fn normalize_file(
-    file: &str,
-    as_kind: Option<SurfaceArg>,
-    registry: &SeedRegistry,
-) -> Result<(String, l64_core::FormatTransformReceipt)> {
-    let source_kind = infer_surface_kind(file, as_kind)?;
-    let input = fs::read_to_string(file).with_context(|| format!("failed to read `{file}`"))?;
-    if source_kind == SurfaceKind::Qa0 && !input.trim_start().starts_with("!qa0 ") {
-        let document = parse_qa0_document(&input)?;
-        let policy = default_policy_for(SurfaceKind::Qa0, registry)?;
-        let normalized = normalize_qa0_document(&document)?;
-        let receipt = l64_core::FormatTransformReceipt {
-            id: format!("XFR-LEGACY-QA0-{:x}", fxhash(&normalized)),
-            src_surface: SurfaceKind::Qa0,
-            dst_surface: SurfaceKind::Qa0,
-            object_ids: document
-                .entries
-                .iter()
-                .filter_map(|entry| match entry {
-                    QaEntry::Object(item) => Some(item.id.clone()),
-                    _ => None,
-                })
-                .collect(),
-            transform_kind: l64_core::TransformKind::Normalize,
-            policy_id: policy.id,
-            defaults_used: Vec::new(),
-            alias_expansions: Vec::new(),
-            loss_classes: Vec::new(),
-            hash_before: format!("{:x}", fxhash(&input)),
-            hash_after: format!("{:x}", fxhash(&normalized)),
-            verdict: l64_core::TransformVerdict::Lossless,
-            rollback_ref: None,
-            replay_ref: Some("legacy-qa0".into()),
-        };
-        return Ok((normalized, receipt));
-    }
-    normalize_surface(&input, source_kind, registry)
-}
-
-fn load_document(
-    file: &str,
-    as_kind: Option<SurfaceArg>,
-    registry: &SeedRegistry,
-) -> Result<(QaDocument, l64_core::FormatTransformReceipt)> {
-    let source_kind = infer_surface_kind(file, as_kind)?;
-    let input = fs::read_to_string(file).with_context(|| format!("failed to read `{file}`"))?;
-    if source_kind == SurfaceKind::Qa0 && !input.trim_start().starts_with("!qa0 ") {
-        let document = parse_qa0_document(&input)?;
-        let policy = default_policy_for(SurfaceKind::Qa0, registry)?;
-        let receipt = l64_core::FormatTransformReceipt {
-            id: format!("XFR-LEGACY-QA0-IMPORT-{:x}", fxhash(&input)),
-            src_surface: SurfaceKind::Qa0,
-            dst_surface: SurfaceKind::Qc0,
-            object_ids: document
-                .entries
-                .iter()
-                .filter_map(|entry| match entry {
-                    QaEntry::Object(item) => Some(item.id.clone()),
-                    _ => None,
-                })
-                .collect(),
-            transform_kind: l64_core::TransformKind::Import,
-            policy_id: policy.id,
-            defaults_used: vec!["legacy-qa0-header".into()],
-            alias_expansions: Vec::new(),
-            loss_classes: vec!["ascii-mirror".into()],
-            hash_before: format!("{:x}", fxhash(&input)),
-            hash_after: format!("{:x}", fxhash(&serde_json::to_string(&document)?)),
-            verdict: l64_core::TransformVerdict::ReceiptedLoss,
-            rollback_ref: None,
-            replay_ref: Some("legacy-qa0".into()),
-        };
-        return Ok((document, receipt));
-    }
-    let (artifact, receipt) = import_file(Path::new(file), Some(source_kind), registry)?;
-    Ok((artifact.document, receipt))
-}
-
-fn describe_document(document: &QaDocument) -> String {
-    let mut counts = [0usize; 27];
-    for entry in &document.entries {
-        match entry {
-            QaEntry::Object(_) => counts[0] += 1,
-            QaEntry::Regime(_) => counts[1] += 1,
-            QaEntry::Bridge(_) => counts[2] += 1,
-            QaEntry::ProofShape(_) => counts[3] += 1,
-            QaEntry::AtlasCell(_) => counts[4] += 1,
-            QaEntry::MechanizationPackage(_) => counts[5] += 1,
-            QaEntry::TheoremSpec(_) => counts[6] += 1,
-            QaEntry::Obligation(_) => counts[7] += 1,
-            QaEntry::TargetProfile(_) => counts[8] += 1,
-            QaEntry::RouteLedger(_) => counts[9] += 1,
-            QaEntry::Certificate(_) => counts[10] += 1,
-            QaEntry::Campaign(_) => counts[11] += 1,
-            QaEntry::CampaignPortfolio(_) => counts[12] += 1,
-            QaEntry::RouteClass(_) => counts[13] += 1,
-            QaEntry::AtlasDeficiency(_) => counts[14] += 1,
-            QaEntry::AdequacyClause(_) => counts[15] += 1,
-            QaEntry::BurdenPack(_) => counts[16] += 1,
-            QaEntry::ClaimPacket(_) => counts[17] += 1,
-            QaEntry::EvidenceContract(_) => counts[18] += 1,
-            QaEntry::BenchmarkReceipt(_) => counts[19] += 1,
-            QaEntry::ChallengeReceipt(_) => counts[20] += 1,
-            QaEntry::ReproducibilityPacket(_) => counts[21] += 1,
-            QaEntry::SurfacePolicy(_) => counts[22] += 1,
-            QaEntry::TransformReceipt(_) => counts[23] += 1,
-            QaEntry::RoundTripReport(_) => counts[24] += 1,
-            QaEntry::CapabilityMatrix(_) => counts[25] += 1,
-            QaEntry::SurfaceBudget(_) => counts[26] += 1,
-            QaEntry::PolicyObject(_)
-            | QaEntry::PolicyBinding(_)
-            | QaEntry::PolicyResolution(_)
-            | QaEntry::BundleLock(_)
-            | QaEntry::ExecutionManifest(_)
-            | QaEntry::ReplayLockManifest(_)
-            | QaEntry::LockReceipt(_)
-            | QaEntry::LockDiff(_)
-            | QaEntry::RecomputationPlan(_)
-            | QaEntry::PlanExecution(_)
-            | QaEntry::PredictionAssessment(_)
-            | QaEntry::Reconciliation(_)
-            | QaEntry::RootResolution(_) => {}
-        }
-    }
-    format!(
-        "objects={} regimes={} bridges={} proofs={} atlas_cells={} mechanization_packages={} theorem_specs={} obligations={} target_profiles={} route_ledgers={} certificates={} campaigns={} portfolios={} route_classes={} diagnostics={} adequacy_clauses={} burden_packs={} claim_packets={} evidence_contracts={} benchmark_receipts={} challenge_receipts={} reproducibility_packets={} surface_policies={} transform_receipts={} roundtrip_reports={} capability_matrices={} surface_budgets={}",
-        counts[0],
-        counts[1],
-        counts[2],
-        counts[3],
-        counts[4],
-        counts[5],
-        counts[6],
-        counts[7],
-        counts[8],
-        counts[9],
-        counts[10],
-        counts[11],
-        counts[12],
-        counts[13],
-        counts[14],
-        counts[15],
-        counts[16],
-        counts[17],
-        counts[18],
-        counts[19],
-        counts[20],
-        counts[21],
-        counts[22],
-        counts[23],
-        counts[24],
-        counts[25],
-        counts[26]
-    )
-}
-
-fn validate_document(
-    kernel: &ConstitutionKernel,
-    registry: &impl RegistryLookup,
-    document: &QaDocument,
-) -> Result<()> {
-    for entry in &document.entries {
-        match entry {
-            QaEntry::Object(object) => {
-                kernel.validate_object(object, registry)?;
-                kernel
-                    .promote(object, registry)
-                    .map_err(anyhow::Error::msg)?;
-            }
-            QaEntry::Regime(regime) => kernel.validate_regime(regime)?,
-            QaEntry::Bridge(bridge) => kernel.validate_bridge(bridge, registry)?,
-            QaEntry::ProofShape(shape) => {
-                kernel
-                    .check_proof_shape(shape, registry)
-                    .map_err(anyhow::Error::msg)?;
-            }
-            QaEntry::AtlasCell(cell) => {
-                if registry.get_regime(&cell.source_regime).is_none()
-                    || registry.get_regime(&cell.target_regime).is_none()
-                {
-                    anyhow::bail!("atlas cell `{}` references an unknown regime", cell.id);
-                }
-            }
-            QaEntry::MechanizationPackage(package) => {
-                if package
-                    .parser
-                    .supported_surfaces
-                    .iter()
-                    .all(|surface| surface != "QA-0")
-                {
-                    anyhow::bail!(
-                        "mechanization package `{}` does not support QA-0",
-                        package.id
-                    );
-                }
-            }
-            QaEntry::TheoremSpec(item) => kernel.validate_theorem_spec(item, registry)?,
-            QaEntry::Obligation(item) => {
-                if item.description.trim().is_empty() {
-                    anyhow::bail!("obligation `{}` is missing a description", item.id);
-                }
-            }
-            QaEntry::TargetProfile(item) => kernel.validate_target_profile(item)?,
-            QaEntry::RouteLedger(item) => kernel.validate_route_ledger(item, registry)?,
-            QaEntry::Certificate(item) => kernel.validate_certificate(item, registry)?,
-            QaEntry::Campaign(item) => kernel.validate_campaign(item, registry)?,
-            QaEntry::CampaignPortfolio(item) => {
-                for campaign in &item.campaigns {
-                    if registry.get_campaign(campaign).is_none() {
-                        anyhow::bail!(
-                            "portfolio `{}` references unknown campaign `{campaign}`",
-                            item.id
-                        );
-                    }
-                }
-            }
-            QaEntry::RouteClass(item) => {
-                if registry.get_theorem_spec(&item.theorem).is_none() {
-                    anyhow::bail!("route class `{}` references unknown theorem", item.id);
-                }
-            }
-            QaEntry::AtlasDeficiency(item) => {
-                if item.message.trim().is_empty() {
-                    anyhow::bail!("diagnostic `{}` is missing a message", item.id);
-                }
-            }
-            QaEntry::AdequacyClause(item) => kernel.validate_adequacy_clause(item, registry)?,
-            QaEntry::BurdenPack(item) => {
-                if item.obligation_ids.is_empty() {
-                    anyhow::bail!("burden pack `{}` is missing obligations", item.id);
-                }
-            }
-            QaEntry::ClaimPacket(item) => {
-                if item.statement.trim().is_empty() {
-                    anyhow::bail!("claim packet `{}` is missing a statement", item.id);
-                }
-            }
-            QaEntry::EvidenceContract(item) => {
-                if item.required_evidence_kinds.is_empty() {
-                    anyhow::bail!(
-                        "evidence contract `{}` is missing required evidence kinds",
-                        item.id
-                    );
-                }
-            }
-            QaEntry::BenchmarkReceipt(item) => {
-                if registry.get_claim_packet(&item.claim_packet_id).is_none() {
-                    anyhow::bail!(
-                        "benchmark receipt `{}` references unknown claim packet",
-                        item.id
-                    );
-                }
-            }
-            QaEntry::ChallengeReceipt(item) => {
-                if registry.get_claim_packet(&item.claim_packet_id).is_none() {
-                    anyhow::bail!(
-                        "challenge receipt `{}` references unknown claim packet",
-                        item.id
-                    );
-                }
-            }
-            QaEntry::ReproducibilityPacket(item) => {
-                if registry.get_claim_packet(&item.claim_packet_id).is_none() {
-                    anyhow::bail!(
-                        "reproducibility packet `{}` references unknown claim packet",
-                        item.id
-                    );
-                }
-            }
-            QaEntry::SurfacePolicy(item) => {
-                if registry
-                    .get_projection_policy(&item.projection_policy)
-                    .is_none()
-                {
-                    anyhow::bail!(
-                        "surface policy `{}` references unknown projection policy",
-                        item.id
-                    );
-                }
-            }
-            QaEntry::TransformReceipt(item) => {
-                if item.object_ids.is_empty() {
-                    anyhow::bail!("transform receipt `{}` is missing object ids", item.id);
-                }
-            }
-            QaEntry::RoundTripReport(item) => {
-                if item.receipt_ids.is_empty() {
-                    anyhow::bail!("roundtrip report `{}` is missing receipt ids", item.id);
-                }
-            }
-            QaEntry::CapabilityMatrix(item) => {
-                if !item.import_support && !item.export_support {
-                    anyhow::bail!(
-                        "capability matrix `{}` declares no active surface support",
-                        item.id
-                    );
-                }
-            }
-            QaEntry::SurfaceBudget(item) => {
-                if item.forbid_silent_defaulting && item.max_loss_classes == 0 {
-                    continue;
-                }
-            }
-            QaEntry::PolicyObject(_)
-            | QaEntry::PolicyBinding(_)
-            | QaEntry::PolicyResolution(_)
-            | QaEntry::BundleLock(_)
-            | QaEntry::ExecutionManifest(_)
-            | QaEntry::ReplayLockManifest(_)
-            | QaEntry::LockReceipt(_)
-            | QaEntry::LockDiff(_)
-            | QaEntry::RecomputationPlan(_)
-            | QaEntry::PlanExecution(_)
-            | QaEntry::PredictionAssessment(_)
-            | QaEntry::Reconciliation(_)
-            | QaEntry::RootResolution(_) => {}
-        }
-    }
-    Ok(())
-}
-
 fn certify_with_registry(
     registry: &(impl RegistryLookup + Sync),
     campaign: Option<String>,
@@ -2216,8 +1620,8 @@ fn build_cert_options(
     strict_policy: bool,
 ) -> Result<CertificationOptions> {
     let bundle_hash = if let Some(file) = file {
-        let input = fs::read_to_string(file).with_context(|| format!("failed to read `{file}`"))?;
-        format!("{:x}", fxhash(&input))
+        let input = fs::read(file).with_context(|| format!("failed to read `{file}`"))?;
+        format!("{:x}", fxhash_bytes(&input))
     } else if let Some(bundle) = bundle {
         format!("{:x}", fxhash(bundle))
     } else {
@@ -2245,69 +1649,21 @@ fn build_cert_options(
     })
 }
 
-fn export_report_sidecar(
-    report: &l64_core::CertificationReport,
-    surface: SurfaceKind,
-    _registry: &SeedRegistry,
-) -> Result<()> {
-    let registry = SeedRegistry::load()?;
-    let document = if let Some(bundle_id) = report
+fn validation_bundle_document(registry_id: &str, registry: &SeedRegistry) -> Result<QaDocument> {
+    let report = cert_replay_report(registry_id).map_err(anyhow::Error::msg)?;
+    if let Some(bundle_id) = report
         .execution_envelope
         .as_ref()
         .and_then(|item| item.bundle_id.clone())
     {
         if let Ok(world) = load_bundle_world(&bundle_id) {
-            report_to_document_with_registry(report, &world.overlay)?
-        } else {
-            report_to_document_with_registry(report, &registry)?
+            return Ok(report_to_validation_bundle_with_registry(
+                &report,
+                &world.overlay,
+            )?);
         }
-    } else {
-        report_to_document_with_registry(report, &registry)?
-    };
-    let policy = default_policy_for(surface.clone(), &registry)?;
-    let (rendered, _) = export_document(&document, surface.clone(), &policy, &registry)?;
-    let target = report_cache_root()?.join(format!(
-        "{}.{}",
-        report_id(report),
-        surface_extension(&surface)
-    ));
-    fs::write(target, rendered)?;
-    Ok(())
-}
-
-fn load_report_document_for_export(
-    registry_id: &str,
-    registry: &SeedRegistry,
-) -> Result<QaDocument> {
-    let path = report_cache_path(registry_id)?;
-    if path.exists() {
-        let bytes = fs::read(path)?;
-        let report = decode_locus_packet_report(&bytes).map_err(anyhow::Error::msg)?;
-        if let Some(bundle_id) = report
-            .execution_envelope
-            .as_ref()
-            .and_then(|item| item.bundle_id.clone())
-        {
-            if let Ok(world) = load_bundle_world(&bundle_id) {
-                return report_to_document_with_registry(&report, &world.overlay);
-            }
-        }
-        return report_to_document_with_registry(&report, registry);
     }
-    let text = fs::read_to_string(report_cache_root()?.join(format!("{registry_id}.json")))?;
-    if let Ok(report) = serde_json::from_str::<l64_core::CertificationReport>(&text) {
-        if let Some(bundle_id) = report
-            .execution_envelope
-            .as_ref()
-            .and_then(|item| item.bundle_id.clone())
-        {
-            if let Ok(world) = load_bundle_world(&bundle_id) {
-                return report_to_document_with_registry(&report, &world.overlay);
-            }
-        }
-        return report_to_document_with_registry(&report, registry);
-    }
-    Ok(serde_json::from_str(&text)?)
+    Ok(report_to_validation_bundle_with_registry(&report, registry)?)
 }
 
 fn document_for_id(registry: &SeedRegistry, id: &str) -> Result<QaDocument> {
@@ -2326,42 +1682,6 @@ fn document_for_id(registry: &SeedRegistry, id: &str) -> Result<QaDocument> {
     Ok(QaDocument {
         entries: vec![entry],
     })
-}
-
-fn resolve_surface_cert_args(
-    registry: &SeedRegistry,
-    campaign: Option<String>,
-    theorem: Option<String>,
-    target_profile: Option<String>,
-    file: Option<String>,
-    as_kind: Option<SurfaceArg>,
-) -> Result<(Option<String>, Option<String>, Option<String>)> {
-    if file.is_none() {
-        return Ok((campaign, theorem, target_profile));
-    }
-    let (document, _) = load_document(file.as_deref().unwrap_or_default(), as_kind, registry)?;
-    Ok((
-        campaign.or_else(|| {
-            document.entries.iter().find_map(|entry| match entry {
-                QaEntry::Campaign(item) => Some(item.id.clone()),
-                _ => None,
-            })
-        }),
-        theorem.or_else(|| {
-            document.entries.iter().find_map(|entry| match entry {
-                QaEntry::TheoremSpec(item) => Some(item.id.clone()),
-                QaEntry::Campaign(item) => Some(item.theorem.clone()),
-                _ => None,
-            })
-        }),
-        target_profile.or_else(|| {
-            document.entries.iter().find_map(|entry| match entry {
-                QaEntry::TargetProfile(item) => Some(item.id.clone()),
-                QaEntry::Campaign(item) => Some(item.target_profile.clone()),
-                _ => None,
-            })
-        }),
-    ))
 }
 
 fn parse_genome_artifact_class(value: &str) -> Result<GenomeArtifactClass> {
@@ -2388,6 +1708,14 @@ fn dump_canonical(kernel: &ConstitutionKernel, registry: &SeedRegistry, id: &str
 }
 
 fn fxhash(input: &str) -> u64 {
+    use std::collections::hash_map::DefaultHasher;
+    use std::hash::{Hash, Hasher};
+    let mut hasher = DefaultHasher::new();
+    input.hash(&mut hasher);
+    hasher.finish()
+}
+
+fn fxhash_bytes(input: &[u8]) -> u64 {
     use std::collections::hash_map::DefaultHasher;
     use std::hash::{Hash, Hasher};
     let mut hasher = DefaultHasher::new();

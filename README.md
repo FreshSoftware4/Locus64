@@ -41,13 +41,19 @@ RNA is the human symbolic surface. DNA is the machine artifact surface. SSR is e
 ## Sample Bundles
 
 ```powershell
-.\target\release\l64.exe certify-bundle --file samples/chain_rule_bundle.qc0 --conflict-policy exact-match
-.\target\release\l64.exe certify-bundle --file samples/chain_rule_integrated_bundle.qc0 --conflict-policy exact-match
-.\target\release\l64.exe certify-bundle --file samples/imported_claim_bundle.qc0 --conflict-policy exact-match
-.\target\release\l64.exe certify-bundle --file samples/imported_claim_stress_gap_bundle.qc0 --conflict-policy exact-match
+.\target\release\l64.exe certify-bundle --file samples/chain_rule_bundle.dna --conflict-policy exact-match
+.\target\release\l64.exe certify-bundle --file samples/chain_rule_integrated_bundle.dna --conflict-policy exact-match
+.\target\release\l64.exe certify-bundle --file samples/imported_claim_bundle.dna --conflict-policy exact-match
+.\target\release\l64.exe certify-bundle --file samples/imported_claim_stress_gap_bundle.dna --conflict-policy exact-match
 ```
 
 The imported-claim samples exercise evidence contracts, benchmark receipts, challenge receipts, reproducibility packets, and sharp stress-gap blocking.
+
+If you have bundle-entry text, compile it into a `.dna` packet before using it as a certification input:
+
+```powershell
+.\target\release\l64.exe compile-bundle .\bundle.locus.rna --out .\bundle.dna
+```
 
 ## Torture Test
 
@@ -55,7 +61,7 @@ The imported-claim samples exercise evidence contracts, benchmark receipts, chal
 powershell -ExecutionPolicy Bypass -File .\scripts\torture-test.ps1
 ```
 
-The harness builds release binaries, runs the full test suite, exercises seeded campaigns, sample bundles, report export/import, lock/replay, research reconnect, and RNA/DNA normalize/compile/sequence checks. Output lands in `release\torture` unless overridden.
+The harness builds release binaries, runs the full test suite, exercises seeded campaigns, sample bundles, report DNA export/import, validation DNA bundle export/import, lock/replay, research reconnect, and RNA/DNA normalize/compile/sequence checks. Output lands in `release\torture` unless overridden.
 
 ## Release Layout
 
@@ -70,7 +76,7 @@ Zip files for all five release packages are placed directly under `release`.
 ## Development References
 
 - `LINEAR_EXECUTION_RAIL.md`: authoritative linear rail; compounding change chains are trajectory-preserving changes to this file
-- `LOCUS64_LANGUAGE_SPEC.md`: transitional command/RNA/QC0 notes while QC0 is extracted into RNA/DNA-backed lineage
+- `LOCUS64_LANGUAGE_SPEC.md`: RNA/DNA command and language reference
 - `USAGE_GUIDE.md`: command guide
 - `SEMANTIC_USAGE_GUIDE.md`: semantic/claim-governance guide for research frameworks and indirect ChatGPT workflows
 - `HANDOFF_STATUS.md`: developer handoff and verification notes

@@ -17,7 +17,7 @@ use l64_core::{
     SchedulerDecisionReceipt, SchedulerPolicy, SemanticDiff, SemanticDiffClass,
     StepExecutionOutcome, TheoremDrift, resolve_cache_root, runtime_root_report,
 };
-use l64_locus::{read_section_packet_or_json, write_section_packet};
+use l64_locus::{decode_section_payload, write_section_packet};
 use l64_policy::resolve_policy_graph;
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use std::{
@@ -192,10 +192,6 @@ fn locus_store_path(root: &PathBuf, id: &str) -> PathBuf {
     root.join(format!("{id}.locus"))
 }
 
-fn legacy_json_store_path(root: &PathBuf, id: &str) -> PathBuf {
-    root.join(format!("{id}.json"))
-}
-
 fn persist_store_payload<T: Serialize>(
     root: PathBuf,
     id: &str,
@@ -226,8 +222,7 @@ fn load_store_payload<T: DeserializeOwned>(
     opcode: LocusOpcode,
 ) -> Result<T> {
     let locus_path = locus_store_path(&root, id);
-    let legacy = legacy_json_store_path(&root, id);
-    read_section_packet_or_json(&locus_path, &legacy, opcode).map_err(anyhow::Error::msg)
+    decode_section_payload(&fs::read(locus_path)?, opcode).map_err(anyhow::Error::msg)
 }
 
 pub fn observe_report(
