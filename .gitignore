@@ -1,4 +1,5 @@
 target/
+.l64-cache/
 .mf-cache/
 release/perfopt/
 release/compact/
