@@ -280,6 +280,12 @@ Current verified gate:
 - `cargo test --workspace` passed before Node 11B resumed; `cargo test -p l64-core`, `cargo check -p l64-bundle`, `cargo check --workspace`, and `cargo fmt --check` pass after the Node 11B second slice. Targeted CKI CLI fixed-point regression also passes.
 - Node 11B exit gate is satisfied: CodonSpec, LexonSpec, MacroCodonSpec, alias resolution, phase/admission matrix, opcode range/tombstone law, structural-region generated-word ban, representative lexon/macro-codon corpus, and codon header parser are implemented and tested. `cargo test --workspace` passes after the gate.
 - Next implementation node is Node 11C audit and substrate re-keying. Current substrate primitives remain provisional until audited against completed Node 11B law.
+- Node 11C first audit/re-key slice has landed in `l64-core`: substrate primitives and molecular codec records moved from `lib.rs` into `molecular.rs`, witness construction moved into `witness.rs`, and `lib.rs` now exports the molecular/witness surfaces without carrying the implementation block inline.
+- Node 11C codec validation now checks primitive-internal codons against completed Node 11B law: atom lexon bindings must resolve through the lexon registry, bond/reaction/chassis codons must be canonical, phase admission rules must exist, and witness primitives must be derived rather than authored truth.
+- Node 11C schema-law slice has landed: `substrate_primitive_kinds` and `molecular_codec_record_field_names` make the closed primitive inventory and no-generic-payload-bag rule testable.
+- `cargo test -p l64-core`, `cargo check --workspace`, and `cargo fmt --check` pass after Node 11C molecular/witness module extraction and stricter codec validation.
+- Node 11C witness-normal serialization slice has landed: derived substrate witnesses can be wrapped as molecular codec records and roundtrip through deterministic encode/decode, while authored witness truth remains rejected. `cargo test -p l64-core`, `cargo check --workspace`, and `cargo fmt --check` pass after this slice.
+- Node 11C codec envelope slice has landed: `MolecularCodecEnvelope` binds a codon header to a molecular codec record, validates header/record phase and subject agreement, validates canonical/admitted header codons, and roundtrips deterministically. `cargo test -p l64-core`, `cargo check --workspace`, and `cargo fmt --check` pass after this slice.
 
 ## Rail Node Template
 

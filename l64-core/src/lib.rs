@@ -7,10 +7,14 @@ use std::path::{Path, PathBuf};
 pub mod codons;
 pub mod lexons;
 pub mod macro_codons;
+pub mod molecular;
+pub mod witness;
 
 pub use codons::*;
 pub use lexons::*;
 pub use macro_codons::*;
+pub use molecular::*;
+pub use witness::*;
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
@@ -3483,201 +3487,6 @@ pub struct StructuralOpcodeSpec {
     pub compatible_skip_allowed: bool,
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
-pub enum SubstratePrimitiveKind {
-    Locus,
-    Atom,
-    Bond,
-    Reaction,
-    Witness,
-    Chassis,
-    Cassette,
-    Plasmid,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct SubstrateLocus {
-    pub id: String,
-    pub subject: String,
-    pub chassis_id: String,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct SubstrateAtom {
-    pub id: String,
-    pub codon_symbol: String,
-    pub lexon_symbol: Option<String>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct SubstrateBond {
-    pub id: String,
-    pub relation_codon: String,
-    pub left: String,
-    pub right: String,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct SubstrateReaction {
-    pub id: String,
-    pub process_codon: String,
-    pub inputs: Vec<String>,
-    pub outputs: Vec<String>,
-    pub receipt_id: String,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct SubstrateWitness {
-    pub id: String,
-    pub subject: String,
-    pub status_codon: String,
-    pub dependencies: Vec<String>,
-    pub proof_route: Vec<String>,
-    pub open_frontier: Vec<String>,
-    pub receipt_id: String,
-    pub derived: bool,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct SubstrateChassis {
-    pub id: String,
-    pub policy_codons: Vec<String>,
-    pub admitted_phases: Vec<CodonPhase>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct SubstrateCassette {
-    pub id: String,
-    pub locus_ids: Vec<String>,
-    pub reaction_ids: Vec<String>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct SubstratePlasmid {
-    pub id: String,
-    pub cassette_ids: Vec<String>,
-    pub integration_reaction: String,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub enum SubstratePrimitive {
-    Locus(SubstrateLocus),
-    Atom(SubstrateAtom),
-    Bond(SubstrateBond),
-    Reaction(SubstrateReaction),
-    Witness(SubstrateWitness),
-    Chassis(SubstrateChassis),
-    Cassette(SubstrateCassette),
-    Plasmid(SubstratePlasmid),
-}
-
-impl SubstratePrimitive {
-    pub fn kind(&self) -> SubstratePrimitiveKind {
-        match self {
-            SubstratePrimitive::Locus(_) => SubstratePrimitiveKind::Locus,
-            SubstratePrimitive::Atom(_) => SubstratePrimitiveKind::Atom,
-            SubstratePrimitive::Bond(_) => SubstratePrimitiveKind::Bond,
-            SubstratePrimitive::Reaction(_) => SubstratePrimitiveKind::Reaction,
-            SubstratePrimitive::Witness(_) => SubstratePrimitiveKind::Witness,
-            SubstratePrimitive::Chassis(_) => SubstratePrimitiveKind::Chassis,
-            SubstratePrimitive::Cassette(_) => SubstratePrimitiveKind::Cassette,
-            SubstratePrimitive::Plasmid(_) => SubstratePrimitiveKind::Plasmid,
-        }
-    }
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct MolecularCodecRecord {
-    pub codon_symbol: String,
-    pub phase: CodonPhase,
-    pub origin_authority: String,
-    pub subject: String,
-    pub primitive_kind: SubstratePrimitiveKind,
-    pub primitive: SubstratePrimitive,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct MolecularCodecValidationReport {
-    pub valid: bool,
-    pub codec_digest: String,
-    pub failures: Vec<String>,
-}
-
-pub fn validate_molecular_codec_record(
-    record: &MolecularCodecRecord,
-) -> MolecularCodecValidationReport {
-    let mut failures = Vec::new();
-    match resolve_codon_symbol_or_alias(&record.codon_symbol) {
-        Some(codon) => {
-            if codon.symbol != record.codon_symbol {
-                failures.push("codec record must use canonical codon symbol".into());
-            }
-            if !codon_admitted_in_phase(&codon, record.phase) {
-                failures.push(format!(
-                    "codon {} not admitted in phase {:?}",
-                    record.codon_symbol, record.phase
-                ));
-            }
-        }
-        None => failures.push(format!("unknown codon {}", record.codon_symbol)),
-    }
-    if record.primitive.kind() != record.primitive_kind {
-        failures.push("primitive kind does not match primitive variant".into());
-    }
-    if record.origin_authority.trim().is_empty() {
-        failures.push("missing origin authority".into());
-    }
-    if record.subject.trim().is_empty() {
-        failures.push("missing subject".into());
-    }
-
-    MolecularCodecValidationReport {
-        valid: failures.is_empty(),
-        codec_digest: hash_serialized(record),
-        failures,
-    }
-}
-
-pub fn encode_molecular_codec_record(record: &MolecularCodecRecord) -> Result<Vec<u8>, String> {
-    let report = validate_molecular_codec_record(record);
-    if !report.valid {
-        return Err(report.failures.join("; "));
-    }
-    bincode::serialize(record).map_err(|err| err.to_string())
-}
-
-pub fn decode_molecular_codec_record(bytes: &[u8]) -> Result<MolecularCodecRecord, String> {
-    let record: MolecularCodecRecord =
-        bincode::deserialize(bytes).map_err(|err| err.to_string())?;
-    let report = validate_molecular_codec_record(&record);
-    if !report.valid {
-        return Err(report.failures.join("; "));
-    }
-    Ok(record)
-}
-
-pub fn derive_substrate_witness(
-    subject: &str,
-    dependencies: Vec<String>,
-    proof_route: Vec<String>,
-    open_frontier: Vec<String>,
-    receipt_id: &str,
-) -> SubstrateWitness {
-    SubstrateWitness {
-        id: format!(
-            "WIT_{}",
-            stable_hash_u64(&format!("{subject}:{receipt_id}"))
-        ),
-        subject: subject.into(),
-        status_codon: "|-".into(),
-        dependencies,
-        proof_route,
-        open_frontier,
-        receipt_id: receipt_id.into(),
-        derived: true,
-    }
-}
-
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct DnaHeaderReceipt {
     pub id: String,
@@ -6736,6 +6545,36 @@ mod genome_foundation_tests {
     }
 
     #[test]
+    fn molecular_codec_schema_has_no_generic_payload_bag() {
+        let kinds = substrate_primitive_kinds();
+        assert_eq!(kinds.len(), 8);
+        assert!(kinds.contains(&SubstratePrimitiveKind::Locus));
+        assert!(kinds.contains(&SubstratePrimitiveKind::Atom));
+        assert!(kinds.contains(&SubstratePrimitiveKind::Bond));
+        assert!(kinds.contains(&SubstratePrimitiveKind::Reaction));
+        assert!(kinds.contains(&SubstratePrimitiveKind::Witness));
+        assert!(kinds.contains(&SubstratePrimitiveKind::Chassis));
+        assert!(kinds.contains(&SubstratePrimitiveKind::Cassette));
+        assert!(kinds.contains(&SubstratePrimitiveKind::Plasmid));
+
+        let fields = molecular_codec_record_field_names();
+        assert_eq!(
+            fields,
+            vec![
+                "codon_symbol",
+                "phase",
+                "origin_authority",
+                "subject",
+                "primitive_kind",
+                "primitive"
+            ]
+        );
+        assert!(!fields.contains(&"family"));
+        assert!(!fields.contains(&"payload"));
+        assert!(!fields.contains(&"payload_json"));
+    }
+
+    #[test]
     fn molecular_codec_record_rejects_alias_header_and_kind_mismatch() {
         let record = MolecularCodecRecord {
             codon_symbol: "depends_on".into(),
@@ -6793,6 +6632,61 @@ mod genome_foundation_tests {
     }
 
     #[test]
+    fn molecular_codec_record_rejects_unknown_lexon_binding() {
+        let record = MolecularCodecRecord {
+            codon_symbol: "A#".into(),
+            phase: CodonPhase::DnaAuthority,
+            origin_authority: "GENOME_DNA_1".into(),
+            subject: "SUBJ".into(),
+            primitive_kind: SubstratePrimitiveKind::Atom,
+            primitive: SubstratePrimitive::Atom(SubstrateAtom {
+                id: "A1".into(),
+                codon_symbol: "A#".into(),
+                lexon_symbol: Some("OLD_THEOREM_KIND".into()),
+            }),
+        };
+
+        let report = validate_molecular_codec_record(&record);
+        assert!(!report.valid);
+        assert!(
+            report
+                .failures
+                .iter()
+                .any(|failure| failure.contains("unknown atom lexon"))
+        );
+    }
+
+    #[test]
+    fn molecular_codec_record_rejects_authored_witness_truth() {
+        let record = MolecularCodecRecord {
+            codon_symbol: "W!".into(),
+            phase: CodonPhase::Product,
+            origin_authority: "GENOME_DNA_1".into(),
+            subject: "SUBJ".into(),
+            primitive_kind: SubstratePrimitiveKind::Witness,
+            primitive: SubstratePrimitive::Witness(SubstrateWitness {
+                id: "WIT_AUTHORED".into(),
+                subject: "SUBJ".into(),
+                status_codon: "|-".into(),
+                dependencies: vec![],
+                proof_route: vec![],
+                open_frontier: vec![],
+                receipt_id: "RCP_AUTHORED".into(),
+                derived: false,
+            }),
+        };
+
+        let report = validate_molecular_codec_record(&record);
+        assert!(!report.valid);
+        assert!(
+            report
+                .failures
+                .iter()
+                .any(|failure| failure.contains("must be derived"))
+        );
+    }
+
+    #[test]
     fn substrate_witnesses_are_derived_not_authored_truth() {
         let witness = derive_substrate_witness(
             "SUBJ",
@@ -6805,6 +6699,84 @@ mod genome_foundation_tests {
         assert_eq!(witness.status_codon, "|-");
         assert_eq!(witness.receipt_id, "RCP1");
         assert_eq!(witness.dependencies, vec!["DEP1"]);
+    }
+
+    #[test]
+    fn derived_witness_serializes_as_molecular_codec_record() {
+        let witness = derive_substrate_witness(
+            "THS_CHAIN_RULE",
+            vec!["δ_deriv".into(), "δ_comp".into()],
+            vec!["↻✓".into()],
+            vec![],
+            "RCP_CHAIN",
+        );
+        let record = witness_to_molecular_codec_record("GENOME_DNA_1", witness);
+
+        let report = validate_molecular_codec_record(&record);
+        assert!(report.valid, "{:?}", report.failures);
+        assert_eq!(record.codon_symbol, "W!");
+        assert_eq!(record.phase, CodonPhase::Product);
+        assert_eq!(record.primitive_kind, SubstratePrimitiveKind::Witness);
+
+        let encoded = encode_molecular_codec_record(&record).expect("witness codec encoding");
+        let decoded = decode_molecular_codec_record(&encoded).expect("witness codec decoding");
+        assert_eq!(decoded, record);
+    }
+
+    #[test]
+    fn molecular_codec_envelope_binds_header_to_record() {
+        let witness = derive_substrate_witness(
+            "THS_CHAIN_RULE",
+            vec!["δ_deriv".into()],
+            vec!["↻✓".into()],
+            vec![],
+            "RCP_CHAIN",
+        );
+        let record = witness_to_molecular_codec_record("GENOME_DNA_1", witness);
+        let envelope = MolecularCodecEnvelope {
+            header: CodonHeader {
+                protocol: "l64".into(),
+                version: 2,
+                phase: CodonPhase::Product,
+                class_symbol: "W!".into(),
+                role_symbol: "|-".into(),
+                subject: "THS_CHAIN_RULE".into(),
+            },
+            record,
+        };
+
+        let report = validate_molecular_codec_envelope(&envelope);
+        assert!(report.valid, "{:?}", report.failures);
+        let encoded = encode_molecular_codec_envelope(&envelope).expect("envelope encoding");
+        let decoded = decode_molecular_codec_envelope(&encoded).expect("envelope decoding");
+        assert_eq!(decoded, envelope);
+    }
+
+    #[test]
+    fn molecular_codec_envelope_rejects_header_record_mismatch() {
+        let witness =
+            derive_substrate_witness("THS_CHAIN_RULE", vec![], vec!["↻✓".into()], vec![], "RCP");
+        let record = witness_to_molecular_codec_record("GENOME_DNA_1", witness);
+        let envelope = MolecularCodecEnvelope {
+            header: CodonHeader {
+                protocol: "l64".into(),
+                version: 2,
+                phase: CodonPhase::Product,
+                class_symbol: "W!".into(),
+                role_symbol: "|-".into(),
+                subject: "WRONG_SUBJECT".into(),
+            },
+            record,
+        };
+
+        let report = validate_molecular_codec_envelope(&envelope);
+        assert!(!report.valid);
+        assert!(
+            report
+                .failures
+                .iter()
+                .any(|failure| failure.contains("header subject does not match"))
+        );
     }
 
     #[test]
