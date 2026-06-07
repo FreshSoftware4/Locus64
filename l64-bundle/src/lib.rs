@@ -34,6 +34,7 @@ pub struct OverlayRegistry {
 pub struct BundleWorld {
     pub manifest: BundleManifest,
     pub overlay: OverlayRegistry,
+    pub substrate_parity: BundleSubstrateParityReport,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -43,6 +44,8 @@ struct CachedBundleWorld {
     local: RegistryBundle,
     merge_report: BundleMergeReport,
     import_receipts: Vec<FormatTransformReceipt>,
+    #[serde(default)]
+    substrate_parity: BundleSubstrateParityReport,
 }
 
 fn bundle_cache_root() -> Result<PathBuf> {
@@ -61,6 +64,7 @@ pub fn load_bundle_world(bundle_id: &str) -> Result<BundleWorld> {
             merge_report: cached.merge_report,
             import_receipts: cached.import_receipts,
         },
+        substrate_parity: cached.substrate_parity,
     })
 }
 
@@ -72,6 +76,7 @@ pub fn persist_bundle_world(world: &BundleWorld) -> Result<()> {
         local: world.overlay.local.clone(),
         merge_report: world.overlay.merge_report.clone(),
         import_receipts: world.overlay.import_receipts.clone(),
+        substrate_parity: world.substrate_parity.clone(),
     };
     fs::write(path, serde_json::to_string_pretty(&cached)?)?;
     Ok(())
@@ -153,7 +158,7 @@ pub fn bundle_document_to_molecular_codec_envelopes(
         .collect()
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
 pub struct BundleSubstrateParityReport {
     pub entry_count: usize,
     pub dependency_edge_count: usize,
@@ -327,6 +332,7 @@ pub fn import_bundle_document(
     if policy == BundleConflictPolicy::Reject && !merge_report.conflicts.is_empty() {
         return Err(anyhow!("bundle import rejected due to conflicts"));
     }
+    let substrate_parity = bundle_substrate_parity_report(&document, &format!("{bundle_id}.dna"));
     let manifest = BundleManifest {
         id: bundle_id.clone(),
         entries: bundle_entries(&local),
@@ -369,6 +375,7 @@ pub fn import_bundle_document(
             merge_report,
             import_receipts,
         },
+        substrate_parity,
     };
     persist_bundle_world(&world)?;
     Ok(world)
@@ -1483,6 +1490,12 @@ mod tests {
         assert_eq!(world.manifest.entries.len(), 1);
         assert!(world.overlay.get_theorem_spec("THS_DOC_NATIVE").is_some());
         assert!(world.overlay.import_receipts.is_empty());
+        assert!(
+            world.substrate_parity.valid,
+            "{:?}",
+            world.substrate_parity.failures
+        );
+        assert_eq!(world.substrate_parity.entry_count, 1);
     }
 
     #[test]
@@ -1656,6 +1669,11 @@ mod tests {
         .expect("exact match overlap should import");
         assert!(world.overlay.merge_report.conflicts.is_empty());
         assert!(world.overlay.get_theorem_spec("THS_CHAIN_RULE").is_some());
+        assert!(
+            world.substrate_parity.valid,
+            "{:?}",
+            world.substrate_parity.failures
+        );
     }
 
     #[test]
@@ -1720,9 +1738,17 @@ mod tests {
         fs::write(&path, bytes).expect("write bundle packet");
         let world = import_bundle_file(&path, None, BundleConflictPolicy::Reject, None)
             .expect("dna bundle import");
+        let loaded =
+            load_bundle_world(&world.manifest.id).expect("load persisted dna bundle world");
         let _ = fs::remove_file(&path);
         assert!(world.overlay.get_theorem_spec("THS_DNA_NATIVE").is_some());
         assert!(world.overlay.import_receipts.is_empty());
+        assert!(
+            world.substrate_parity.valid,
+            "{:?}",
+            world.substrate_parity.failures
+        );
+        assert_eq!(loaded.substrate_parity, world.substrate_parity);
     }
 
     #[test]
