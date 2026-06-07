@@ -286,6 +286,7 @@ Current verified gate:
 - `cargo test -p l64-core`, `cargo check --workspace`, and `cargo fmt --check` pass after Node 11C molecular/witness module extraction and stricter codec validation.
 - Node 11C witness-normal serialization slice has landed: derived substrate witnesses can be wrapped as molecular codec records and roundtrip through deterministic encode/decode, while authored witness truth remains rejected. `cargo test -p l64-core`, `cargo check --workspace`, and `cargo fmt --check` pass after this slice.
 - Node 11C codec envelope slice has landed: `MolecularCodecEnvelope` binds a codon header to a molecular codec record, validates header/record phase and subject agreement, validates canonical/admitted header codons, and roundtrips deterministically. `cargo test -p l64-core`, `cargo check --workspace`, and `cargo fmt --check` pass after this slice.
+- Node 11D first authority-reroute slice has landed: bundle document lowering now produces molecular codec envelopes, and substrate parity validates the envelope membrane rather than validating bare records only. `cargo test -p l64-bundle`, `cargo check --workspace`, and `cargo fmt --check` pass after this slice.
 
 ## Rail Node Template
 

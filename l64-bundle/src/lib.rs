@@ -4,14 +4,14 @@ use l64_core::{
     BenchmarkReceipt, BridgeContract, BundleConflict, BundleConflictPolicy, BundleDependency,
     BundleEntry, BundleExecutionReceipt, BundleManifest, BundleMergeReport, BurdenPack, Campaign,
     CampaignPortfolio, CapabilityMatrix, Certificate, ChallengeReceipt, ClaimPacket, CodebookPack,
-    CodonPhase, ComboPack, EquivalenceClass, EvidenceContract, ExecutionManifest,
+    CodonHeader, CodonPhase, ComboPack, EquivalenceClass, EvidenceContract, ExecutionManifest,
     FormatTransformReceipt, GlyphPack, MechanizationPackage, MechanizationPolicyObject,
-    MolecularCodecRecord, Obligation, OverlayRegistryDescriptor, PolicyBinding, PolicyResolution,
-    ProjectionPolicy, ProofShape, QaDocument, QaEntry, QcObject, RegimePack, RegistryBundle,
-    RegistryLookup, ReplayLockManifest, ReproducibilityPacket, RoundTripReport, RouteClass,
-    RouteLedger, SubstrateAtom, SubstrateBond, SubstratePrimitive, SubstratePrimitiveKind,
-    SurfaceDeficiency, SurfaceKind, SurfacePolicy, TargetProfile, TheoremSpec, ensure_cache_subdir,
-    stable_hash_u64,
+    MolecularCodecEnvelope, MolecularCodecRecord, Obligation, OverlayRegistryDescriptor,
+    PolicyBinding, PolicyResolution, ProjectionPolicy, ProofShape, QaDocument, QaEntry, QcObject,
+    RegimePack, RegistryBundle, RegistryLookup, ReplayLockManifest, ReproducibilityPacket,
+    RoundTripReport, RouteClass, RouteLedger, SubstrateAtom, SubstrateBond, SubstratePrimitive,
+    SubstratePrimitiveKind, SurfaceDeficiency, SurfaceKind, SurfacePolicy, TargetProfile,
+    TheoremSpec, ensure_cache_subdir, stable_hash_u64,
 };
 use l64_registry::SeedRegistry;
 use serde::{Deserialize, Serialize};
@@ -133,6 +133,26 @@ pub fn bundle_document_to_molecular_codec_records(
     records
 }
 
+pub fn bundle_document_to_molecular_codec_envelopes(
+    document: &QaDocument,
+    origin_authority: &str,
+) -> Vec<MolecularCodecEnvelope> {
+    bundle_document_to_molecular_codec_records(document, origin_authority)
+        .into_iter()
+        .map(|record| MolecularCodecEnvelope {
+            header: CodonHeader {
+                protocol: "l64".into(),
+                version: 2,
+                phase: record.phase,
+                class_symbol: record.codon_symbol.clone(),
+                role_symbol: "|-".into(),
+                subject: record.subject.clone(),
+            },
+            record,
+        })
+        .collect()
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct BundleSubstrateParityReport {
     pub entry_count: usize,
@@ -152,34 +172,38 @@ pub fn bundle_substrate_parity_report(
         .iter()
         .map(|dependency| dependency.depends_on.len())
         .sum::<usize>();
-    let records = bundle_document_to_molecular_codec_records(document, origin_authority);
+    let envelopes = bundle_document_to_molecular_codec_envelopes(document, origin_authority);
     let mut failures = Vec::new();
 
-    if records.len() != document.entries.len() + dependency_edge_count {
+    if envelopes.len() != document.entries.len() + dependency_edge_count {
         failures.push("substrate record count does not match entries plus dependency edges".into());
     }
-    for record in &records {
-        let report = l64_core::validate_molecular_codec_record(record);
+    for envelope in &envelopes {
+        let report = l64_core::validate_molecular_codec_envelope(envelope);
         if !report.valid {
             failures.extend(report.failures);
         }
     }
     for entry in &document.entries {
         let id = entry.id();
-        if !records.iter().any(|record| {
-            matches!(record.primitive, SubstratePrimitive::Atom(_)) && record.subject == id
+        if !envelopes.iter().any(|envelope| {
+            matches!(envelope.record.primitive, SubstratePrimitive::Atom(_))
+                && envelope.record.subject == id
         }) {
             failures.push(format!("missing substrate atom for entry {id}"));
         }
     }
     for dependency in &dependencies {
         for depends_on in &dependency.depends_on {
-            if !records.iter().any(|record| match &record.primitive {
-                SubstratePrimitive::Bond(bond) => {
-                    bond.left == dependency.id && bond.right == *depends_on
-                }
-                _ => false,
-            }) {
+            if !envelopes
+                .iter()
+                .any(|envelope| match &envelope.record.primitive {
+                    SubstratePrimitive::Bond(bond) => {
+                        bond.left == dependency.id && bond.right == *depends_on
+                    }
+                    _ => false,
+                })
+            {
                 failures.push(format!(
                     "missing substrate bond for dependency {} <- {}",
                     dependency.id, depends_on
@@ -191,7 +215,7 @@ pub fn bundle_substrate_parity_report(
     BundleSubstrateParityReport {
         entry_count: document.entries.len(),
         dependency_edge_count,
-        substrate_record_count: records.len(),
+        substrate_record_count: envelopes.len(),
         valid: failures.is_empty(),
         failures,
     }
@@ -1495,6 +1519,42 @@ mod tests {
         }
         let validation = l64_core::validate_molecular_codec_record(record);
         assert!(validation.valid, "{:?}", validation.failures);
+    }
+
+    #[test]
+    fn bundle_document_lowers_entries_into_codec_envelopes() {
+        let theorem = TheoremSpec {
+            id: "THS_SUBSTRATE_ENVELOPE".into(),
+            statement: "substrate envelope lowering".into(),
+            hosts: vec!["R_SET".into()],
+            bridges: vec![],
+            operators: vec![],
+            target_equivalence: "eq".into(),
+            obligations: vec![],
+            primary_zone: l64_core::ProofMechanismZone::PmzSemantic,
+            verdict: l64_core::CertificationVerdict::RouteFound,
+            proof_shapes: vec![],
+        };
+        let document = QaDocument {
+            entries: vec![QaEntry::TheoremSpec(theorem)],
+        };
+
+        let envelopes =
+            bundle_document_to_molecular_codec_envelopes(&document, "BND_SUBSTRATE_DNA");
+        assert_eq!(envelopes.len(), 1);
+        let envelope = &envelopes[0];
+        assert_eq!(envelope.header.phase, envelope.record.phase);
+        assert_eq!(envelope.header.subject, envelope.record.subject);
+        assert_eq!(envelope.header.class_symbol, "A#");
+        assert_eq!(envelope.header.role_symbol, "|-");
+
+        let validation = l64_core::validate_molecular_codec_envelope(envelope);
+        assert!(validation.valid, "{:?}", validation.failures);
+        let encoded =
+            l64_core::encode_molecular_codec_envelope(envelope).expect("bundle envelope encoding");
+        let decoded =
+            l64_core::decode_molecular_codec_envelope(&encoded).expect("bundle envelope decoding");
+        assert_eq!(decoded, *envelope);
     }
 
     #[test]
