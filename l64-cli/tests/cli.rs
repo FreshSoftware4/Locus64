@@ -1,5 +1,7 @@
 use assert_cmd::Command;
-use l64_core::{LocusCapabilityMask, LocusOpcode, LocusPacketKind, QaDocument, QaEntry};
+use l64_core::{
+    LocusCapabilityMask, LocusOpcode, LocusPacketKind, QaDocument, QaEntry, decode_locus_packet,
+};
 use std::{
     fs,
     path::PathBuf,
@@ -53,7 +55,7 @@ fn bundle_document_from_text(bundle: &str) -> QaDocument {
         .lines()
         .filter_map(|line| {
             let line = line.trim();
-            if line.is_empty() || line.starts_with("!qc0") {
+            if line.is_empty() || line.starts_with("!l64-bundle") {
                 return None;
             }
             let (kind, payload) = line.split_once(' ').unwrap();
@@ -65,7 +67,7 @@ fn bundle_document_from_text(bundle: &str) -> QaDocument {
 
 fn chain_rule_bundle() -> &'static str {
     concat!(
-        "!qc0 {\"surface_kind\":\"Qc0\",\"version\":\"1\",\"policy_id\":\"POL_QC0_CORE\",\"capability_id\":\"CAP_QC0_CORE\"}\n",
+        "!l64-bundle v1\n",
         "policy-object {\"id\":\"MOP_BND_CHAIN_RULE_CLI_SCHED\",\"kind\":\"ReportExport\",\"scope\":{\"Bundle\":\"BND_CHAIN_RULE_CLI\"},\"extends\":null,\"optimizer\":null,\"evaluator\":null,\"replay_cache\":null,\"report\":{\"export_surfaces\":[\"Qc0\",\"Qa0\"],\"include_policy_trace\":true,\"include_route_explanation\":true,\"include_obligation_logs\":true},\"scheduler\":{\"parallelization\":\"ParallelIndependent\",\"max_workers\":2,\"allow_parallel_replay\":true,\"allow_parallel_certification\":true,\"allow_parallel_exports\":true,\"deterministic_ordering\":true,\"allow_parallel_obligations\":true,\"max_obligation_workers\":3,\"allow_parallel_obligation_replay\":true,\"serialize_canonicalization_sensitive\":true},\"canonicalizer_mode\":null,\"merge_policy\":null,\"notes\":[\"cli flagship chain rule scheduler\"]}\n",
         "theorem {\"id\":\"THS_CHAIN_RULE\",\"statement\":\"DER(g∘f,x) ≈1 DER(g,f(x))∘DER(f,x)\",\"hosts\":[\"R_TOP\",\"R_CALC\"],\"bridges\":[\"B_TOP_TO_CALC\"],\"operators\":[\"OPR.Chain1\"],\"target_equivalence\":\"first-order jet equivalence\",\"obligations\":[\"OblEq\",\"OblAdm\",\"OblLoc\",\"OblRed\"],\"primary_zone\":\"PmzStructural\",\"verdict\":\"Benchmarked\",\"proof_shapes\":[\"PS_SQUARE_TOPO\"]}\n",
         "obligation {\"id\":\"OBL_CHAIN_EQ\",\"kind\":\"OblEq\",\"description\":\"first-order slack equivalence preserved under composition\",\"status\":\"Benchmarked\"}\n",
@@ -82,7 +84,7 @@ fn chain_rule_bundle() -> &'static str {
 
 fn integrated_chain_rule_bundle() -> String {
     format!(concat!(
-        "!qc0 {{\"surface_kind\":\"Qc0\",\"version\":\"1\",\"policy_id\":\"POL_QC0_CORE\",\"capability_id\":\"CAP_QC0_CORE\"}}\n",
+        "!l64-bundle v1\n",
         "policy-object {{\"id\":\"MOP_BND_CHAIN_RULE_INT_SCHED\",\"kind\":\"ReportExport\",\"scope\":{{\"Bundle\":\"BND_CHAIN_RULE_INT\"}},\"extends\":null,\"optimizer\":null,\"evaluator\":null,\"replay_cache\":null,\"report\":{{\"export_surfaces\":[\"Qc0\",\"Qa0\"],\"include_policy_trace\":true,\"include_route_explanation\":true,\"include_obligation_logs\":true}},\"scheduler\":{{\"parallelization\":\"ParallelIndependent\",\"max_workers\":2,\"allow_parallel_replay\":true,\"allow_parallel_certification\":true,\"allow_parallel_exports\":true,\"deterministic_ordering\":true,\"allow_parallel_obligations\":true,\"max_obligation_workers\":3,\"allow_parallel_obligation_replay\":true,\"serialize_canonicalization_sensitive\":true}},\"canonicalizer_mode\":null,\"merge_policy\":null,\"notes\":[\"cli integrated chain rule scheduler\"]}}\n",
         "object {{\"id\":\"OPR_PROMOTED_OPR_CHAIN1\",\"identity\":{{\"tag\":\"OPR\",\"cid\":\"cid:OPR_PROMOTED_OPR_CHAIN1\",\"codebook\":\"QC0_CORE\",\"remap\":\"none\",\"lineage\":\"derived-from:THS_CHAIN_RULE\"}},\"structural\":{{\"head\":\"operator\",\"args\":[\"THS_CHAIN_RULE\",\"CPG_CHAIN_RULE\"],\"local_sections\":[\"first-order derivative composition\"],\"morphism_hooks\":[\"B_TOP_TO_CALC\"]}},\"constraint\":{{\"regime\":\"R_CALC\",\"contracts\":[\"chain-rule\",\"first-order\"],\"invariants\":[\"jet-compose\",\"reduction-exact\"],\"equivalence\":\"first-order jet equivalence\",\"admissibility\":\"promoted after exact certified discharge\"}},\"evidence\":{{\"evidence_class\":\"DerivedPromotion\",\"traces\":[\"THS_CHAIN_RULE\"],\"receipts\":[\"CRT_CHAIN_RULE\",\"REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE\"],\"maturity\":\"Certified\",\"gate_verdict\":\"Pass\"}},\"alias\":{{\"aliases\":[\"OPR.Chain1\"],\"profile_pack\":[\"STD\",\"chain-rule\"],\"qm_binding\":\"THS·ChainRule\",\"qa_binding\":\"OPR.Chain1\",\"projection_policy\":\"canonical-authored\"}}}}\n",
         "theorem {{\"id\":\"THS_CHAIN_RULE\",\"statement\":\"DER(g∘f,x) ≈1 DER(g,f(x))∘DER(f,x)\",\"hosts\":[\"R_TOP\",\"R_CALC\"],\"bridges\":[\"B_TOP_TO_CALC\"],\"operators\":[\"OPR.Chain1\"],\"target_equivalence\":\"first-order jet equivalence\",\"obligations\":[\"OblEq\",\"OblAdm\",\"OblLoc\",\"OblRed\"],\"primary_zone\":\"PmzStructural\",\"verdict\":\"Benchmarked\",\"proof_shapes\":[\"PS_SQUARE_TOPO\"]}}\n",
@@ -100,7 +102,7 @@ fn integrated_chain_rule_bundle() -> String {
 
 fn broken_chain_rule_bridge_bundle() -> &'static str {
     concat!(
-        "!qc0 {\"surface_kind\":\"Qc0\",\"version\":\"1\",\"policy_id\":\"POL_QC0_CORE\",\"capability_id\":\"CAP_QC0_CORE\"}\n",
+        "!l64-bundle v1\n",
         "theorem {\"id\":\"THS_CHAIN_RULE\",\"statement\":\"DER(g∘f,x) ≈1 DER(g,f(x))∘DER(f,x)\",\"hosts\":[\"R_TOP\",\"R_CALC\"],\"bridges\":[\"B_TOP_TO_CALC\"],\"operators\":[\"OPR.Chain1\"],\"target_equivalence\":\"first-order jet equivalence\",\"obligations\":[\"OblEq\",\"OblAdm\",\"OblLoc\",\"OblRed\"],\"primary_zone\":\"PmzStructural\",\"verdict\":\"Benchmarked\",\"proof_shapes\":[\"PS_SQUARE_TOPO\"]}\n",
         "obligation {\"id\":\"OBL_CHAIN_EQ\",\"kind\":\"OblEq\",\"description\":\"first-order slack equivalence preserved under composition\",\"status\":\"Benchmarked\"}\n",
         "obligation {\"id\":\"OBL_CHAIN_ADM\",\"kind\":\"OblAdm\",\"description\":\"both derivatives admitted in R_CALC\",\"status\":\"Benchmarked\"}\n",
@@ -194,6 +196,8 @@ fn compile_atlas_succeeds() {
 fn rna_dna_primary_authority_commands_work() {
     let rna_path = write_fixture("primary.gene.rna", "ι ≔ σ ‖ κ\n");
     let dna_path = rna_path.with_extension("gene.dna");
+    let canonical_rna_path = rna_path.with_extension("canonical.gene.rna");
+    let recompiled_dna_path = rna_path.with_extension("recompiled.gene.dna");
 
     Command::cargo_bin("l64-cli")
         .unwrap()
@@ -210,12 +214,256 @@ fn rna_dna_primary_authority_commands_work() {
     assert!(dna_path.exists());
     assert!(!fs::read(&dna_path).unwrap().is_empty());
 
-    Command::cargo_bin("l64-cli")
+    let sequence_output = Command::cargo_bin("l64-cli")
         .unwrap()
         .current_dir(workspace_root())
         .args(["sequence-dna", dna_path.to_str().unwrap()])
         .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let canonical_rna = String::from_utf8(sequence_output).unwrap();
+    assert!(!canonical_rna.trim_start().starts_with('{'));
+    fs::write(&canonical_rna_path, canonical_rna).unwrap();
+
+    Command::cargo_bin("l64-cli")
+        .unwrap()
+        .current_dir(workspace_root())
+        .args([
+            "compile-rna",
+            canonical_rna_path.to_str().unwrap(),
+            "--out",
+            recompiled_dna_path.to_str().unwrap(),
+        ])
+        .assert()
         .success();
+
+    let original_packet = decode_locus_packet(&fs::read(&dna_path).unwrap()).unwrap();
+    let recompiled_packet = decode_locus_packet(&fs::read(&recompiled_dna_path).unwrap()).unwrap();
+    assert_eq!(
+        original_packet.header.integrity_hash,
+        recompiled_packet.header.integrity_hash
+    );
+
+    Command::cargo_bin("l64-cli")
+        .unwrap()
+        .current_dir(workspace_root())
+        .args(["verify-roundtrip", rna_path.to_str().unwrap()])
+        .assert()
+        .success();
+}
+
+#[test]
+fn cki_registry_fixture_preserves_rna_dna_fixed_point() {
+    let source_path = workspace_root()
+        .join("fixtures")
+        .join("cki_registry.genome.rna");
+    assert!(source_path.exists(), "controlled CKI fixture is missing");
+    let out_dir = std::env::temp_dir().join(format!(
+        "l64_cki_fixture_{}",
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos()
+    ));
+    fs::create_dir_all(&out_dir).unwrap();
+    let dna_path = out_dir.join("cki_registry.genome.dna");
+    let canonical_rna_path = out_dir.join("cki_registry.canonical.rna");
+    let recompiled_dna_path = out_dir.join("cki_registry.recompiled.dna");
+
+    Command::cargo_bin("l64-cli")
+        .unwrap()
+        .current_dir(workspace_root())
+        .args([
+            "compile-rna",
+            source_path.to_str().unwrap(),
+            "--artifact-class",
+            "genome",
+            "--out",
+            dna_path.to_str().unwrap(),
+        ])
+        .assert()
+        .success();
+
+    let canonical_rna = Command::cargo_bin("l64-cli")
+        .unwrap()
+        .current_dir(workspace_root())
+        .args(["sequence-dna", dna_path.to_str().unwrap()])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let canonical_rna = String::from_utf8(canonical_rna).unwrap();
+    assert!(!canonical_rna.trim_start().starts_with('{'));
+    fs::write(&canonical_rna_path, canonical_rna).unwrap();
+
+    Command::cargo_bin("l64-cli")
+        .unwrap()
+        .current_dir(workspace_root())
+        .args([
+            "compile-rna",
+            canonical_rna_path.to_str().unwrap(),
+            "--artifact-class",
+            "genome",
+            "--out",
+            recompiled_dna_path.to_str().unwrap(),
+        ])
+        .assert()
+        .success();
+
+    let original_packet = decode_locus_packet(&fs::read(&dna_path).unwrap()).unwrap();
+    let recompiled_packet = decode_locus_packet(&fs::read(&recompiled_dna_path).unwrap()).unwrap();
+    assert_eq!(
+        original_packet.header.integrity_hash,
+        recompiled_packet.header.integrity_hash
+    );
+}
+
+#[test]
+fn inspect_dna_output_is_not_rna_source() {
+    let rna_path = write_fixture("inspect-source.gene.rna", "ι ≔ σ ‖ κ\n");
+    let dna_path = rna_path.with_extension("gene.dna");
+    let inspection_path = rna_path.with_extension("inspection.gene.rna");
+    let rejected_dna_path = rna_path.with_extension("rejected.gene.dna");
+
+    Command::cargo_bin("l64-cli")
+        .unwrap()
+        .current_dir(workspace_root())
+        .args([
+            "compile-rna",
+            rna_path.to_str().unwrap(),
+            "--out",
+            dna_path.to_str().unwrap(),
+        ])
+        .assert()
+        .success();
+
+    let inspection_output = Command::cargo_bin("l64-cli")
+        .unwrap()
+        .current_dir(workspace_root())
+        .args(["inspect-dna", dna_path.to_str().unwrap()])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let inspection = String::from_utf8(inspection_output).unwrap();
+    assert!(inspection.trim_start().starts_with('{'));
+    fs::write(&inspection_path, inspection).unwrap();
+
+    let output = Command::cargo_bin("l64-cli")
+        .unwrap()
+        .current_dir(workspace_root())
+        .args([
+            "compile-rna",
+            inspection_path.to_str().unwrap(),
+            "--out",
+            rejected_dna_path.to_str().unwrap(),
+        ])
+        .output()
+        .unwrap();
+    assert!(!output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("source RNA only") || stderr.contains("projection/report"));
+}
+
+#[test]
+fn genome_release_exports_coordinate_spine_and_rejects_views_as_source() {
+    let rna_path = write_fixture("release-source.gene.rna", "ι ≔ σ ‖ κ\n");
+    let release_dir = std::env::temp_dir().join(format!(
+        "l64_release_test_{}",
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos()
+    ));
+    let rejected_dna_path = release_dir.join("rejected.dna");
+
+    Command::cargo_bin("l64-cli")
+        .unwrap()
+        .current_dir(workspace_root())
+        .args([
+            "export-genome-release",
+            "--rna",
+            rna_path.to_str().unwrap(),
+            "--out",
+            release_dir.to_str().unwrap(),
+        ])
+        .assert()
+        .success();
+
+    let manifest = release_dir.join("release_manifest.record");
+    let subject_id = rna_path.file_stem().unwrap().to_str().unwrap();
+    let source_rna = release_dir
+        .join("genome")
+        .join(format!("{subject_id}.source.rna"));
+    let canonical_rna = release_dir
+        .join("genome")
+        .join(format!("{subject_id}.canonical.rna"));
+    let non_source_artifacts = [
+        manifest,
+        release_dir
+            .join("claims")
+            .join(format!("{subject_id}.claim")),
+        release_dir
+            .join("spine")
+            .join("dependency_spine.projection"),
+        release_dir.join("spine").join("closure_map.projection"),
+        release_dir.join("spine").join("lineage.record"),
+        release_dir
+            .join("frontier")
+            .join("closure_frontier.projection"),
+        release_dir.join("frontier").join("stress_map.projection"),
+        release_dir.join("replay").join("replay_record.record"),
+        release_dir.join("views").join("overview.md"),
+        release_dir
+            .join("views")
+            .join("view_receipts")
+            .join("overview.view.rcp"),
+    ];
+    assert!(source_rna.exists());
+    assert!(canonical_rna.exists());
+
+    for source in [&source_rna, &canonical_rna] {
+        let accepted_dna_path = release_dir.join("accepted.dna");
+        Command::cargo_bin("l64-cli")
+            .unwrap()
+            .current_dir(workspace_root())
+            .args([
+                "compile-rna",
+                source.to_str().unwrap(),
+                "--out",
+                accepted_dna_path.to_str().unwrap(),
+            ])
+            .assert()
+            .success();
+    }
+
+    for artifact in &non_source_artifacts {
+        assert!(
+            artifact.exists(),
+            "missing release artifact: {}",
+            artifact.display()
+        );
+        let output = Command::cargo_bin("l64-cli")
+            .unwrap()
+            .current_dir(workspace_root())
+            .args([
+                "compile-rna",
+                artifact.to_str().unwrap(),
+                "--out",
+                rejected_dna_path.to_str().unwrap(),
+            ])
+            .output()
+            .unwrap();
+        assert!(
+            !output.status.success(),
+            "release artifact should not compile as source: {}",
+            artifact.display()
+        );
+    }
 }
 
 #[test]
@@ -1063,7 +1311,7 @@ fn textual_report_projection_commands_are_removed() {
 #[test]
 fn validation_dna_bundle_surfaces_imported_claim_entries() {
     let namespace = test_namespace("cli_export_imported_claim");
-    let imported_claim_bundle = r#"!qc0 {"surface_kind":"Qc0","version":"1","policy_id":"POL_QC0_CORE","capability_id":"CAP_QC0_CORE"}
+    let imported_claim_bundle = r#"!l64-bundle v1
 proof {"id":"PS_X","kind":"Square","nodes":["a","b","c","d"],"edges":[{"from":"a","to":"b","label":"f"},{"from":"b","to":"d","label":"g"},{"from":"a","to":"c","label":"h"},{"from":"c","to":"d","label":"i"}],"equations":["g∘f=i∘h"],"target_equivalence":"eq","receipts":["r"],"gate":"Pass"}
 bridge {"id":"B_X","src":"R_TOP","tgt":"R_CALC","id_pres":"pres","eq_pres":"eq","forget":[],"enrich":["der"],"loss":[],"reversibility":"Enriching","receipts":["r"],"rollback":"allowed"}
 atlas {"id":"A_X","source_regime":"R_TOP","target_regime":"R_CALC","burden_class":"ImportedKernelClaim","proof_target":"kernel-claim","candidate_paths":[["B_X"]],"normalized_winner":["B_X"],"winner_state":"Candidate","loss_profile":{"items":[]},"proof_shapes_checked":["PS_X"],"recipe_maturity":"Stable","failure_signatures":[],"side_conditions":[],"surface_transition":{"compatibility":"AuthorityPreserving","penalties":[],"total_penalty":0}}

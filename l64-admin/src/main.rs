@@ -3,8 +3,8 @@ use clap::{Parser, Subcommand, ValueEnum};
 use l64_bundle::{BundleWorld, import_bundle_file, load_bundle_world};
 use l64_cert::{
     CertificationOptions, certify_derived_campaign_with_options,
-    certify_derived_theorem_with_options, encode_locus_packet_for_report,
-    legacy_report_cache_path, replay_report, report_cache_path, report_cache_root, report_id,
+    certify_derived_theorem_with_options, encode_locus_packet_for_report, replay_report,
+    report_cache_path, report_id,
 };
 use l64_command::{BundlePolicyArg, OptimizerPolicyArg};
 use l64_core::{
@@ -230,12 +230,7 @@ fn real_main() -> Result<()> {
             cache_policy,
             strict_policy,
         } => {
-            let world = import_bundle_file(
-                Path::new(&file),
-                None,
-                conflict_policy.into(),
-                None,
-            )?;
+            let world = import_bundle_file(Path::new(&file), None, conflict_policy.into(), None)?;
             let options = build_cert_options(
                 optimizer_policy.into(),
                 &file,
@@ -1089,35 +1084,17 @@ fn predict_from_policy_object(
 }
 
 fn locate_known_artifact(id: &str) -> Result<ArtifactLocator> {
-    let manifest = manifest_cache_root()?.join(format!("{id}.locus"));
+    let manifest = manifest_cache_root()?.join(format!("{id}.dna"));
     if manifest.exists() {
         return Ok(locate_artifact(id, "manifest", &manifest).map_err(anyhow::Error::msg)?);
     }
-    let legacy_manifest = manifest_cache_root()?.join(format!("{id}.json"));
-    if legacy_manifest.exists() {
-        return Ok(locate_artifact(id, "manifest", &legacy_manifest).map_err(anyhow::Error::msg)?);
-    }
-    let lock = manifest_cache_root()?.join(format!("{id}.lock.locus"));
+    let lock = manifest_cache_root()?.join(format!("{id}.lock.dna"));
     if lock.exists() {
         return Ok(locate_artifact(id, "lock", &lock).map_err(anyhow::Error::msg)?);
-    }
-    let legacy_lock = manifest_cache_root()?.join(format!("{id}.lock.json"));
-    if legacy_lock.exists() {
-        return Ok(locate_artifact(id, "lock", &legacy_lock).map_err(anyhow::Error::msg)?);
     }
     let report = report_cache_path(id)?;
     if report.exists() {
         return Ok(locate_artifact(id, "report", &report).map_err(anyhow::Error::msg)?);
-    }
-    let legacy_packet_report = legacy_report_cache_path(id)?;
-    if legacy_packet_report.exists() {
-        return Ok(
-            locate_artifact(id, "report", &legacy_packet_report).map_err(anyhow::Error::msg)?
-        );
-    }
-    let legacy_report = report_cache_root()?.join(format!("{id}.json"));
-    if legacy_report.exists() {
-        return Ok(locate_artifact(id, "report", &legacy_report).map_err(anyhow::Error::msg)?);
     }
     let roots = runtime_root_report(&[]).map_err(anyhow::Error::msg)?;
     Err(anyhow!(

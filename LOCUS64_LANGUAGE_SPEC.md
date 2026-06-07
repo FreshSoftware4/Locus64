@@ -12,6 +12,28 @@ There are three practical interaction forms:
 
 If you are driving Locus64 indirectly from ChatGPT or another system, generate RNA or bundle-entry text, compile it into DNA, and then use the `.dna` artifact for certification/execution.
 
+Native structural law is moving toward codon/lexon governance:
+
+- **Codons** are finite structural operators/classes with arity, phase/admission law, and opcode identity.
+- **Lexons** are scoped symbolic bindings for domain-local objects such as chain rule, derivative, composition, and bridge-sector patterns.
+- **Macro-codons** are recurring structural/reaction patterns such as roundtrip, closure frontier, view receipt, integration receipt, and expression receipt. They are not lexons and do not share the lexon registry.
+- Aliases are ingress-only. Generated native artifacts should emit canonical symbols, not structural aliases as words.
+- Header truth and codon phase law outrank filename extensions. A source/product/receipt/view decision must come from the native header and phase table, not from `.rna`, `.pep`, `.prot`, JSON shape, or command habit.
+- Opcode allocation is stable law: never reuse an opcode, deprecate by tombstone, migrate by receipt, and do not rely on Rust enum variant order for persisted numeric meaning.
+- Generated-word bans apply to native structural regions only. Words such as `claim_page`, `dependency_spine`, `theorem`, or `campaign` may appear in gloss/comments/views, but must not survive as generated native structural tokens.
+- Digests and hashes are machine memo bindings, not public proof identity.
+- Products, views, receipts, and projections remain rejected as source unless explicitly reconstructed into canonical RNA.
+
+This law exists to prevent future bundle/product records from becoming JSON with different punctuation. Bundle-entry text remains transitional until representative workflows are rerouted through substrate-native records.
+
+Current representative registries:
+
+- Codon module: `l64-core/src/codons.rs`
+- Lexon module: `l64-core/src/lexons.rs`
+- Macro-codon module: `l64-core/src/macro_codons.rs`
+
+The controlled CKI registry fixture lives at `fixtures/cki_registry.genome.rna`. It is a regression fixture for the RNA/DNA fixed-point membrane, not independent authority and not a third public surface.
+
 ## 1. Command Language
 
 Primary executable:
@@ -28,6 +50,9 @@ Core commands:
 l64 normalize-rna <file>
 l64 compile-rna <file> [--out <file.dna>] [--artifact-class gene|haplotype|chromosome|genome] [--persist-lineage]
 l64 sequence-dna <file.dna>
+l64 inspect-dna <file.dna>
+l64 verify-roundtrip <file.rna> [--artifact-class gene|haplotype|chromosome|genome]
+l64 export-genome-release --rna <file.rna> --out <dir> [--artifact-class gene|haplotype|chromosome|genome]
 
 l64 compile-bundle <file.locus.rna|file.dna> [--out <file.dna>]
 l64 certify-bundle --file <file.dna> --conflict-policy exact-match
@@ -99,11 +124,16 @@ Unclosed splice regions fail.
 l64 normalize-rna .\claim_root.gene.rna
 l64 compile-rna .\claim_root.gene.rna --out .\claim_root.gene.dna --artifact-class gene --persist-lineage
 l64 sequence-dna .\claim_root.gene.dna
+l64 inspect-dna .\claim_root.gene.dna
+l64 verify-roundtrip .\claim_root.gene.rna --artifact-class gene
+l64 export-genome-release --rna .\claim_root.gene.rna --out .\claim_root.release --artifact-class gene
 ```
 
 ### 2.4 RNA Output Guarantees
 
-Successful `compile-rna` returns:
+`compile-rna` accepts source RNA only. It rejects inspection reports, receipts, views, closure maps, claim pages, stress maps, replay records, and JSON report/projection text before lower-chain tokenization.
+
+Successful `compile-rna` returns an inspection report containing:
 
 - byte count
 - packet summary
@@ -112,18 +142,32 @@ Successful `compile-rna` returns:
 - DNA validation report
 - lineage record
 
-Use this for identity and canonicalization. Use QC0 for claims, assumptions, evidence, challenges, and adequacy.
+`sequence-dna` emits canonical reconstructable RNA, not JSON.
 
-## 3. QC0 Bundle Language
+`inspect-dna` emits a JSON inspection report for humans and tooling. Inspection output is not source and must not be passed to `compile-rna`.
 
-QC0 is the current transitional semantic interaction language. It is not the target public language and is slated for extraction into RNA/DNA-backed lineage objects or native Rust records.
+`verify-roundtrip` proves the public fixed-point law:
+
+```text
+RNA -> DNA -> canonical RNA -> DNA
+```
+
+The canonical hash must be preserved. Packet bytes may differ when intentionally variable metadata changes, but same-subject library roundtrips are expected to stabilize byte-for-byte.
+
+Use RNA/DNA for identity and canonicalization. Bundle-entry text remains a transitional authoring convenience compiled into `.dna`; it is not a public authority surface.
+
+`export-genome-release` creates derived review artifacts from the same RNA/DNA authority spine. Its manifest, claim pages, dependency spine, closure map, closure frontier, stress map, lineage, replay record, views, and view receipts are projections or records. They use role-specific projection/record/receipt filenames, are not source RNA, and are rejected by `compile-rna`; generated source RNA and canonical RNA are the re-compilable text artifacts.
+
+## 3. Bundle-Entry Authoring Text
+
+Bundle-entry text is a transitional authoring convenience for generating `.dna` bundle packets. It is not a public authority surface and is not accepted by normal bundle execution without first compiling it through `compile-bundle`.
 
 ### 3.1 File Structure
 
-QC0 is line-oriented:
+Bundle-entry text is line-oriented:
 
 ```text
-!qc0 <header-json>
+!l64-bundle v1
 <entry-kind> <entry-json>
 <entry-kind> <entry-json>
 ...
@@ -131,7 +175,7 @@ QC0 is line-oriented:
 
 Rules:
 
-- First non-empty line must be `!qc0 { ... }`.
+- First non-empty line must be `!l64-bundle v1`.
 - Each later non-empty line must contain one entry kind, one space, and one JSON object.
 - JSON must be valid on a single line.
 - Entry order can matter operationally for readability, but parsing accepts entries by kind.
@@ -140,7 +184,7 @@ Rules:
 Header:
 
 ```text
-!qc0 {"surface_kind":"Qc0","version":"1","policy_id":"POL_QC0_CORE","capability_id":"CAP_QC0_CORE"}
+!l64-bundle v1
 ```
 
 `capability_id` may be `null`.
@@ -539,7 +583,7 @@ DHostPackMissing
 This is the smallest practical semantic bundle shape for a governed external claim:
 
 ```text
-!qc0 {"surface_kind":"Qc0","version":"1","policy_id":"POL_QC0_CORE","capability_id":"CAP_QC0_CORE"}
+!l64-bundle v1
 proof {"id":"PS_COSMO","kind":"Square","nodes":["a","b","c","d"],"edges":[{"from":"a","to":"b","label":"derive"},{"from":"b","to":"d","label":"observe"},{"from":"a","to":"c","label":"project"},{"from":"c","to":"d","label":"compare"}],"equations":["observable=projection(assumption)"],"target_equivalence":"observational-equivalence","receipts":["RCP_COSMO"],"gate":"Pass"}
 bridge {"id":"B_COSMO","src":"R_TOP","tgt":"R_CALC","id_pres":"preserved","eq_pres":"observational","forget":[],"enrich":["observable"],"loss":[],"reversibility":"Enriching","receipts":["RCP_COSMO"],"rollback":"allowed"}
 atlas {"id":"A_COSMO","source_regime":"R_TOP","target_regime":"R_CALC","burden_class":"ImportedKernelClaim","proof_target":"cosmology-claim","candidate_paths":[["B_COSMO"]],"normalized_winner":["B_COSMO"],"winner_state":"Candidate","loss_profile":{"items":[]},"proof_shapes_checked":["PS_COSMO"],"recipe_maturity":"Stable","failure_signatures":[],"side_conditions":[],"surface_transition":{"compatibility":"AuthorityPreserving","penalties":[],"total_penalty":0}}
@@ -618,7 +662,7 @@ If validation fails:
 
 ## 9. Common Failure Causes
 
-- Missing `!qc0` header.
+- Missing `!l64-bundle v1` header.
 - Multi-line JSON payloads.
 - Wrong enum casing, e.g. `certified` instead of `Certified`.
 - Referencing an id that has no entry.

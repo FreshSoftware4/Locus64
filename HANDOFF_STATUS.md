@@ -56,8 +56,16 @@ Windows target used by this release pass: `x86_64-pc-windows-msvc`.
 
 - The repo is a Git repository connected to GitHub.
 - `.locus` decode remains as a compatibility path; `.dna` is the preferred machine artifact language.
-- Q-surface crates currently remain in the workspace, but the active rail now treats them as extraction-and-deletion targets, not compatibility commitments. Public doctrine is RNA/DNA, with `l64` as the target public command/crate naming direction.
+- Q-surface crates have been removed from the workspace. Public doctrine is RNA/DNA; remaining Q-surface mentions are historical notes, negative regressions, or documented tombstones only.
 - SSR is intentionally ephemeral and must not become a persisted semantic authority layer.
+- `sequence-dna` emits canonical reconstructable RNA; `inspect-dna` owns JSON inspection output.
+- `compile-rna` rejects inspection reports, release projections, release records, receipts, and JSON report/projection text as source.
+- Generated genome release artifacts now use source/canonical `.rna`, genome `.dna`, and role-specific `.projection`, `.record`, or receipt filenames. They no longer emit `.locus` projection files or an on-disk JSON manifest.
+- Admin/cert artifact discovery no longer reads legacy JSON manifest/lock/report caches, legacy report `.locus` caches, or execution `reports.json`.
+- Execution manifest and bundle-lock packet caches now use `.dna` filenames rather than `.locus` filenames.
+- Certification execution cache entries now use `.dna` filenames rather than `.locus` filenames. Rebuild `l64-cli` and `l64-admin` together before running admin tests that use CLI-produced cache entries.
+- Observe persistence entries now use `.dna` filenames rather than `.locus` filenames for observation/diff/prediction/plan/explanation/assessment/execution/reconciliation records.
+- Bundle-entry authoring text now uses the native `!l64-bundle v1` header. `compile-bundle` rejects obsolete `!qc0`/`!qa0` headers.
 
 ## Cleanup Policy Used
 
@@ -72,7 +80,7 @@ They are not hard-deleted.
 ## Most Important Files
 
 - `README.md`: concise project overview and release layout
-- `LOCUS64_LANGUAGE_SPEC.md`: transitional command/RNA/QC0 notes; QC0 content is slated for extraction into RNA/DNA-backed lineage or native Rust records
+- `LOCUS64_LANGUAGE_SPEC.md`: RNA/DNA command and language reference, including source/inspection membrane rules
 - `USAGE_GUIDE.md`: operator command guide
 - `SEMANTIC_USAGE_GUIDE.md`: semantic usage guide for claim governance, branch/challenge tracking, and research-framework integration
 - `LINEAR_EXECUTION_RAIL.md`: authoritative linear execution rail and phase sequence

@@ -34,7 +34,13 @@ Set-Content .\sample.gene.rna "ι ≔ σ ‖ κ" -Encoding UTF8
 .\target\release\l64.exe normalize-rna .\sample.gene.rna
 .\target\release\l64.exe compile-rna .\sample.gene.rna --out .\sample.gene.dna --artifact-class gene --persist-lineage
 .\target\release\l64.exe sequence-dna .\sample.gene.dna
+.\target\release\l64.exe inspect-dna .\sample.gene.dna
+.\target\release\l64.exe verify-roundtrip .\sample.gene.rna --artifact-class gene
+.\target\release\l64.exe export-genome-release --rna .\sample.gene.rna --out .\sample-release --artifact-class gene
 ```
+
+`sequence-dna` emits canonical reconstructable RNA. `inspect-dna` emits inspection JSON. `compile-rna` rejects inspection/report/projection text as source.
+`export-genome-release` emits a coordinate-bearing release spine from RNA/DNA authority: genome, source sequence, claim page, dependency spine, closure map, frontier, stress map, replay record, views, and view receipts. Only generated source/canonical RNA are re-compilable; the other release artifacts use projection/record/receipt roles and extensions.
 
 RNA is the human symbolic surface. DNA is the machine artifact surface. SSR is ephemeral and must not be treated as public authority.
 

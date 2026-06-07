@@ -188,8 +188,8 @@ fn reconciliations_root() -> Result<PathBuf> {
     Ok(root)
 }
 
-fn locus_store_path(root: &PathBuf, id: &str) -> PathBuf {
-    root.join(format!("{id}.locus"))
+fn dna_store_path(root: &PathBuf, id: &str) -> PathBuf {
+    root.join(format!("{id}.dna"))
 }
 
 fn persist_store_payload<T: Serialize>(
@@ -201,7 +201,7 @@ fn persist_store_payload<T: Serialize>(
     payload: &T,
     capabilities: LocusCapabilityMask,
 ) -> Result<PathBuf> {
-    let path = locus_store_path(&root, id);
+    let path = dna_store_path(&root, id);
     write_section_packet(
         &path,
         kind,
@@ -221,8 +221,8 @@ fn load_store_payload<T: DeserializeOwned>(
     id: &str,
     opcode: LocusOpcode,
 ) -> Result<T> {
-    let locus_path = locus_store_path(&root, id);
-    decode_section_payload(&fs::read(locus_path)?, opcode).map_err(anyhow::Error::msg)
+    let dna_path = dna_store_path(&root, id);
+    decode_section_payload(&fs::read(dna_path)?, opcode).map_err(anyhow::Error::msg)
 }
 
 pub fn observe_report(

@@ -83,7 +83,19 @@ When obsolete mechanisms remain, rank them by how much authority flow they still
 3. Expand the migration until the obsolete beam no longer carries major workflow responsibility.
 4. Delete residual leaf projections, helper crates, samples, and docs only after the replacement path proves it can carry the load.
 
-Leaf deletion is allowed early only when the leaf is genuinely isolated and does not delay a higher-pressure replacement. The completed QK0 deletion is an isolated-leaf cut, not the default template for remaining work. The remaining strategy prioritizes the QC0-style bundle/import/certification beam because it still carries fixture, command, and certification pressure.
+Leaf deletion is allowed early only when the leaf is genuinely isolated and does not delay a higher-pressure replacement.
+
+The prior Q/projection cleanup is now historical. The current load-bearing beam is the RNA/DNA membrane:
+
+```text
+RNA source
+ -> canonical structure
+ -> DNA authority
+ -> canonical RNA sequencing
+ -> DNA fixed point
+```
+
+Any command, fixture, report, receipt, or projection that can cross that membrane without a role check is now the highest-priority debt source.
 
 ## External Proving Slice Rule
 
@@ -103,6 +115,22 @@ external authored structure
 External source code, Markdown reports, DOT graphs, JSON, Julia objects, notebooks, or other documents are not authority. They may provide extraction material, fixtures, or derived projections, but the proving value is real only when the same structure can be represented as RNA, compiled to DNA, validated, replayed, and projected back out.
 
 The CKI typed registry is the current best pilot candidate because it is small, dependency-explicit, validation-oriented, and mathematically interpretable. It must remain a proving slice for the authority path, not a new side quest or a new public surface.
+
+Every serious external proving slice must be able to ship with coordinates:
+
+- canonical genome artifact
+- source sequence or canonical reconstruction
+- dependency spine
+- closure map
+- claim pages
+- closure frontier
+- stress map
+- lineage
+- replay record
+- generated views
+- view receipts
+
+These are not additional authority surfaces. They are release artifacts derived from the same genome so reviewers can inspect claims, dependencies, open edges, projections, and replay steps without guessing where the authority lives.
 
 ## Current Execution Ledger
 
@@ -169,7 +197,13 @@ Landed:
 Still active extraction targets:
 
 - None for QC0/QA0/surfaces. Remaining references to removed projection command names are negative regression tests or historical rail notes only.
-- The next active extraction target is any residual semantic-object persistence that bypasses `.dna` lineage, not Q-surface compatibility.
+- Node 11 membrane confusion patch has landed: source RNA, canonical RNA, DNA authority, and inspection/report artifacts now have separate command behavior.
+- `sequence-dna` emits canonical reconstructable RNA rather than inspection JSON.
+- `inspect-dna` owns JSON inspection output.
+- `compile-rna` rejects JSON/report/projection artifacts before lower-chain tokenization.
+- `verify-roundtrip` exposes the public `RNA -> DNA -> canonical RNA -> DNA` fixed-point gate.
+- The next active extraction target is Node 11B codon/lexon law: release artifacts, bundle records, and future products must be governed by native symbol/phase/admission law before they are rewritten as molecular substrate or expression products.
+- CKI `cki_registry.genome.rna` remains the best regression fixture for the next release-artifact spine because it is nontrivial, dependency-explicit, and already exposes the source/authority/projection distinction.
 
 Current verified gate:
 
@@ -194,12 +228,58 @@ Current verified gate:
 - `cargo test -p l64-admin --test admin` passes after deleting admin artifact projection export.
 - `cargo test --workspace` passes after deleting `l64-surfaces`, `l64-qc0`, and `l64-qa0` from the workspace.
 - `scripts/torture-test.ps1 -OuterRounds 1 -InnerNamespaces 1` passes after removing report projection export from the torture harness.
+- `cargo test --workspace` passes after the Node 11 membrane patch.
+- `scripts/torture-test.ps1 -OuterRounds 1 -InnerNamespaces 1` passes after adding canonical RNA sequencing, `inspect-dna`, `verify-roundtrip`, and inspection-output rejection checks.
+- Direct release-wrapper reproduction proves `sequence-dna` output is not JSON, `sequence-dna -> compile-rna` preserves canonical hash, and `inspect-dna -> compile-rna` is rejected.
+- Initial Node 17A release spine has landed:
+  - `export-genome-release` creates genome, source sequence, claim page, dependency spine, closure map, closure frontier, stress map, replay record, overview view, and view receipt artifacts from RNA/DNA authority.
+  - Generated non-source release artifacts carry explicit role/surface markers and use projection/record/receipt filenames rather than `.locus` or JSON authority hints.
+  - CLI regression proves generated manifest, claim page, dependency spine, closure map, lineage, closure frontier, stress map, replay record, view, and view receipt artifacts are rejected by `compile-rna`, while generated source RNA and canonical RNA remain accepted.
 - Residue scan for `l64_surfaces`, `l64-qc0`, `l64-qa0`, and `l64-surfaces` returns no source/workspace dependency references; remaining mentions are historical rail notes or negative regression tests.
 - Manifest and bundle-lock packet persistence has moved from `l64-surfaces` to `l64-locus`, so execution artifact storage no longer depends on the projection adapter crate.
 - Report packet cache ownership, report IDs, and report packet persistence have moved from `l64-surfaces` to `l64-cert`, so report artifact storage now lives beside certification/report packet encoding.
 - Report-to-document derivation and validation-bundle document derivation have moved from `l64-surfaces` to `l64-cert`, so certification-derived report documents now live beside report packet/cache ownership.
-- `l64-surfaces` no longer depends on `l64-cert`; remaining duties are registry object projection lookup and explicit QC0/QA0 adapter import/export.
-- Projection transform receipt persistence has been deleted from `l64-surfaces`; import/export still returns receipts to callers, but no longer writes projection transform history into cache as pseudo-lineage.
+- `l64-surfaces` has been deleted; there are no remaining workspace duties for that crate.
+- Projection transform receipt persistence has been deleted with the projection adapter crate; no projection transform history is written into cache as pseudo-lineage.
+- Reproduction gate: `compile-rna sample.gene.rna -> sequence-dna -> compile-rna sequence-output` now preserves canonical identity through canonical RNA output, and `inspect-dna -> compile-rna` is rejected.
+- Legacy cache fallback reads have been removed from admin/cert lookup paths: JSON manifest/lock/report cache files, legacy report `.locus` lookup, and execution `reports.json` are no longer live discovery paths.
+- Execution manifest and bundle-lock packet cache files now write/read `.dna` paths (`<id>.dna`, `<id>.lock.dna`) rather than `.locus` paths.
+- Certification execution cache entries now write/read `.dna` paths rather than `.locus` paths; sibling CLI/admin binaries must be rebuilt together because admin tests invoke the CLI binary for cache-producing setup.
+- Observe persistence records now write/read `.dna` packet paths rather than `.locus` paths for observations, diffs, predictions, plans, explanations, assessments, executions, and reconciliations.
+- Bundle-entry authoring text now requires the native `!l64-bundle v1` header. Obsolete `!qc0`/`!qa0` bundle headers are rejected by `compile-bundle`; active bundle tests and public docs have moved to the native header.
+- New planning correction: current `.record`/`.projection` release artifacts and `!l64-bundle v1` JSON bodies are transitional. The next authority reroute is Node 11B-11F: codon/lexon law, molecular substrate codec, bundle semantic reroute, witnessed expression products, then legacy quarantine.
+- Node 11A readiness guard has been inserted before Node 11B so codon/lexon implementation cannot compensate for prior-node defects.
+- Node 11B first slice has landed in `l64-core`: `CodonSpec`, `LexonSpec`, phase/admission helpers, alias resolution, generated structural word ban list, and law validation report.
+- `cargo test -p l64-core` passes with Node 11B law-table, alias, phase, digest/memo, lexon binding, and generated-word-ban tests.
+- Node 11C first slice has landed in `l64-core`: substrate primitives, molecular codec record validation, deterministic encode/decode, and derived witness construction.
+- Node 11D preparatory slice has landed in `l64-bundle`: `QaDocument` entries can lower into substrate atom codec records without preserving old entry kind names as native lexons.
+- Node 11D dependency parity slice has landed in `l64-bundle`: bundle dependency edges lower into substrate bond codec records and parity reports check entry count, dependency edge count, codec validation, and missing atom/bond failures.
+- Node 11D namespace parity slice has landed in `l64-bundle`: substrate lowering follows existing namespace behavior by rewriting local bundle IDs while preserving external dependency references.
+- Node 11D conflict parity slice has landed in `l64-bundle`: substrate-lowered bundle documents coexist with current `ExactMatch` positive behavior and current `Reject` negative behavior for seed overlaps.
+- `cargo test -p l64-core` and `cargo test -p l64-bundle` pass after the first molecular substrate codec and bundle-lowering slices.
+- Correction from latest pasted-text decision: these Node 11B/11C/11D code slices are not full substrate completion. They are first-slice scaffolds and tests only. The rail must still treat Node 11B's concrete codon/lexon law tables, opcode allocation, tombstone/versioning policy, phase/admission matrix, generated-word ban list, and representative lexon/macro-codon corpus as the next governing payload before deeper substrate or bundle reroute work proceeds.
+- Do not make bundle substrate parity a mandatory import gate yet. The current decision is rail-first: prove the complete symbolic law and native molecular frame direction before turning transitional bundle import into a load-bearing substrate path.
+- Sharpened scaffold classification before resuming:
+  - current codon/lexon code is an experimental law scaffold
+  - current substrate primitive code is a provisional substrate scaffold
+  - current bundle lowering code is a parity probe
+  - none of these are authority-bearing
+  - none of these may gate runtime import, certification, execution, or promotion yet
+- Required resume gate: run `cargo fmt --check` and `cargo test --workspace` before continuing implementation. Run the compact torture slice too if the next change touches CLI/runtime command surfaces.
+- `cki_registry.genome.rna` must be classified before it becomes load-bearing: fixture candidate, local scratch artifact, external project artifact, or ignored generated sample. If fixture candidate, move it into a controlled fixture path; if scratch, ignore or remove it.
+- CKI classification landed: `cki_registry.genome.rna` moved from ambiguous project-root artifact to `fixtures/cki_registry.genome.rna` as a controlled regression fixture candidate. Its only current load-bearing role is proving the public `RNA -> DNA -> canonical RNA -> DNA` fixed-point membrane over a nontrivial external source.
+- CLI regression `cki_registry_fixture_preserves_rna_dna_fixed_point` proves the controlled CKI fixture compiles as genome RNA, sequences to canonical RNA, recompiles, and preserves DNA integrity hash.
+- Node 11B phase/admission matrix has landed in `l64-core/src/codons.rs`: every codon phase has an explicit admission rule, and only source RNA plus canonical RNA admit source compilation.
+- `codon_header_admits_source_compile` now makes header phase law the source-admission membrane for native codon headers; filename extension and command habit are not the law.
+- Node 11B second slice has landed in `l64-core`: codon/lexon law is now physically modularized into `codons.rs`, `lexons.rs`, and `macro_codons.rs`; `lib.rs` exports the law surface rather than growing the compiled law table inline.
+- The retired inline codon/lexon scaffold has been physically removed from `l64-core/src/lib.rs`; there is no disabled duplicate law block left in the compiled crate source.
+- Node 11B now has a separate `MacroCodonSpec` registry for recurring reaction/product/receipt patterns. Roundtrip, closure frontier, view receipt, integration receipt, and expression receipt are no longer lexons.
+- Node 11B now has explicit opcode range and tombstone law: active codon/macro-codon opcodes are checked against tombstoned opcodes, and tombstones cannot be reused.
+- Node 11B generated-word bans are now structural-region aware: generated native structural regions reject banned words, while gloss/comment/human-view regions may carry explanatory words.
+- Node 11B now has a codon header parser that derives phase from header truth rather than filename extension.
+- `cargo test --workspace` passed before Node 11B resumed; `cargo test -p l64-core`, `cargo check -p l64-bundle`, `cargo check --workspace`, and `cargo fmt --check` pass after the Node 11B second slice. Targeted CKI CLI fixed-point regression also passes.
+- Node 11B exit gate is satisfied: CodonSpec, LexonSpec, MacroCodonSpec, alias resolution, phase/admission matrix, opcode range/tombstone law, structural-region generated-word ban, representative lexon/macro-codon corpus, and codon header parser are implemented and tested. `cargo test --workspace` passes after the gate.
+- Next implementation node is Node 11C audit and substrate re-keying. Current substrate primitives remain provisional until audited against completed Node 11B law.
 
 ## Rail Node Template
 
@@ -231,6 +311,7 @@ Rules:
 - Prefer newtypes for authority-sensitive IDs: `CanonicalId`, `DnaDigest`, `PhaseId`, `LedgerEntryId`, `LineageId`.
 - Prefer table-driven law over scattered matches for token classes, opcodes, phase IDs, artifact classes, failure kinds, and exactness classes.
 - Prefer `Result<T, E>` with domain errors over stringly `anyhow` at substrate boundaries; `anyhow` is acceptable at CLI edges.
+- Keep substrate law physically modular. Do not continue growing `l64-core/src/lib.rs` as a new schema junk drawer; move codon, lexon, molecular substrate, and witness-normal logic into focused modules once the next Node 11B slice edits them.
 - Treat naming as coordination hygiene, not execution. Rename only when the name itself creates authority confusion, public API drift, dependency cleanup risk, or repeated implementation mistakes.
 - When a rename is necessary, prefer mechanical rename commits over mixed semantic commits.
 - Prefer crate-local tests before workspace-wide tests during deletion or justified naming-hygiene passes.
@@ -1803,65 +1884,646 @@ Downstream payoff:
 
 - creates the actual machine authority surface
 
-### Node 11 - DNA Validation Phase
+### Node 11 - Artifact Membrane And Fixed-Point Authority Gate
 
 Purpose:
 
-- separate encoding from validation so execution never receives unvalidated DNA
+- close the source/authority/projection membrane failure before any more upper-stack work
+- make `sequence-dna` mean canonical RNA sequencing, not inspection-report emission
+- prevent reports, receipts, traces, JSON, or inspection output from being compiled as RNA source
+- make fixed-point identity the first user-visible authority proof
 
 Depends on:
 
 - Node 10
+- current reproduced membrane failure: `compile-rna RNA -> sequence-dna JSON -> compile-rna JSON` succeeds but produces different DNA
+
+Code targets:
+
+- `l64-core`
+- `l64-locus`
+- `l64-cli`
+- `l64-cli/tests`
+- `l64-locus` tests
+- `scripts/torture-test.ps1`
+- CKI fixture path `cki_registry.genome.rna`
+- `LOCUS64_LANGUAGE_SPEC.md`
+
+Step sequence:
+
+1. Add role/surface distinctions at the lowest shared boundary:
+   - `ArtifactRole`: `Source`, `Authority`, `Projection`, `Receipt`, `Trace`, `Failure`
+   - `SurfaceKind`: `RNA`, `DNA`, `CanonicalRNA`, `InspectionReport`, `Receipt`
+   - use existing `GenomeSurface` only where it still accurately describes packet header truth
+2. Add a compile input gate:
+   - `compile-rna` accepts only `role=Source` and `surface=RNA`
+   - obvious report/projection/receipt/trace formats fail before tokenization
+   - JSON object/array text is rejected as RNA source unless an explicit future import command owns conversion into RNA
+3. Split sequencing from inspection:
+   - `sequence-dna` emits canonical reconstructable RNA text only
+   - `inspect-dna` emits JSON inspection/report output
+   - current JSON artifact output moves from `sequence-dna` to `inspect-dna`
+4. Add canonical RNA reconstruction:
+   - DNA decode reconstructs canonical structure
+   - canonical structure projects to canonical RNA deterministically
+   - canonical RNA can recompile to the same canonical structure and DNA digest
+5. Add `verify-roundtrip` or equivalent first-class command:
+   - `RNA0 -> DNA0 -> CanonicalRNA1 -> DNA1`
+   - require `CanonicalId0 == CanonicalId1`
+   - require `CanonicalHash0 == CanonicalHash1`
+   - require DNA digest equality or explicit canonical-packet equality if packet metadata is intentionally variable
+6. Add fixed-point stabilization:
+   - repeated `DNA -> sequence-dna -> compile-rna -> DNA` stabilizes
+   - repeated `DNA -> inspect-dna` never feeds the compile path
+7. Promote CKI as a regression fixture:
+   - compile `cki_registry.genome.rna`
+   - sequence to canonical RNA
+   - recompile
+   - verify fixed-point identity
+   - keep CKI as a fixture, not as a third surface
+8. Update torture test:
+   - replace “sequence output exists” checks with fixed-point verification
+   - include a negative test that compiling `inspect-dna` JSON output fails
+9. Update docs:
+   - `compile-rna`: source RNA only
+   - `sequence-dna`: canonical RNA only
+   - `inspect-dna`: reports only
+   - `verify-roundtrip`: first correctness command for operators
+
+Actions:
+
+- add role/surface types or equivalent command-boundary classifiers
+- route `compile-rna` through the source gate before lower-chain execution
+- change `sequence-dna` output from JSON artifact serialization to canonical RNA text
+- add `inspect-dna` for the current JSON artifact view
+- add fixed-point verification helper in `l64-locus` and expose it through CLI
+- wire CKI fixture into targeted tests
+- remove JSON/report fixture assumptions from lower-chain golden tests
+
+Invariants:
+
+- source RNA, DNA authority, canonical RNA, inspection reports, receipts, traces, and failures are distinct roles
+- projection output cannot silently become source input
+- inspection output cannot silently become source input
+- `sequence-dna` output is reconstructable canonical RNA, not a report
+- fixed-point identity is relational, not merely local validation
+- local validity never substitutes for roundtrip authority preservation
+- JSON is not a native source, authority, or golden lower-chain fixture format
+
+Tests:
+
+- CLI test: `sequence-dna` stdout can be passed to `compile-rna` and produces the same canonical ID/hash as the original DNA
+- CLI test: `inspect-dna` stdout passed to `compile-rna` fails with a role/surface diagnostic
+- library test: `RNA -> DNA -> canonical RNA -> DNA` fixed point
+- library test: repeated fixed-point cycle stabilizes
+- CKI fixture fixed-point test
+- torture test includes sequence/inspect membrane checks
+- docs command examples match the new command roles
+
+Exit condition:
+
+- `sequence-dna` is no longer an inspection command
+- `inspect-dna` owns report/JSON output
+- `compile-rna` rejects projection/report/receipt/trace text
+- CKI fixed-point test passes
+- the reproduced membrane failure is impossible through the public CLI
+
+Downstream payoff:
+
+- execution, lineage, reuse, certification, and external proving slices can trust that source, authority, and projection roles do not collapse at the command boundary
+
+### Node 11A - Pre-Codon Authority Readiness Audit
+
+Purpose:
+
+- prove Nodes 00-11 are actually complete enough to support codon/lexon law
+- prevent Node 11B from compensating for unresolved lower-chain or membrane defects
+- make the transition from RNA/DNA authority into molecular substrate work explicit
+
+Depends on:
+
+- Node 11
+
+Code targets:
+
+- `l64-core`
+- `l64-locus`
+- `l64-cli`
+- `l64-bundle`
+- `LINEAR_EXECUTION_RAIL.md`
+- current targeted tests
+
+Step sequence:
+
+1. Verify the lower chain still exposes the required substrate:
+   - token classes are closed
+   - RNORM is deterministic
+   - SSR remains ephemeral
+   - structural equivalence law exists before CNORM
+   - CNORM emits canonical structure
+   - DNA encodes canonical structure
+2. Verify the artifact membrane still holds:
+   - `compile-rna` accepts source/canonical RNA only
+   - `sequence-dna` emits canonical reconstructable RNA
+   - `inspect-dna` emits inspection/report output only
+   - `verify-roundtrip` proves fixed-point identity
+3. Verify bundle and release transitional paths are correctly classified:
+   - bundle v1 remains transitional authoring/ingress
+   - generated release artifacts are rejected as source
+   - JSON remains inspection/foreign/debug, not source or authority
+4. Verify the next active implementation target is only Node 11B:
+   - do not implement product files first
+   - do not implement bundle reroute first
+   - do not delete legacy paths first
+
+Invariants:
+
+- Node 11B may only add codon/lexon law; it must not patch lower-chain deficits indirectly
+- if any lower-chain or membrane gate fails, return to the owning prior node before proceeding
+- prior-node completion is verified by current tests or direct code inspection, not by historical confidence alone
+
+Tests:
+
+- run the smallest targeted tests that cover lower-chain fixed point and artifact membrane
+- run `cargo test -p l64-core` after Node 11B law code lands
+- run targeted CLI membrane tests if Node 11B touches admission behavior
+
+Exit condition:
+
+- the lower chain and artifact membrane are confirmed stable enough that Node 11B can proceed without backfilling prior-node defects
+
+Downstream payoff:
+
+- codon/lexon law work starts from a verified substrate instead of an assumed one
+
+### Node 11B - Codon/Lexon Law Gate
+
+Purpose:
+
+- establish native symbolic law before molecular substrate implementation
+- prevent generated products, bundle records, and future codecs from fossilizing word-shaped temporary names
+- define codons as finite structural operators/classes with phase and arity laws, not semantic codebooks
+- define lexons as scoped symbolic bindings, not global opcodes
+
+Depends on:
+
+- Node 11A
+- current `!l64-bundle v1` header migration
+- current genome release artifact spine
+- CKI proving slice
+
+Code targets:
+
+- `l64-core`
+  - `l64-core/src/codons.rs`
+  - `l64-core/src/lexons.rs`
+  - `l64-core/src/macro_codons.rs`
+- `l64-locus`
+- `l64-bundle`
+- `l64-cli`
+- `LOCUS64_LANGUAGE_SPEC.md`
+
+Step sequence:
+
+1. Define `CodonSpec`:
+   - symbol
+   - ASCII aliases
+   - codon class
+   - arity law
+   - phase/admission law
+   - opcode
+   - canonical/tombstone status
+2. Define `LexonSpec`:
+   - symbol
+   - scope
+   - class
+   - canonical target
+   - aliases
+   - gloss
+   - binding/admission receipt
+3. Define `MacroCodonSpec` separately from `LexonSpec`:
+   - symbol
+   - ASCII aliases
+   - pattern class
+   - reaction/transition shape
+   - arity law
+   - phase/admission law
+   - witness requirements
+   - opcode or opcode-range allocation
+4. Produce the phase/admission matrix:
+   - source RNA and canonical RNA admission
+   - product/view/receipt rejection
+   - memo/hash codon restrictions
+   - foreign/debug artifact quarantine
+5. Allocate opcode ranges and tombstone/version policy before substrate implementation:
+   - never reuse an opcode
+   - deprecate by tombstone
+   - migrate by receipt
+   - keep stable numeric allocation independent of Rust enum variant order
+6. Add alias normalization rules:
+   - aliases are ingress-only
+   - generated native artifacts emit symbols, not structural words
+   - gloss is human explanation only
+7. Produce the first representative lexon corpus:
+   - chain rule
+   - derivative
+   - composition
+   - triadic bridge sector
+   - spectral generation bridge
+8. Produce the first representative macro-codon corpus:
+   - roundtrip
+   - closure frontier
+   - view receipt
+   - integration receipt
+   - expression receipt
+9. Produce generated-word ban list for native structural regions:
+   - `claim_page`
+   - `dependency_spine`
+   - `closure_map`
+   - `roundtrip_report`
+   - `view_receipt`
+   - `artifact_class`
+   - `payload_json`
+   - `metadata`
+   - `theorem`
+   - `campaign`
+   - `adequacy`
+10. Make the generated-word ban structural-region aware:
+   - reject banned words in generated native headers, codon bodies, structural tokens, and role fields
+   - allow banned words only in authored shorthand before normalization, explicit gloss/comment fields, or human Markdown/views
+   - do not use a raw whole-file string grep as the final authority test
+11. Add a codon header parser:
+   - header truth outranks extension hints
+   - source/product/receipt/view/foreign admission comes from codon phase law
+   - no call site may invent an independent source/admission rule once the parser lands
+
+Actions:
+
+- add native Rust tables or generated tables for codons, lexons, and macro-codons
+- add uniqueness checks for codon symbols, aliases, opcodes, and tombstones
+- add compile/admission checks from the phase matrix
+- add structural-region generated-output word-ban tests before any product/bundle rewrite
+- split current `l64-core/src/lib.rs` scaffold into focused modules as part of the next code touch:
+  - `codons.rs`
+  - `lexons.rs`
+  - `macro_codons.rs`
+  - leave `lib.rs` as exports and integration glue
+
+Invariants:
+
+- codons are finite structural operators/classes with phase and arity laws
+- codons are not semantic codebooks
+- lexons are scoped symbolic bindings, not global opcodes
+- macro-codons are recurring structural/reaction patterns, not scoped semantic-object bindings
+- lexons and macro-codons must not share the same registry bucket
+- meaning cannot be reconstructed from a global dictionary
+- generated native structure emits symbols, not structural aliases as words
+- structural words may appear in gloss/comments/views but not in generated native structural regions
+- machine digest/memo codons cannot act as public proof identity
+- products, views, receipts, and projections reject as source unless explicitly reconstructed into canonical RNA
+- codon phase/admission law is the membrane; filenames, JSON shape, and command-specific heuristics are not authority
+
+Tests:
+
+- codon symbols are unique
+- codon opcodes are unique
+- aliases cannot collide across active codons/lexons unless an explicit scope rule permits it
+- tombstoned opcodes cannot be reused
+- phase/admission violations reject deterministically
+- generated native structural regions do not contain banned structural words
+- banned words remain allowed in explicit gloss/comment/view regions
+- products/views/receipts reject as source
+- hash/memo identity cannot be promoted as public witness identity
+- codon header phase controls source admission independently of filename extension
+- macro-codons and lexons occupy distinct registries and cannot collide silently
+
+Exit condition:
+
+- Node 11B has produced and tested:
+
+```text
+CodonSpec table
+LexonSpec table
+MacroCodonSpec table
+alias normalization table
+phase/admission matrix
+opcode allocation and tombstone policy
+structural-region generated-word ban list
+first representative lexon corpus
+first representative macro-codon corpus
+codon header parser
+```
+
+Downstream payoff:
+
+- future substrate and product work cannot smuggle semantic meaning through labels, aliases, JSON fields, or digest-only identity
+
+### Node 11C - Molecular Substrate Codec Spine
+
+Purpose:
+
+- define the native substrate units that carry semantic structure before product expression or bundle deletion
+- serialize substrate primitives through codec records without making codec records the ontology
+- prevent a generic family/payload record from replacing JSON with a differently shaped object soup
+
+Depends on:
+
+- Node 11B
+- full Node 11B exit gates, not merely the current first-slice scaffold
+
+Code targets:
+
+- `l64-core`
+  - `l64-core/src/molecular.rs`
+  - `l64-core/src/witness.rs`
+- `l64-locus`
+- `l64-bundle`
+- `l64-cli/tests`
+
+Step sequence:
+
+1. Define substrate primitives:
+   - `Locus`
+   - `Atom`
+   - `Bond`
+   - `Reaction`
+   - `Witness`
+   - `Chassis`
+   - `Cassette`
+   - `Plasmid`
+2. Define codec record envelope:
+   - codon header
+   - phase/admission role
+   - origin DNA or canonical source
+   - subject
+   - substrate primitive kind
+   - deterministic field order
+3. Add hard codec law:
+   - frames/records are serialization units, not ontology
+   - no arbitrary native payload bag
+   - unknown fields reject unless explicitly namespaced by extension law
+4. Add witness derivation:
+   - witnesses derive from substrate state, lineage, obligations, receipts, and closure status
+   - witnesses are not accepted as authored truth
+   - hashes remain machine memo bindings only
+5. Add first certification-slice substrate serialization:
+   - one valid seeded flow
+   - one old-invalid flow
+   - one old-allowed-but-now-category-wrong flow
+
+Invariants:
+
+- current substrate primitives remain provisional until audited against completed Node 11B law
+- old bundle objects lower into substrate primitives; they do not become substrate primitives by default
+- campaign, adequacy, theorem, policy, and report names are not native ontology unless structurally forced
+- witness forms replace public digest identity
+- codec records cannot validate solely by carrying a recognizable family name
+- codec records serialize substrate primitives; codec records are not ontology
+- no bundle import, certification, execution, or promotion path may depend on provisional substrate scaffolding before this node exits
+
+Tests:
+
+- substrate primitives serialize and deserialize deterministically
+- generic payload escape hatch is absent
+- witness-authored-as-truth rejects or downgrades to claim intent
+- digest/memo identity used as proof identity rejects or quarantines
+- first certification-slice witness derivation is stable
+
+Exit condition:
+
+- molecular substrate codec exists, has no generic payload bag, and emits derived witnesses from substrate state
+
+Downstream payoff:
+
+- bundle rerouting can target substrate mechanics instead of copying old object boundaries
+
+### Node 11D - Bundle Semantic Reroute
+
+Purpose:
+
+- reroute existing `QaDocument`/bundle workflows through the molecular substrate without making the old bundle ontology sovereign
+- prove behavior parity before deleting JSON-body bundle paths
+
+Depends on:
+
+- Node 11C
+- completed witness-normal derivation from Node 11C
+
+Code targets:
+
+- `l64-bundle`
+- `l64-cert`
+- `l64-cli`
+- `l64-admin`
+- `l64-cli/tests`
+- `l64-admin/tests`
+
+Step sequence:
+
+1. Inventory current bundle object families and map each to substrate primitives:
+   - atom
+   - bond
+   - reaction
+   - witness
+   - receipt
+   - policy
+   - obligation
+   - chassis relation
+2. Add lowering adapter:
+   - `QaDocument`/bundle DNA -> molecular substrate
+   - substrate -> temporary old workflow structs only where existing cert/runtime code still requires them
+3. Prove positive behavior parity:
+   - dependency extraction
+   - conflict behavior
+   - namespace rewrites
+   - certification verdicts
+   - execution receipts
+   - adequacy outcomes
+4. Prove negative parity:
+   - same old-invalid inputs remain invalid
+   - old rejection/failure behavior remains explicit
+   - old-allowed-but-now-category-wrong inputs are newly rejected
+5. Move representative docs/fixtures to substrate-backed bundle DNA path.
+
+Invariants:
+
+- behavior parity includes success, rejection, and failure modes
+- behavior parity includes same old valid behavior, same old invalid rejection, and new rejection of known category errors
+- bundle object boundaries do not define final substrate primitive boundaries
+- temporary old workflow structs are adapters, not authority
+- parity probes are not runtime authority gates until this node exits
+
+Tests:
+
+- representative valid bundle flow produces same certification outcome through substrate path
+- representative invalid bundle flow remains invalid
+- report/product/witness-as-source category error rejects
+- namespace/conflict/dependency behavior matches old path where old behavior was valid
+
+Exit condition:
+
+- representative bundle/certification workflows pass through molecular substrate with positive and negative behavior parity
+
+Downstream payoff:
+
+- JSON-body bundle paths can be quarantined from a position of replacement, not hope
+
+### Node 11E - Expression Product Layer
+
+Purpose:
+
+- express release products from witnessed substrate/DNA authority after codon/lexon law and substrate codec exist
+- evolve the current release spine in place rather than creating a second release generator
+
+Depends on:
+
+- Node 11D
+- witnessed DNA authority from Node 11C/11D, not raw DNA or raw object fields
 
 Code targets:
 
 - `l64-locus`
-- `l64-runtime`
 - `l64-cli`
+- `l64-cli/tests`
+- `l64-observe`
+- `l64-cert`
+- `USAGE_GUIDE.md`
+- `SEMANTIC_USAGE_GUIDE.md`
+- `scripts/torture-test.ps1`
+
+Format family:
+
+```text
+.rna    source sequence
+.dna    canonical genome / machine authority
+.pep    small expressed product
+.prot   structured expressed product
+.ptome  expressed product index
+.cell   redistributable release organism directory/archive
+```
 
 Step sequence:
 
-1. Add `DNA_VALIDATE` as a distinct phase ID.
-2. Implement validator over the new DNA structures.
-3. Route CLI validate through validator.
-4. Block executor entry points that lack validation receipts.
-5. Add the first complete authority-chain test: `RNA -> TOKENIZE -> RNORM -> SSR -> EQUIV -> CNORM -> DNA -> DNA_DECODE -> CNORM_RECONSTRUCTION`.
-6. Add fixed-point stability tests: `CNORM_A == CNORM_B`, `ID_A == ID_B`, `HASH_A == HASH_B`, and repeated `DNA -> DECODE -> CNORM -> DNA` stabilizes.
-7. Add invalid corpus tests before execution refactor.
-
-Actions:
-
-- add explicit `DNA_VALIDATE` phase
-- emit validation receipts
-- classify header failure, section failure, opcode failure, digest failure, and canonicality failure
-- make CLI validation use the phase engine path
+1. Re-key the current release spine before adding a broad product framework:
+   - modify `export_genome_release_from_rna`
+   - keep existing fixed-point, source/canonical RNA, view, and membrane tests
+   - make `.pep`/`.prot`/`.ptome` output a direct evolution of current `.record`/`.projection` outputs
+2. Add product record writers:
+   - `.pep`: claim, view receipt, roundtrip receipt, build receipt, small stress point
+   - `.prot`: dependency spine, closure map, closure frontier, stress map, replay record, build record
+   - `.ptome`: complete product index mapping product path, kind, subject, witness form, digest/cache key, origin DNA
+3. Add `.cell` directory/archive writer:
+   - genome DNA
+   - canonical RNA
+   - product index
+   - products
+   - views
+   - receipts
+   - replay
+4. Add `express` only as wrapper/rename over the proven release product path:
+   - no divergent release generator
+   - generated Markdown/DOT views remain projections and require `.pep` receipts
+5. Move native `inspect-dna` toward product-record output only after product substrate exists:
+   - JSON remains explicit foreign/debug mode only
 
 Invariants:
 
-- execution input is validated DNA only
-- validation does not require semantic labels
-- validation failure halts propagation
+- `.pep`, `.prot`, and `.ptome` are products, not sources
+- `.cell` is a package, not an authority replacement
+- every product declares role before payload
+- every product carries origin DNA
+- every public identity has a derived witness form
+- every digest is subordinate to a witness form
+- hash/digest identity is represented as a machine memo binding only, not public proof identity
+- products express witnessed authority, not raw field exports
+- product path and timestamps never affect canonical identity
+- no generated product can be ingested by `compile-rna`
 
 Tests:
 
-- invalid DNA corpus
-- compatible unknown section test
-- incompatible unknown section test
-- CLI `validate` smoke test
-- RNA-to-DNA-to-canonical-structure reconstruction test
-- canonical ID stability across encode/decode
-- DNA decode/re-encode fixed-point test
-- repeated decode/canonicalize/encode stabilization test
+- product parser rejects missing role/origin/schema fields
+- product canonicalization erases comments and normalizes whitespace
+- product digest is stable under path changes
+- `.pep` products include witness form, closure status, dependencies, frontier, and receipt coordinate
+- `.prot` products include witness forms and origin DNA
+- `.ptome` maps every digest/cache key to a witness form
+- `.cell` contains genome DNA, canonical RNA, ptome, products, views, and receipts
+- generated views without `.pep` receipts fail release conformance
+- `compile-rna` rejects `.pep`, `.prot`, `.ptome`, and `.cell` product text
 
 Exit condition:
 
-- executor cannot be called through public path with unvalidated DNA
-- the replacement authority path exists before any legacy deletion begins
+```text
+RNA -> DNA -> canonical RNA -> fixed-point receipt -> express -> .cell
+```
+
+- `.cell` products use `.pep`, `.prot`, and `.ptome`
+- products expose canonical witness forms rather than digest-only identity
 
 Downstream payoff:
 
-- execution and certification trust one validation boundary
-- remaining subsystems can now be classified by whether they feed, consume, or bypass the authority path
+- release artifacts become witnessed products rather than paperwork exports
+
+### Node 11F - Legacy Quarantine
+
+Purpose:
+
+- remove or quarantine transitional release/bundle paths after replacement authority is proven
+
+Depends on:
+
+- Node 11E
+
+Code targets:
+
+- `l64-bundle`
+- `l64-cli`
+- `l64-admin`
+- `l64-cert`
+- docs
+- samples
+- torture/conformance tests
+
+Step sequence:
+
+1. Quarantine `!l64-bundle v1` JSON-body input:
+   - require explicit legacy flag or delete once substrate reroute carries representative workflows
+   - normal `compile-bundle` rejects JSON-body bundle records after the replacement path carries the beam
+2. Clip transitional release artifacts:
+   - `release_manifest.record` -> `<subject>.ptome`
+   - claim pages -> `.pep`
+   - view receipts -> `.pep`
+   - dependency spine -> `.prot`
+   - closure map -> `.prot`
+   - closure frontier -> `.prot`
+   - stress map -> `.prot`
+   - replay record -> `.prot`
+3. Move JSON inspection to explicit foreign/debug mode:
+   - default native inspection emits product records where applicable
+   - JSON requires `--json` or `--foreign json`
+4. Delete docs/samples that teach transitional outputs as public authority.
+
+Invariants:
+
+- legacy paths cannot silently become authority
+- JSON is foreign/debug unless explicitly admitted by a legacy adapter
+- compatibility imports are removed unless backed by a concrete active requirement and deletion condition
+
+Tests:
+
+- normal `compile-bundle` rejects quarantined JSON-body bundle input
+- transitional `.record`/`.projection` release artifacts are absent from native release output
+- JSON inspection requires explicit foreign/debug mode
+- docs/examples use source RNA, DNA, substrate-backed bundle DNA, or expressed products only
+- workspace, torture, and representative certification tests pass
+
+Exit condition:
+
+- transitional release artifacts and JSON-body bundle authoring are clipped without removing load-bearing behavior
+
+Downstream payoff:
+
+- old authority paths become history rather than living coordination cost
 
 ### Node 12 - Execution Over DNA
 
@@ -1871,7 +2533,7 @@ Purpose:
 
 Depends on:
 
-- Node 11
+- Node 11F
 
 Code targets:
 
@@ -2363,6 +3025,140 @@ Downstream payoff:
 
 - the extensive current semantic system becomes an asset rather than substrate debt
 
+### Node 17A - Genome Release Artifact Spine
+
+Purpose:
+
+- produce redistributable review artifacts from canonical DNA and lineage without creating another authority surface
+- make every claim, view, open edge, and replay step coordinate-addressable
+- force status downgrade and open-obligation visibility before public release packaging
+
+Depends on:
+
+- Node 17
+- Node 11 surface-role admission gate
+- Node 11 DNA-to-canonical-RNA reconstruction gate
+- Node 11 fixed-point membrane gate:
+  - `compile-rna` rejects reports, views, receipts, traces, closure maps, claim pages, stress maps, replay records, and inspection output
+  - `sequence-dna` emits canonical reconstructable RNA
+  - `inspect-dna` emits non-authority inspection output
+  - `verify-roundtrip` proves `RNA -> DNA -> canonical RNA -> DNA` fixed point
+
+Code targets:
+
+- `l64-research`
+- `l64-cert`
+- `l64-observe`
+- `l64-cli`
+- `l64-locus`
+- `LOCUS64_LANGUAGE_SPEC.md`
+- `USAGE_GUIDE.md`
+- CKI fixture outputs
+
+Step sequence:
+
+1. Define release artifact roles as derived outputs:
+   - `CanonicalGenome`
+   - `SourceSequence`
+   - `DependencySpine`
+   - `ClosureMap`
+   - `ClaimPage`
+   - `ClosureFrontier`
+   - `StressMap`
+   - `Lineage`
+   - `ReplayRecord`
+   - `View`
+   - `ViewReceipt`
+2. Add status propagation rules:
+   - closed claim with conditional parent becomes conditional
+   - closed claim with bridge-dependent parent becomes bridge-qualified
+   - claim with open parent remains open-dependent
+   - observable without benchmark/test attachment remains hypothesis-class
+   - generated view remains projection-only
+3. Add claim-page schema:
+   - claim ID
+   - claim class
+   - status
+   - assumptions
+   - proof or derivation route
+   - dependencies
+   - open dependencies
+   - stress points
+   - authority coordinates: DNA hash, canonical ID, source node IDs, receipt IDs
+   - generated view links
+4. Add dependency-spine and closure-map extraction from lineage records.
+5. Add closure-frontier extraction from residual obligations and open dependencies.
+6. Add stress-map extraction from known failure classes:
+   - undefined term
+   - hidden assumption
+   - invalid dependency
+   - overstated status
+   - circular construction
+   - missing proof
+   - projection mistaken for source
+   - non-reproducible computation
+   - empirical mismatch
+   - ambiguous symbol reuse
+7. Add replay record generation:
+   - commands
+   - input/output hashes
+   - protocol versions
+   - environment details where deterministic replay depends on them
+   - regenerated projection hashes
+8. Add view receipts for every Markdown, DOT, paper skeleton, diagram, or reviewer-facing output.
+9. Build the first CKI genome release fixture:
+   - `genome/`
+   - `spine/`
+   - `claims/`
+   - `frontier/`
+   - `replay/`
+   - `views/`
+10. Add CLI generation command only after the data contracts are testable.
+
+Actions:
+
+- introduce release artifact structs or records in the smallest owner crate
+- generate CKI claim pages from RNA/DNA lineage rather than from Markdown or report text
+- generate dependency spine and closure map from canonical lineage
+- generate frontier and stress map from typed residual/open records
+- generate replay record from fixed-point and validation receipts
+- generate view receipts for derived views
+- keep all generated human-facing views projection-only
+
+Invariants:
+
+- every claim has coordinates
+- every view traces to a genome
+- every open edge remains visible
+- every release can be replayed
+- every change has lineage
+- closure status propagates through dependencies
+- generated views cannot become source or authority
+- no release artifact is accepted as source unless its role is `Source` and its surface is `RNA` or `CanonicalRNA`
+- claim pages, closure maps, stress maps, replay records, lineages, receipts, and views remain projection/record artifacts
+- known limits are represented as frontier/stress entries, not hidden prose
+
+Tests:
+
+- CKI release fixture contains canonical genome and source sequence
+- every claim page has DNA hash, canonical ID, dependencies, status, and open-dependency fields
+- status propagation downgrades claims with conditional, bridge-dependent, or open parents
+- generated views have view receipts and are projection-only
+- replay record reproduces the fixed-point command path
+- closure frontier is non-empty when open obligations exist
+- stress map routes common criticism classes to exact coordinates or open records
+- `inspect-dna` output passed to `compile-rna` is rejected
+- generated view, claim page, closure map, stress map, replay record, and receipt outputs passed to `compile-rna` are rejected
+- `sequence-dna` output passed to `compile-rna` preserves canonical hash and DNA fixed point
+
+Exit condition:
+
+- CKI can emit a complete genome release fixture whose review artifacts are all derived from canonical DNA, lineage, receipts, and fixed-point replay
+
+Downstream payoff:
+
+- conformance and release packaging can verify public-facing artifacts by structure rather than relying on prose claims
+
 ### Node 18 - Conformance, Torture, And Release Gates
 
 Purpose:
@@ -2385,13 +3181,24 @@ Step sequence:
 1. Build a conformance corpus for token, RNORM, SSR, CNORM, DNA, execution, lineage, and reuse.
 2. Add randomized or fuzz-style stress where practical.
 3. Update torture tests to exercise the full rail through the current public command surface.
-4. Add residue scans for misleading names, Q surfaces, proto-DNA claims, and stale docs.
-5. Add release smoke tests for Windows, Linux, compact, perfopt, and source packages.
-6. Make failed conformance block release generation.
+4. Add release-artifact conformance for claim pages, dependency spine, closure map, frontier, stress map, replay record, and view receipts.
+5. Add membrane conformance for derived release artifacts:
+   - `inspect-dna` output -> `compile-rna` must reject
+   - generated view -> `compile-rna` must reject
+   - claim page -> `compile-rna` must reject
+   - closure map -> `compile-rna` must reject
+   - stress map -> `compile-rna` must reject
+   - replay record -> `compile-rna` must reject
+   - receipt -> `compile-rna` must reject
+   - `sequence-dna` output -> `compile-rna` must preserve canonical hash
+6. Add residue scans for misleading names, Q surfaces, proto-DNA claims, and stale docs.
+7. Add release smoke tests for Windows, Linux, compact, perfopt, and source packages.
+8. Make failed conformance block release generation.
 
 Actions:
 
 - create conformance corpus for token/RNORM/SSR/CNORM/DNA/execution/reuse
+- create conformance corpus for claim pages, dependency spine, closure map, frontier, stress map, replay record, and view receipts
 - add fuzzing or randomized stress where practical
 - update torture test to exercise the full rail
 - add cross-platform determinism checks where available
@@ -2401,12 +3208,16 @@ Invariants:
 
 - release cannot pass with stale docs
 - release cannot pass with proto-DNA represented as final DNA
+- release cannot pass with uncoordinateable claims, unreceipted views, hidden open edges, or missing replay records
+- release cannot pass if any view, receipt, closure map, claim page, stress map, replay record, or inspection report can be ingested as RNA source without an explicit source/reconstruction role
 - conformance failures block release
 
 Tests:
 
 - `cargo test`
 - rail conformance suite
+- genome release artifact conformance suite
+- release artifact membrane rejection suite
 - torture test
 - release package smoke tests
 
@@ -2557,9 +3368,81 @@ This change chain incorporates the CKI registry proving-project lesson without c
 4. CKI-style typed registries are recognized as useful pilot fixtures because they expose dependency closure, parent ordering, typed edges, proof dependencies, and open obligations.
 5. Node 16A may use one bounded CKI-style registry pilot only if it reduces primary-beam ambiguity and does not create a third public surface.
 6. Node 17 now carries the semantic rekeying requirements for registry-like structures.
-7. Mathematical-legitimacy gates now explicitly include dependency closure, parent-before-child constructive order, explicit open obligations, validation receipts, and projection/authority separation.
+7. Release discipline gates now explicitly include dependency closure, parent-before-child constructive order, explicit open obligations, validation receipts, and projection/authority separation.
 
-## 30. Definition Of Done
+## 30. Eighth Compounding Change Chain
+
+This change chain incorporates the artifact-membrane failure found by inspecting `sequence-dna`, `compile-rna`, and the CKI proving path:
+
+1. The active load-bearing beam is no longer Q/projection cleanup. That cleanup is historical; the current beam is source/authority/projection membrane correctness.
+2. Local validity is insufficient. The authority gate is relational identity preservation across `RNA -> DNA -> canonical RNA -> DNA`.
+3. `sequence-dna` must mean canonical RNA sequencing and must not emit report/inspection JSON.
+4. Inspection/report output belongs to `inspect-dna` or an equivalent projection command and cannot be fed back into `compile-rna`.
+5. `compile-rna` must accept only source RNA and reject obvious projection, report, receipt, trace, failure, and JSON artifacts before lower-chain tokenization.
+6. `verify-roundtrip` becomes the operator-facing proof command for fixed-point authority.
+7. CKI `cki_registry.genome.rna` becomes the first nontrivial regression fixture for source/authority/projection separation.
+8. Torture tests must prove both positive sequencing fixed point and negative inspection-output rejection.
+9. JSON/YAML/report formats are projections or import materials only; they are not native lower-chain golden surfaces.
+10. Documentation must teach actual command roles instead of implying every emitted text artifact is valid source.
+
+## 31. Ninth Compounding Change Chain
+
+This change chain adds genome release discipline without making public-facing artifacts into authority:
+
+1. Public release artifacts are function-named, not virtue-named.
+2. The release spine is: canonical genome, source sequence, dependency spine, closure map, claim pages, closure frontier, stress map, lineage, replay record, views, and view receipts.
+3. These artifacts are derived from DNA, canonical structure, lineage, receipts, obligations, and fixed-point replay.
+4. Every claim must ship with coordinates: DNA hash, canonical ID, source node IDs, receipt IDs, dependencies, status, open dependencies, and stress points.
+5. Closure status propagates through dependencies and downgrades rather than overclaims.
+6. Generated Markdown, DOT, diagrams, paper skeletons, and reviewer summaries are views with receipts, never authority.
+7. The CKI proving slice becomes the first genome release fixture after the membrane patch and semantic rekeying.
+8. Conformance now checks coordinate completeness, visible open edges, replayability, view receipts, and status propagation.
+9. Release packaging fails if public-facing artifacts are not traceable to the genome or if open obligations are hidden.
+10. Node 17A explicitly depends on surface-role admission, DNA-to-canonical-RNA reconstruction, and fixed-point roundtrip gates.
+11. Release artifacts are rejected by `compile-rna` unless explicitly admitted as `Source` over `RNA` or `CanonicalRNA`.
+12. Conformance includes positive canonical RNA fixed-point tests and negative ingestion tests for inspection output, views, receipts, claim pages, closure maps, stress maps, and replay records.
+
+## 32. Tenth Compounding Change Chain
+
+This change chain corrects the next-order substrate mistake before implementation drifts into product-first syntax cleanup:
+
+1. The current `!l64-bundle v1` header migration is useful but not sufficient. It removes the old Q marker while preserving JSON-shaped bundle bodies.
+2. The next route is not a prettier identifier scheme and not product-first packaging. The next route is a law-first substrate reroute.
+3. Node 11B must produce codon/lexon law before substrate implementation:
+   - `CodonSpec`
+   - `LexonSpec`
+   - alias normalization
+   - phase/admission matrix
+   - opcode ranges
+   - tombstone/versioning policy
+   - generated-word ban list
+   - representative lexon/macro-codon corpus
+4. Codons define structural class, operation, arity, phase, admission, and opcode identity. Codons are not semantic codebooks.
+5. Lexons bind scoped semantic names to canonical targets with aliases, gloss, and binding receipts. Lexons are not global opcodes.
+6. Node 11C must define the molecular substrate codec spine:
+   - locus
+   - atom
+   - bond
+   - reaction
+   - witness
+   - chassis
+   - cassette
+   - plasmid
+7. Codec records serialize substrate primitives. Codec records are not ontology and must not contain a generic native payload bag.
+8. Node 11D must reroute bundle semantics through substrate primitives and prove behavior parity:
+   - same successful outcomes
+   - same old-valid behavior
+   - same old-invalid rejection behavior
+   - new rejection of known category errors
+9. Bundle object boundaries do not define substrate primitive boundaries; old workflow structs are temporary adapters.
+10. Node 11E expresses `.pep`, `.prot`, `.ptome`, and `.cell` products only after witnessed substrate/DNA authority exists.
+11. `.pep`, `.prot`, and `.ptome` are not source formats. They are expressed products and must be rejected by `compile-rna`.
+12. `.cell` is not a new authority surface. It is a package containing DNA, canonical RNA, products, views, receipts, replay, and index.
+13. Witnesses are derived from substrate state, not authored as truth. Public product identity becomes canonical witness form; hashes remain memo/cache bindings.
+14. `express` becomes the product-generation command only as a wrapper/rename over the proven release product path.
+15. Node 11F quarantines/deletes transitional `.record`, `.projection`, default JSON inspection, and JSON bundle-body paths after replacement behavior is proven.
+
+## 33. Definition Of Done
 
 The rail is implemented when:
 
@@ -2568,6 +3451,11 @@ The rail is implemented when:
 - structural-form representations cannot become public identity layers
 - CNORM identity is independent of presentation strings and source formatting
 - DNA validates from structural sections alone
+- `compile-rna` accepts source RNA only and rejects projection/report/receipt/trace/failure text
+- `sequence-dna` emits canonical reconstructable RNA only
+- `inspect-dna` owns inspection/report output
+- `verify-roundtrip` proves `RNA -> DNA -> canonical RNA -> DNA` fixed-point identity
+- CKI fixed-point regression passes through the public command path
 - execution traverses DNA or canonical structure directly
 - every public CLI command maps to phase-engine transitions and ledger entries
 - semantic systems are lineage-keyed derived overlays
@@ -2576,9 +3464,14 @@ The rail is implemented when:
 - compatibility imports are removed unless backed by a concrete active requirement and deletion condition
 - conformance, fuzz, torture, replay, migration, and cross-platform determinism tests pass
 - external proving slices demonstrate that authored registry-like structures can be ingested through RNA/DNA and exported as projections without making the projection authoritative
-- mathematical-legitimacy gates include dependency closure, parent-before-child constructive order, explicit open obligations, validation receipts, and projection/authority separation
+- genome release artifacts are expressed as `.pep`, `.prot`, `.ptome`, and `.cell` products after Node 11E lands
+- every claim/product has canonical witness identity: kind, status, subject, dependencies, proof route, open frontier, and receipt coordinate
+- every digest/cache key resolves to a witness form in the product index
+- no release artifact can be ingested by `compile-rna` unless it has an explicit source/reconstruction role over RNA or canonical RNA
+- inspection reports, generated views, receipts, `.pep`, `.prot`, `.ptome`, `.cell` product text, claim pages, closure maps, stress maps, replay records, and lineages are rejected as source
+- release gates include dependency closure, parent-before-child constructive order, explicit open obligations, validation receipts, replay records, status propagation, and projection/authority separation
 
-## 31. Final System Definition
+## 34. Final System Definition
 
 Locus64 is a deterministic structural substrate in which symbolic interaction surfaces are normalized into canonical structure, encoded into reconstructive machine form, executed under lineage-preserving authority, and amortized through lawful structural reuse.
 

@@ -23,7 +23,8 @@ use l64_core::{
 };
 use l64_kernel::ConstitutionKernel;
 use l64_locus::{
-    compile_rna_to_dna_packet, load_bundle_lock, load_execution_manifest, sequence_dna_to_rna,
+    GenomeReleaseManifest, compile_rna_to_dna_packet, load_bundle_lock, load_execution_manifest,
+    sequence_dna_to_canonical_rna, sequence_dna_to_rna, verify_rna_dna_roundtrip,
 };
 use l64_registry::SeedRegistry;
 use l64_research::{
@@ -324,6 +325,22 @@ enum Command {
     SequenceDna {
         file: String,
     },
+    InspectDna {
+        file: String,
+    },
+    VerifyRoundtrip {
+        file: String,
+        #[arg(long, default_value = "gene")]
+        artifact_class: String,
+    },
+    ExportGenomeRelease {
+        #[arg(long)]
+        rna: String,
+        #[arg(long)]
+        out: String,
+        #[arg(long, default_value = "gene")]
+        artifact_class: String,
+    },
     DeriveFrontier {
         #[arg(long)]
         report_id: String,
@@ -621,12 +638,7 @@ fn real_main() -> Result<()> {
             strict_policy,
             conflict_policy,
         } => {
-            let world = import_bundle_file(
-                Path::new(&file),
-                None,
-                conflict_policy.into(),
-                None,
-            )?;
+            let world = import_bundle_file(Path::new(&file), None, conflict_policy.into(), None)?;
             let mut options = build_cert_options(
                 optimizer_policy.into(),
                 Some(&file),
@@ -659,12 +671,7 @@ fn real_main() -> Result<()> {
             conflict_policy,
             strict_surface,
         } => {
-            let world = import_bundle_file(
-                Path::new(&file),
-                None,
-                conflict_policy.into(),
-                None,
-            )?;
+            let world = import_bundle_file(Path::new(&file), None, conflict_policy.into(), None)?;
             let mut options = build_cert_options(
                 optimizer_policy.into(),
                 Some(&file),
@@ -936,7 +943,8 @@ fn real_main() -> Result<()> {
                 .file_stem()
                 .and_then(|item| item.to_str())
                 .unwrap_or("BUNDLE_ARTIFACT");
-            let document = if Path::new(&file).extension().and_then(|ext| ext.to_str()) == Some("dna")
+            let document = if Path::new(&file).extension().and_then(|ext| ext.to_str())
+                == Some("dna")
             {
                 let bytes = fs::read(&file).with_context(|| format!("failed to read `{file}`"))?;
                 l64_locus::decode_section_payload::<QaDocument>(
@@ -945,8 +953,8 @@ fn real_main() -> Result<()> {
                 )
                 .map_err(anyhow::Error::msg)?
             } else {
-                let text =
-                    fs::read_to_string(&file).with_context(|| format!("failed to read `{file}`"))?;
+                let text = fs::read_to_string(&file)
+                    .with_context(|| format!("failed to read `{file}`"))?;
                 bundle_document_from_entry_text(&text)?
             };
             let bytes = l64_locus::encode_section_packet(
@@ -978,8 +986,43 @@ fn real_main() -> Result<()> {
         }
         Command::SequenceDna { file } => {
             let bytes = fs::read(&file).with_context(|| format!("failed to read `{file}`"))?;
+            let canonical_rna =
+                sequence_dna_to_canonical_rna(&bytes).map_err(anyhow::Error::msg)?;
+            println!("{canonical_rna}");
+        }
+        Command::InspectDna { file } => {
+            let bytes = fs::read(&file).with_context(|| format!("failed to read `{file}`"))?;
             let artifact = sequence_dna_to_rna(&bytes).map_err(anyhow::Error::msg)?;
             println!("{}", serde_json::to_string_pretty(&artifact)?);
+        }
+        Command::VerifyRoundtrip {
+            file,
+            artifact_class,
+        } => {
+            let input =
+                fs::read_to_string(&file).with_context(|| format!("failed to read `{file}`"))?;
+            let artifact_class = parse_genome_artifact_class(&artifact_class)?;
+            let subject_id = Path::new(&file)
+                .file_stem()
+                .and_then(|item| item.to_str())
+                .unwrap_or("RNA_ARTIFACT");
+            let report =
+                verify_rna_dna_roundtrip(subject_id, &input, artifact_class, vec!["core".into()])
+                    .map_err(anyhow::Error::msg)?;
+            if !report.dna_bytes_equal || !report.canonical_hash_equal {
+                anyhow::bail!("RNA/DNA roundtrip failed to preserve canonical identity");
+            }
+            println!("{}", serde_json::to_string_pretty(&report)?);
+        }
+        Command::ExportGenomeRelease {
+            rna,
+            out,
+            artifact_class,
+        } => {
+            let artifact_class = parse_genome_artifact_class(&artifact_class)?;
+            let manifest =
+                export_genome_release_from_rna(Path::new(&rna), Path::new(&out), artifact_class)?;
+            println!("{}", serde_json::to_string_pretty(&manifest)?);
         }
         Command::DeriveFrontier { report_id } => {
             let report = cert_replay_report(&report_id).map_err(anyhow::Error::msg)?;
@@ -1663,7 +1706,9 @@ fn validation_bundle_document(registry_id: &str, registry: &SeedRegistry) -> Res
             )?);
         }
     }
-    Ok(report_to_validation_bundle_with_registry(&report, registry)?)
+    Ok(report_to_validation_bundle_with_registry(
+        &report, registry,
+    )?)
 }
 
 fn document_for_id(registry: &SeedRegistry, id: &str) -> Result<QaDocument> {
@@ -1682,6 +1727,159 @@ fn document_for_id(registry: &SeedRegistry, id: &str) -> Result<QaDocument> {
     Ok(QaDocument {
         entries: vec![entry],
     })
+}
+
+fn export_genome_release_from_rna(
+    rna_path: &Path,
+    out_root: &Path,
+    artifact_class: GenomeArtifactClass,
+) -> Result<GenomeReleaseManifest> {
+    let input = fs::read_to_string(rna_path)
+        .with_context(|| format!("failed to read `{}`", rna_path.display()))?;
+    let subject_id = rna_path
+        .file_stem()
+        .and_then(|item| item.to_str())
+        .unwrap_or("RNA_ARTIFACT");
+    let (dna_bytes, artifact) =
+        compile_rna_to_dna_packet(subject_id, &input, artifact_class, vec!["core".into()])
+            .map_err(anyhow::Error::msg)?;
+    let roundtrip =
+        verify_rna_dna_roundtrip(subject_id, &input, artifact_class, vec!["core".into()])
+            .map_err(anyhow::Error::msg)?;
+    if !roundtrip.canonical_hash_equal {
+        anyhow::bail!("genome release export requires fixed-point canonical hash preservation");
+    }
+
+    let genome_dir = out_root.join("genome");
+    let spine_dir = out_root.join("spine");
+    let claims_dir = out_root.join("claims");
+    let frontier_dir = out_root.join("frontier");
+    let replay_dir = out_root.join("replay");
+    let views_dir = out_root.join("views");
+    let view_receipts_dir = views_dir.join("view_receipts");
+    for dir in [
+        &genome_dir,
+        &spine_dir,
+        &claims_dir,
+        &frontier_dir,
+        &replay_dir,
+        &views_dir,
+        &view_receipts_dir,
+    ] {
+        fs::create_dir_all(dir)?;
+    }
+
+    let dna_name = format!("{subject_id}.genome.dna");
+    let source_name = format!("{subject_id}.source.rna");
+    let canonical_name = format!("{subject_id}.canonical.rna");
+    let claim_name = format!("{subject_id}.claim");
+    let view_name = "overview.md".to_string();
+    let view_receipt_name = "overview.view.rcp".to_string();
+
+    fs::write(genome_dir.join(&dna_name), dna_bytes)?;
+    fs::write(genome_dir.join(&source_name), input.as_bytes())?;
+    fs::write(
+        genome_dir.join(&canonical_name),
+        roundtrip.canonical_rna.as_bytes(),
+    )?;
+
+    let claim_page = format!(
+        "l64_release_artifact: claim_page\nartifact_role: Projection\nsurface_kind: ClaimPage\nclaim_id: {subject_id}\nstatus: fixed_point_checked\ncanonical_id: {}\ncanonical_hash: {}\ndependencies: source_sequence,canonical_genome,replay_record\nopen_dependencies: none_declared\nstress_points: projection_mistaken_for_source,non_reproducible_computation\nreceipt_ids: {},{},{}\n",
+        artifact.canonical_structure.canonical_id.0,
+        artifact.canonical_structure.canonical_hash,
+        artifact.rn_receipt.id,
+        artifact.ssr_receipt.id,
+        artifact.cnorm_receipt.id
+    );
+    fs::write(claims_dir.join(&claim_name), claim_page)?;
+
+    let dependency_spine = format!(
+        "l64_release_artifact: dependency_spine\nartifact_role: Projection\nsurface_kind: DependencySpine\nroot: {subject_id}\nedges: source_sequence -> canonical_genome; canonical_genome -> replay_record; canonical_genome -> claim_page\ncanonical_hash: {}\n",
+        artifact.canonical_structure.canonical_hash
+    );
+    fs::write(
+        spine_dir.join("dependency_spine.projection"),
+        dependency_spine,
+    )?;
+
+    let closure_map = format!(
+        "l64_release_artifact: closure_map\nartifact_role: Projection\nsurface_kind: ClosureMap\nroot: {subject_id}\nfixed_point: {}\ncanonical_hash_equal: {}\nopen_edges: 0\nprojection_only_views: true\n",
+        roundtrip.dna_bytes_equal, roundtrip.canonical_hash_equal
+    );
+    fs::write(spine_dir.join("closure_map.projection"), closure_map)?;
+
+    let lineage = format!(
+        "l64_release_artifact: lineage\nartifact_role: Record\nsurface_kind: Lineage\nsource: genome/{source_name}\ncanonical_genome: genome/{dna_name}\ncanonical_rna: genome/{canonical_name}\ncanonical_hash: {}\n",
+        artifact.canonical_structure.canonical_hash
+    );
+    fs::write(spine_dir.join("lineage.record"), lineage)?;
+
+    let closure_frontier = "l64_release_artifact: closure_frontier\nartifact_role: Projection\nsurface_kind: ClosureFrontier\nopen_obligations: none_declared\nnote: absence_of_declared_open_obligations_is_not_external_proof\n";
+    fs::write(
+        frontier_dir.join("closure_frontier.projection"),
+        closure_frontier,
+    )?;
+
+    let stress_map = "l64_release_artifact: stress_map\nartifact_role: Projection\nsurface_kind: StressMap\nprojection_mistaken_for_source: compile-rna rejection gate\nnon_reproducible_computation: verify-roundtrip replay gate\nhidden_assumption: claim page assumption field required by future semantic slice\n";
+    fs::write(frontier_dir.join("stress_map.projection"), stress_map)?;
+
+    let replay_record = format!(
+        "l64_release_artifact: replay_record\nartifact_role: Record\nsurface_kind: ReplayRecord\ncommand_1: l64 compile-rna {} --out genome/{}\ncommand_2: l64 sequence-dna genome/{} > genome/{}\ncommand_3: l64 verify-roundtrip {}\ncanonical_hash: {}\ncanonical_hash_equal: {}\ndna_bytes_equal_same_subject: {}\n",
+        rna_path.display(),
+        dna_name,
+        dna_name,
+        canonical_name,
+        rna_path.display(),
+        roundtrip.canonical_hash,
+        roundtrip.canonical_hash_equal,
+        roundtrip.dna_bytes_equal
+    );
+    fs::write(replay_dir.join("replay_record.record"), replay_record)?;
+
+    let overview = format!(
+        "<!-- l64_release_artifact: view; artifact_role: Projection; surface_kind: View -->\n# {subject_id} Genome Release\n\nCanonical hash: `{}`\n\nThis view is projection-only. Authority lives in `genome/{dna_name}`.\n\nSee `claims/{claim_name}`, `spine/dependency_spine.projection`, `spine/closure_map.projection`, `frontier/closure_frontier.projection`, and `replay/replay_record.record`.\n",
+        artifact.canonical_structure.canonical_hash
+    );
+    fs::write(views_dir.join(&view_name), overview)?;
+    let view_receipt = format!(
+        "l64_release_artifact: view_receipt\nartifact_role: Receipt\nsurface_kind: ViewReceipt\nview: ../{view_name}\ncanonical_genome: ../../genome/{dna_name}\ncanonical_hash: {}\nprojection_only: true\n",
+        artifact.canonical_structure.canonical_hash
+    );
+    fs::write(view_receipts_dir.join(&view_receipt_name), view_receipt)?;
+
+    let manifest = GenomeReleaseManifest {
+        release_id: subject_id.into(),
+        canonical_hash: artifact.canonical_structure.canonical_hash.clone(),
+        canonical_id: artifact.canonical_structure.canonical_id.0.clone(),
+        source_sequence: format!("genome/{source_name}"),
+        canonical_genome: format!("genome/{dna_name}"),
+        claim_pages: vec![format!("claims/{claim_name}")],
+        dependency_spine: "spine/dependency_spine.projection".into(),
+        closure_map: "spine/closure_map.projection".into(),
+        closure_frontier: "frontier/closure_frontier.projection".into(),
+        stress_map: "frontier/stress_map.projection".into(),
+        lineage: "spine/lineage.record".into(),
+        replay_record: "replay/replay_record.record".into(),
+        view_receipts: vec![format!("views/view_receipts/{view_receipt_name}")],
+    };
+    let manifest_record = format!(
+        "l64_release_artifact: release_manifest\nartifact_role: Record\nsurface_kind: ReleaseManifest\nrelease_id: {}\ncanonical_id: {}\ncanonical_hash: {}\nsource_sequence: {}\ncanonical_genome: {}\nclaim_pages: {}\ndependency_spine: {}\nclosure_map: {}\nclosure_frontier: {}\nstress_map: {}\nlineage: {}\nreplay_record: {}\nview_receipts: {}\n",
+        manifest.release_id,
+        manifest.canonical_id,
+        manifest.canonical_hash,
+        manifest.source_sequence,
+        manifest.canonical_genome,
+        manifest.claim_pages.join(","),
+        manifest.dependency_spine,
+        manifest.closure_map,
+        manifest.closure_frontier,
+        manifest.stress_map,
+        manifest.lineage,
+        manifest.replay_record,
+        manifest.view_receipts.join(",")
+    );
+    fs::write(out_root.join("release_manifest.record"), manifest_record)?;
+    Ok(manifest)
 }
 
 fn parse_genome_artifact_class(value: &str) -> Result<GenomeArtifactClass> {

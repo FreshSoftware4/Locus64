@@ -4,12 +4,14 @@ use l64_core::{
     BenchmarkReceipt, BridgeContract, BundleConflict, BundleConflictPolicy, BundleDependency,
     BundleEntry, BundleExecutionReceipt, BundleManifest, BundleMergeReport, BurdenPack, Campaign,
     CampaignPortfolio, CapabilityMatrix, Certificate, ChallengeReceipt, ClaimPacket, CodebookPack,
-    ComboPack, EquivalenceClass, EvidenceContract, ExecutionManifest, FormatTransformReceipt,
-    GlyphPack, MechanizationPackage, MechanizationPolicyObject, Obligation,
-    OverlayRegistryDescriptor, PolicyBinding, PolicyResolution, ProjectionPolicy, ProofShape,
-    QaDocument, QaEntry, QcObject, RegimePack, RegistryBundle, RegistryLookup, ReplayLockManifest,
-    ReproducibilityPacket, RoundTripReport, RouteClass, RouteLedger, SurfaceDeficiency,
-    SurfaceKind, SurfacePolicy, TargetProfile, TheoremSpec, ensure_cache_subdir,
+    CodonPhase, ComboPack, EquivalenceClass, EvidenceContract, ExecutionManifest,
+    FormatTransformReceipt, GlyphPack, MechanizationPackage, MechanizationPolicyObject,
+    MolecularCodecRecord, Obligation, OverlayRegistryDescriptor, PolicyBinding, PolicyResolution,
+    ProjectionPolicy, ProofShape, QaDocument, QaEntry, QcObject, RegimePack, RegistryBundle,
+    RegistryLookup, ReplayLockManifest, ReproducibilityPacket, RoundTripReport, RouteClass,
+    RouteLedger, SubstrateAtom, SubstrateBond, SubstratePrimitive, SubstratePrimitiveKind,
+    SurfaceDeficiency, SurfaceKind, SurfacePolicy, TargetProfile, TheoremSpec, ensure_cache_subdir,
+    stable_hash_u64,
 };
 use l64_registry::SeedRegistry;
 use serde::{Deserialize, Serialize};
@@ -82,6 +84,119 @@ pub fn local_registry_from_document(document: &QaDocument) -> LocalRegistry {
     }
 }
 
+pub fn bundle_document_to_molecular_codec_records(
+    document: &QaDocument,
+    origin_authority: &str,
+) -> Vec<MolecularCodecRecord> {
+    let mut records = document
+        .entries
+        .iter()
+        .map(|entry| {
+            let entry_id = entry.id();
+            MolecularCodecRecord {
+                codon_symbol: "A#".into(),
+                phase: CodonPhase::DnaAuthority,
+                origin_authority: origin_authority.into(),
+                subject: entry_id.clone(),
+                primitive_kind: SubstratePrimitiveKind::Atom,
+                primitive: SubstratePrimitive::Atom(SubstrateAtom {
+                    id: entry_id,
+                    codon_symbol: "A#".into(),
+                    lexon_symbol: None,
+                }),
+            }
+        })
+        .collect::<Vec<_>>();
+
+    let local = bundle_from_document(document);
+    for dep in bundle_dependencies(&local) {
+        for depends_on in dep.depends_on {
+            records.push(MolecularCodecRecord {
+                codon_symbol: "B#".into(),
+                phase: CodonPhase::DnaAuthority,
+                origin_authority: origin_authority.into(),
+                subject: dep.id.clone(),
+                primitive_kind: SubstratePrimitiveKind::Bond,
+                primitive: SubstratePrimitive::Bond(SubstrateBond {
+                    id: format!(
+                        "BOND_{}",
+                        stable_hash_u64(&format!("{}<-{}", dep.id, depends_on))
+                    ),
+                    relation_codon: "<-".into(),
+                    left: dep.id.clone(),
+                    right: depends_on,
+                }),
+            });
+        }
+    }
+
+    records
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BundleSubstrateParityReport {
+    pub entry_count: usize,
+    pub dependency_edge_count: usize,
+    pub substrate_record_count: usize,
+    pub valid: bool,
+    pub failures: Vec<String>,
+}
+
+pub fn bundle_substrate_parity_report(
+    document: &QaDocument,
+    origin_authority: &str,
+) -> BundleSubstrateParityReport {
+    let local = bundle_from_document(document);
+    let dependencies = bundle_dependencies(&local);
+    let dependency_edge_count = dependencies
+        .iter()
+        .map(|dependency| dependency.depends_on.len())
+        .sum::<usize>();
+    let records = bundle_document_to_molecular_codec_records(document, origin_authority);
+    let mut failures = Vec::new();
+
+    if records.len() != document.entries.len() + dependency_edge_count {
+        failures.push("substrate record count does not match entries plus dependency edges".into());
+    }
+    for record in &records {
+        let report = l64_core::validate_molecular_codec_record(record);
+        if !report.valid {
+            failures.extend(report.failures);
+        }
+    }
+    for entry in &document.entries {
+        let id = entry.id();
+        if !records.iter().any(|record| {
+            matches!(record.primitive, SubstratePrimitive::Atom(_)) && record.subject == id
+        }) {
+            failures.push(format!("missing substrate atom for entry {id}"));
+        }
+    }
+    for dependency in &dependencies {
+        for depends_on in &dependency.depends_on {
+            if !records.iter().any(|record| match &record.primitive {
+                SubstratePrimitive::Bond(bond) => {
+                    bond.left == dependency.id && bond.right == *depends_on
+                }
+                _ => false,
+            }) {
+                failures.push(format!(
+                    "missing substrate bond for dependency {} <- {}",
+                    dependency.id, depends_on
+                ));
+            }
+        }
+    }
+
+    BundleSubstrateParityReport {
+        entry_count: document.entries.len(),
+        dependency_edge_count,
+        substrate_record_count: records.len(),
+        valid: failures.is_empty(),
+        failures,
+    }
+}
+
 pub fn overlay_registry_from_document(
     parent: SeedRegistry,
     document: &QaDocument,
@@ -102,24 +217,35 @@ pub fn overlay_registry_from_document(
 }
 
 pub fn bundle_document_from_entry_text(text: &str) -> Result<QaDocument> {
-    let entries = text
-        .lines()
-        .filter_map(|line| {
-            let line = line.trim();
-            if line.is_empty() || line.starts_with("!qc0") || line.starts_with("!qa0") {
-                None
-            } else {
-                Some(line)
+    let mut saw_header = false;
+    let mut entries = Vec::new();
+    for line in text.lines().map(str::trim).filter(|line| !line.is_empty()) {
+        if line == "!l64-bundle v1" {
+            saw_header = true;
+            continue;
+        }
+        if line.starts_with('!') {
+            if line.starts_with("!qc0") || line.starts_with("!qa0") {
+                return Err(anyhow!(
+                    "obsolete projection bundle header `{}`; use `!l64-bundle v1`",
+                    line.split_whitespace().next().unwrap_or(line)
+                ));
             }
-        })
-        .map(|line| {
-            let (kind, payload) = line
-                .split_once(' ')
-                .ok_or_else(|| anyhow!("bundle entry is missing JSON payload: `{line}`"))?;
+            return Err(anyhow!("unknown bundle header `{line}`"));
+        }
+        let (kind, payload) = line
+            .split_once(' ')
+            .ok_or_else(|| anyhow!("bundle entry is missing JSON payload: `{line}`"))?;
+        entries.push(
             QaEntry::from_surface_json(kind, payload)
-                .map_err(|err| anyhow!("invalid `{kind}` bundle entry: {err}"))
-        })
-        .collect::<Result<Vec<_>>>()?;
+                .map_err(|err| anyhow!("invalid `{kind}` bundle entry: {err}"))?,
+        );
+    }
+    if !saw_header {
+        return Err(anyhow!(
+            "bundle-entry text must start with `!l64-bundle v1`"
+        ));
+    }
     Ok(QaDocument { entries })
 }
 
@@ -143,9 +269,11 @@ pub fn import_bundle_file(
             "bundle execution inputs must be .dna; compile bundle-entry text with `compile-bundle` first"
         ));
     }
-    let document: QaDocument =
-        l64_locus::decode_section_payload(&fs::read(path)?, l64_core::LocusOpcode::CanonicalPayload)
-            .map_err(anyhow::Error::msg)?;
+    let document: QaDocument = l64_locus::decode_section_payload(
+        &fs::read(path)?,
+        l64_core::LocusOpcode::CanonicalPayload,
+    )
+    .map_err(anyhow::Error::msg)?;
     let bundle_id = path
         .file_stem()
         .and_then(|value| value.to_str())
@@ -1334,6 +1462,168 @@ mod tests {
     }
 
     #[test]
+    fn bundle_document_lowers_entries_into_substrate_atoms() {
+        let theorem = TheoremSpec {
+            id: "THS_SUBSTRATE".into(),
+            statement: "substrate lowering".into(),
+            hosts: vec!["R_SET".into()],
+            bridges: vec![],
+            operators: vec![],
+            target_equivalence: "eq".into(),
+            obligations: vec![],
+            primary_zone: l64_core::ProofMechanismZone::PmzSemantic,
+            verdict: l64_core::CertificationVerdict::RouteFound,
+            proof_shapes: vec![],
+        };
+        let document = QaDocument {
+            entries: vec![QaEntry::TheoremSpec(theorem)],
+        };
+
+        let records = bundle_document_to_molecular_codec_records(&document, "BND_SUBSTRATE_DNA");
+        assert_eq!(records.len(), 1);
+        let record = &records[0];
+        assert_eq!(record.codon_symbol, "A#");
+        assert_eq!(record.primitive_kind, SubstratePrimitiveKind::Atom);
+        assert_eq!(record.subject, "THS_SUBSTRATE");
+        match &record.primitive {
+            SubstratePrimitive::Atom(atom) => {
+                assert_eq!(atom.id, "THS_SUBSTRATE");
+                assert_eq!(atom.codon_symbol, "A#");
+                assert!(atom.lexon_symbol.is_none());
+            }
+            other => panic!("expected substrate atom, got {other:?}"),
+        }
+        let validation = l64_core::validate_molecular_codec_record(record);
+        assert!(validation.valid, "{:?}", validation.failures);
+    }
+
+    #[test]
+    fn bundle_substrate_parity_preserves_dependency_edges_as_bonds() {
+        let theorem = TheoremSpec {
+            id: "THS_DEP_SUBSTRATE".into(),
+            statement: "substrate lowering with dependencies".into(),
+            hosts: vec!["R_SET".into()],
+            bridges: vec!["BR_DEP".into()],
+            operators: vec![],
+            target_equivalence: "eq".into(),
+            obligations: vec![],
+            primary_zone: l64_core::ProofMechanismZone::PmzSemantic,
+            verdict: l64_core::CertificationVerdict::RouteFound,
+            proof_shapes: vec![],
+        };
+        let document = QaDocument {
+            entries: vec![QaEntry::TheoremSpec(theorem)],
+        };
+
+        let report = bundle_substrate_parity_report(&document, "BND_SUBSTRATE_DNA");
+        assert!(report.valid, "{:?}", report.failures);
+        assert_eq!(report.entry_count, 1);
+        assert_eq!(report.dependency_edge_count, 1);
+        assert_eq!(report.substrate_record_count, 2);
+
+        let records = bundle_document_to_molecular_codec_records(&document, "BND_SUBSTRATE_DNA");
+        assert!(records.iter().any(|record| match &record.primitive {
+            SubstratePrimitive::Bond(bond) => {
+                bond.left == "THS_DEP_SUBSTRATE"
+                    && bond.right == "BR_DEP"
+                    && bond.relation_codon == "<-"
+            }
+            _ => false,
+        }));
+    }
+
+    #[test]
+    fn bundle_substrate_parity_follows_namespace_rewrites() {
+        let theorem = TheoremSpec {
+            id: "THS_NAMESPACE_SUBSTRATE".into(),
+            statement: "substrate lowering with namespace".into(),
+            hosts: vec!["R_SET".into()],
+            bridges: vec!["BR_NAMESPACE".into()],
+            operators: vec![],
+            target_equivalence: "eq".into(),
+            obligations: vec![],
+            primary_zone: l64_core::ProofMechanismZone::PmzSemantic,
+            verdict: l64_core::CertificationVerdict::RouteFound,
+            proof_shapes: vec![],
+        };
+        let document = namespace_document(
+            QaDocument {
+                entries: vec![QaEntry::TheoremSpec(theorem)],
+            },
+            "ns.test",
+        );
+
+        let report = bundle_substrate_parity_report(&document, "BND_NAMESPACED_DNA");
+        assert!(report.valid, "{:?}", report.failures);
+        assert_eq!(report.entry_count, 1);
+        assert_eq!(report.dependency_edge_count, 1);
+
+        let records = bundle_document_to_molecular_codec_records(&document, "BND_NAMESPACED_DNA");
+        assert!(records.iter().any(|record| match &record.primitive {
+            SubstratePrimitive::Atom(atom) => atom.id == "ns.test::THS_NAMESPACE_SUBSTRATE",
+            _ => false,
+        }));
+        assert!(records.iter().any(|record| match &record.primitive {
+            SubstratePrimitive::Bond(bond) => {
+                bond.left == "ns.test::THS_NAMESPACE_SUBSTRATE" && bond.right == "BR_NAMESPACE"
+            }
+            _ => false,
+        }));
+    }
+
+    #[test]
+    fn bundle_substrate_parity_coexists_with_exact_match_conflict_policy() {
+        let parent = SeedRegistry::load().unwrap();
+        let theorem = parent
+            .get_theorem_spec("THS_CHAIN_RULE")
+            .expect("seed theorem");
+        let document = QaDocument {
+            entries: vec![QaEntry::TheoremSpec(theorem)],
+        };
+
+        let parity = bundle_substrate_parity_report(&document, "BND_EXACT_MATCH_DNA");
+        assert!(parity.valid, "{:?}", parity.failures);
+        assert_eq!(parity.entry_count, 1);
+
+        let world = import_bundle_document(
+            parent,
+            "BND_EXACT_MATCH".into(),
+            document,
+            Vec::new(),
+            BundleConflictPolicy::ExactMatch,
+            None,
+        )
+        .expect("exact match overlap should import");
+        assert!(world.overlay.merge_report.conflicts.is_empty());
+        assert!(world.overlay.get_theorem_spec("THS_CHAIN_RULE").is_some());
+    }
+
+    #[test]
+    fn bundle_substrate_parity_keeps_reject_conflict_policy_negative_behavior() {
+        let parent = SeedRegistry::load().unwrap();
+        let theorem = parent
+            .get_theorem_spec("THS_CHAIN_RULE")
+            .expect("seed theorem");
+        let document = QaDocument {
+            entries: vec![QaEntry::TheoremSpec(theorem)],
+        };
+
+        let parity = bundle_substrate_parity_report(&document, "BND_REJECT_CONFLICT_DNA");
+        assert!(parity.valid, "{:?}", parity.failures);
+
+        let err = import_bundle_document(
+            parent,
+            "BND_REJECT_CONFLICT".into(),
+            document,
+            Vec::new(),
+            BundleConflictPolicy::Reject,
+            None,
+        )
+        .expect_err("reject policy should reject seed overlap");
+        assert!(err.to_string().contains("conflicts"));
+    }
+
+    #[test]
     fn bundle_dna_file_import_bypasses_surface_parser() {
         let theorem = TheoremSpec {
             id: "THS_DNA_NATIVE".into(),
@@ -1376,6 +1666,26 @@ mod tests {
     }
 
     #[test]
+    fn bundle_entry_text_requires_l64_header_and_rejects_q_headers() {
+        let valid = r#"!l64-bundle v1
+theorem {"id":"THS_L64_HEADER","statement":"native bundle header","hosts":["R_SET"],"bridges":[],"operators":[],"target_equivalence":"eq","obligations":[],"primary_zone":"PmzSemantic","verdict":"RouteFound","proof_shapes":[]}"#;
+        let document = bundle_document_from_entry_text(valid).expect("native bundle header");
+        assert_eq!(document.entries.len(), 1);
+
+        let missing = r#"theorem {"id":"THS_NO_HEADER","statement":"missing header","hosts":["R_SET"],"bridges":[],"operators":[],"target_equivalence":"eq","obligations":[],"primary_zone":"PmzSemantic","verdict":"RouteFound","proof_shapes":[]}"#;
+        let err = bundle_document_from_entry_text(missing).unwrap_err();
+        assert!(err.to_string().contains("!l64-bundle v1"));
+
+        let obsolete = r#"!qc0 {"surface_kind":"Qc0","version":"1"}
+theorem {"id":"THS_OLD_HEADER","statement":"old header","hosts":["R_SET"],"bridges":[],"operators":[],"target_equivalence":"eq","obligations":[],"primary_zone":"PmzSemantic","verdict":"RouteFound","proof_shapes":[]}"#;
+        let err = bundle_document_from_entry_text(obsolete).unwrap_err();
+        assert!(
+            err.to_string()
+                .contains("obsolete projection bundle header")
+        );
+    }
+
+    #[test]
     fn bundle_projection_import_is_rejected() {
         let dir = std::env::temp_dir().join(format!(
             "l64_bundle_projection_reject_{}",
@@ -1385,10 +1695,10 @@ mod tests {
                 .as_nanos()
         ));
         fs::create_dir_all(&dir).unwrap();
-        let path = dir.join("bundle.qc0");
+        let path = dir.join("bundle.locus.rna");
         fs::write(
             &path,
-            r#"!qc0 {"surface_kind":"Qc0","version":"1","policy_id":"POL_QC0_CORE","capability_id":"CAP_QC0_CORE"}
+            r#"!l64-bundle v1
 theorem {"id":"THS_PROJECTION_ONLY","statement":"projection-only","hosts":["R_SET"],"bridges":[],"operators":[],"target_equivalence":"eq","obligations":[],"primary_zone":"PmzSemantic","verdict":"RouteFound","proof_shapes":[]}"#,
         )
         .unwrap();

@@ -3,8 +3,8 @@ use l64_core::{
     DnaValidationReport, ExecutionManifest, GenomeArtifactClass, GenomeSurface,
     LocusCapabilityMask, LocusOpcode, LocusPacket, LocusPacketHeader, LocusPacketKind,
     LocusSection, NormalizedRna, RnaNormalizationReceipt, SemanticLoweringReceipt, SsrReceipt,
-    decode_locus_packet, dna_header_receipt, encode_locus_packet, ensure_cache_subdir,
-    execute_lower_chain, locus_packet_summary, validate_dna_packet,
+    canonical_rna_from_structure, decode_locus_packet, dna_header_receipt, encode_locus_packet,
+    ensure_cache_subdir, execute_lower_chain, locus_packet_summary, validate_dna_packet,
 };
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use std::{
@@ -37,6 +37,75 @@ pub struct RnaCompilationArtifact {
     pub dna_validation: DnaValidationReport,
     #[serde(default)]
     pub phase_ledger: Vec<ChangeLedgerEntry>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct RnaDnaRoundtripReport {
+    pub canonical_id: String,
+    pub canonical_hash: String,
+    pub dna_bytes_equal: bool,
+    pub canonical_hash_equal: bool,
+    pub canonical_rna: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct GenomeReleaseManifest {
+    pub release_id: String,
+    pub canonical_hash: String,
+    pub canonical_id: String,
+    pub source_sequence: String,
+    pub canonical_genome: String,
+    pub claim_pages: Vec<String>,
+    pub dependency_spine: String,
+    pub closure_map: String,
+    pub closure_frontier: String,
+    pub stress_map: String,
+    pub lineage: String,
+    pub replay_record: String,
+    pub view_receipts: Vec<String>,
+}
+
+pub fn validate_rna_source_text(input: &str) -> Result<(), LocusIoError> {
+    let trimmed = input.trim_start();
+    if trimmed.is_empty() {
+        return Err(LocusIoError::Packet("RNA source is empty".into()));
+    }
+    if matches!(trimmed.as_bytes().first(), Some(b'{') | Some(b'['))
+        && serde_json::from_str::<serde_json::Value>(trimmed).is_ok()
+    {
+        return Err(LocusIoError::Packet(
+            "compile-rna accepts source RNA only; JSON/report/projection artifacts must use an explicit import or inspection command".into(),
+        ));
+    }
+    let report_markers = [
+        "l64_release_artifact:",
+        "artifact_role:",
+        "surface_kind:",
+        "canonical_genome:",
+        "dependency_spine:",
+        "closure_map:",
+        "closure_frontier:",
+        "stress_map:",
+        "replay_record:",
+        "view_receipt:",
+        "\"artifact\"",
+        "\"canonical_structure\"",
+        "\"packet_summary\"",
+        "\"lineage\"",
+        "\"dna_validation\"",
+        "\"phase_ledger\"",
+        "\"view_receipt\"",
+        "\"claim_page\"",
+        "\"closure_map\"",
+        "\"stress_map\"",
+        "\"replay_record\"",
+    ];
+    if report_markers.iter().any(|marker| trimmed.contains(marker)) {
+        return Err(LocusIoError::Packet(
+            "compile-rna rejected a projection/report/receipt artifact; use source RNA or canonical RNA".into(),
+        ));
+    }
+    Ok(())
 }
 
 pub fn encode_section_packet<T: Serialize>(
@@ -128,11 +197,11 @@ pub fn manifest_cache_root() -> Result<PathBuf, LocusIoError> {
 }
 
 fn manifest_packet_path(id: &str) -> Result<PathBuf, LocusIoError> {
-    Ok(manifest_cache_root()?.join(format!("{id}.locus")))
+    Ok(manifest_cache_root()?.join(format!("{id}.dna")))
 }
 
 fn bundle_lock_packet_path(id: &str) -> Result<PathBuf, LocusIoError> {
-    Ok(manifest_cache_root()?.join(format!("{id}.lock.locus")))
+    Ok(manifest_cache_root()?.join(format!("{id}.lock.dna")))
 }
 
 pub fn load_execution_manifest(id: &str) -> Result<ExecutionManifest, LocusIoError> {
@@ -242,6 +311,7 @@ pub fn compile_rna_to_dna_packet(
     artifact_class: GenomeArtifactClass,
     strand_manifest: Vec<String>,
 ) -> Result<(Vec<u8>, RnaCompilationArtifact), LocusIoError> {
+    validate_rna_source_text(rna)?;
     let execution = execute_lower_chain(rna).map_err(|failure| {
         LocusIoError::Packet(
             serde_json::to_string(&failure).unwrap_or_else(|_| "lower chain failure".into()),
@@ -282,12 +352,18 @@ pub fn compile_rna_to_dna_packet(
     ))
 }
 
+pub fn sequence_dna_to_canonical_rna(bytes: &[u8]) -> Result<String, LocusIoError> {
+    let (_, canonical_structure, _) = decode_canonical_structure_from_dna_packet(bytes)?;
+    Ok(canonical_rna_from_structure(&canonical_structure))
+}
+
 pub fn sequence_dna_to_rna(bytes: &[u8]) -> Result<RnaCompilationArtifact, LocusIoError> {
     let (packet, canonical_structure, dna_validation) =
         decode_canonical_structure_from_dna_packet(bytes)?;
+    let canonical_rna = canonical_rna_from_structure(&canonical_structure);
     let normalized = NormalizedRna {
-        raw_text: canonical_structure.canonical_hash.clone(),
-        normalized_text: canonical_structure.canonical_hash.clone(),
+        raw_text: canonical_rna.clone(),
+        normalized_text: canonical_rna.clone(),
         state: l64_core::RnaState::Stabilized,
         splice_regions: Vec::new(),
     };
@@ -298,7 +374,7 @@ pub fn sequence_dna_to_rna(bytes: &[u8]) -> Result<RnaCompilationArtifact, Locus
         ),
         token_stream_id: String::new(),
         state: l64_core::RnaState::Stabilized,
-        normalized_text: canonical_structure.canonical_hash.clone(),
+        normalized_text: canonical_rna,
         shorthand_eliminated: true,
         splice_regions: Vec::new(),
         issues: Vec::new(),
@@ -347,6 +423,27 @@ pub fn sequence_dna_to_rna(bytes: &[u8]) -> Result<RnaCompilationArtifact, Locus
         dna_header_receipt,
         dna_validation,
         phase_ledger: Vec::new(),
+    })
+}
+
+pub fn verify_rna_dna_roundtrip(
+    subject_id: &str,
+    rna: &str,
+    artifact_class: GenomeArtifactClass,
+    strand_manifest: Vec<String>,
+) -> Result<RnaDnaRoundtripReport, LocusIoError> {
+    let (bytes, artifact) =
+        compile_rna_to_dna_packet(subject_id, rna, artifact_class, strand_manifest.clone())?;
+    let canonical_rna = sequence_dna_to_canonical_rna(&bytes)?;
+    let (recompiled, reartifact) =
+        compile_rna_to_dna_packet(subject_id, &canonical_rna, artifact_class, strand_manifest)?;
+    Ok(RnaDnaRoundtripReport {
+        canonical_id: artifact.canonical_structure.canonical_id.0.clone(),
+        canonical_hash: artifact.canonical_structure.canonical_hash.clone(),
+        dna_bytes_equal: bytes == recompiled,
+        canonical_hash_equal: artifact.canonical_structure.canonical_hash
+            == reartifact.canonical_structure.canonical_hash,
+        canonical_rna,
     })
 }
 
@@ -400,6 +497,30 @@ mod tests {
         assert!(revalidation.failures.is_empty());
         assert!(revalidation.canonical_payload_digest_valid);
         assert_eq!(reencoded, bytes);
+
+        let canonical_rna = sequence_dna_to_canonical_rna(&bytes).expect("canonical rna");
+        let (recompiled, recompiled_artifact) = compile_rna_to_dna_packet(
+            "CHAIN_RULE",
+            &canonical_rna,
+            GenomeArtifactClass::Gene,
+            vec!["core".into()],
+        )
+        .expect("recompile canonical rna");
+        assert_eq!(recompiled, bytes);
+        assert_eq!(
+            recompiled_artifact.canonical_structure.canonical_hash,
+            artifact.canonical_structure.canonical_hash
+        );
+
+        let report = verify_rna_dna_roundtrip(
+            "CHAIN_RULE",
+            "ι ≔ σ ‖ κ",
+            GenomeArtifactClass::Gene,
+            vec!["core".into()],
+        )
+        .expect("verify roundtrip");
+        assert!(report.dna_bytes_equal);
+        assert!(report.canonical_hash_equal);
     }
 
     #[test]
@@ -416,5 +537,17 @@ mod tests {
         let corrupted = encode_locus_packet(&packet).expect("encode corrupted packet");
         let err = sequence_dna_to_rna(&corrupted).expect_err("stale digest must fail");
         assert!(err.to_string().contains("DNA validation failed"));
+    }
+
+    #[test]
+    fn compile_rejects_projection_report_text() {
+        let err = compile_rna_to_dna_packet(
+            "REPORT",
+            "{\"artifact\":{\"canonical_structure\":{}}}",
+            GenomeArtifactClass::Gene,
+            vec!["core".into()],
+        )
+        .expect_err("report text must not compile as RNA");
+        assert!(err.to_string().contains("source RNA only"));
     }
 }

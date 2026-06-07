@@ -108,6 +108,11 @@ fn print_help() {
     println!("  l64 normalize-rna sample.gene.rna");
     println!("  l64 compile-rna sample.gene.rna --out sample.gene.dna --artifact-class gene");
     println!("  l64 sequence-dna sample.gene.dna");
+    println!("  l64 inspect-dna sample.gene.dna");
+    println!("  l64 verify-roundtrip sample.gene.rna --artifact-class gene");
+    println!(
+        "  l64 export-genome-release --rna sample.gene.rna --out sample-release --artifact-class gene"
+    );
     println!("  l64 certify-derived --campaign CPG_CHAIN_RULE");
     println!("  l64 observe-run --report REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE");
     println!("  l64 research-import --kind task samples/research/task_operational_truth.json");

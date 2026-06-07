@@ -73,7 +73,7 @@ fn bundle_document_from_text(bundle: &str) -> QaDocument {
         .lines()
         .filter_map(|line| {
             let line = line.trim();
-            if line.is_empty() || line.starts_with("!qc0") {
+            if line.is_empty() || line.starts_with("!l64-bundle") {
                 return None;
             }
             let (kind, payload) = line.split_once(' ').unwrap();
@@ -150,7 +150,7 @@ fn route_bundle_named(
         r#"["SymbolicFidelity","SurfaceTransitionPenalty","IdentityPreservation","LossCompliance","ProofShapeSatisfiability","ExecutionCost"]"#
     };
     format!(
-        r#"!qc0 {{"surface_kind":"Qc0","version":"1","policy_id":"POL_QC0_CORE","capability_id":"CAP_QC0_CORE"}}
+        r#"!l64-bundle v1
 policy-object {{"id":"MOP_{bundle_id}_OPT","kind":"Optimizer","scope":{{"Bundle":"{bundle_id}"}},"extends":null,"optimizer":{{"optimizer_policy":"{optimizer_policy}","backend":"Lexicographic","active_axes":{axes},"route_explanation_verbosity":"standard","symbolic_fidelity_preferred":{symbolic},"tie_break_rules":["shorter-path"]}},"evaluator":null,"replay_cache":null,"report":null,"canonicalizer_mode":null,"merge_policy":null,"notes":["bundle local optimizer"]}}
 proof {{"id":"PS_LOCAL","kind":"Square","nodes":["a","b","c","d"],"edges":[{{"from":"a","to":"b","label":"f"}},{{"from":"b","to":"d","label":"g"}},{{"from":"a","to":"c","label":"h"}},{{"from":"c","to":"d","label":"i"}}],"equations":["g∘f=i∘h"],"target_equivalence":"eq","receipts":["r"],"gate":"Pass"}}
 bridge {{"id":"B_FAST","src":"R_TOP","tgt":"R_CALC","id_pres":"pres","eq_pres":"eq","forget":[],"enrich":["der"],"loss":["symbolic"],"reversibility":"LossySupported","receipts":["r"],"rollback":"conditional"}}
@@ -185,7 +185,7 @@ fn evaluator_bundle(stem: &str, strict: bool) -> String {
         String::new()
     };
     format!(
-        r#"!qc0 {{"surface_kind":"Qc0","version":"1","policy_id":"POL_QC0_CORE","capability_id":"CAP_QC0_CORE"}}
+        r#"!l64-bundle v1
 {policy_line}
 proof {{"id":"PS_EVAL","kind":"Square","nodes":["a","b","c","d"],"edges":[{{"from":"a","to":"b","label":"f"}},{{"from":"b","to":"d","label":"g"}},{{"from":"a","to":"c","label":"h"}},{{"from":"c","to":"d","label":"i"}}],"equations":["g∘f=i∘h"],"target_equivalence":"eq","receipts":["r"],"gate":"Pass"}}
 bridge {{"id":"B_EVAL","src":"R_TOP","tgt":"R_CALC","id_pres":"pres","eq_pres":"eq","forget":[],"enrich":["der"],"loss":[],"reversibility":"Enriching","receipts":["r"],"rollback":"allowed"}}
@@ -205,7 +205,7 @@ fn replay_bundle(stem: &str, replay_allowed: bool) -> String {
         r#"policy-object {{"id":"MOP_{bundle_id}_REPLAY","kind":"ReplayCache","scope":{{"Bundle":"{bundle_id}"}},"extends":null,"optimizer":null,"evaluator":null,"replay_cache":{{"replay_allowed":{replay_allowed},"exact_policy_match_required":true,"survive_surface_only_changes":false,"reuse_approximate_results":true,"optimizer_change_invalidates":true,"surface_pack_change_invalidates":true,"trust_class":"ExactPolicyOnly"}},"report":null,"canonicalizer_mode":null,"merge_policy":null,"notes":["replay policy"]}}"#
     );
     format!(
-        r#"!qc0 {{"surface_kind":"Qc0","version":"1","policy_id":"POL_QC0_CORE","capability_id":"CAP_QC0_CORE"}}
+        r#"!l64-bundle v1
 {policy_line}
 proof {{"id":"PS_REPLAY","kind":"Square","nodes":["a","b","c","d"],"edges":[{{"from":"a","to":"b","label":"f"}},{{"from":"b","to":"d","label":"g"}},{{"from":"a","to":"c","label":"h"}},{{"from":"c","to":"d","label":"i"}}],"equations":["g∘f=i∘h"],"target_equivalence":"eq","receipts":["r"],"gate":"Pass"}}
 bridge {{"id":"B_REPLAY","src":"R_TOP","tgt":"R_CALC","id_pres":"pres","eq_pres":"eq","forget":[],"enrich":["der"],"loss":[],"reversibility":"Enriching","receipts":["r"],"rollback":"allowed"}}
@@ -222,7 +222,7 @@ campaign {{"id":"CPG_LOCAL_REPLAY","theorem":"THS_LOCAL_REPLAY","target_profile"
 fn parallel_campaign_bundle(stem: &str) -> String {
     let bundle_id = format!("BND_{}", stem.to_ascii_uppercase().replace('-', "_"));
     format!(
-        r#"!qc0 {{"surface_kind":"Qc0","version":"1","policy_id":"POL_QC0_CORE","capability_id":"CAP_QC0_CORE"}}
+        r#"!l64-bundle v1
 policy-object {{"id":"MOP_{bundle_id}_SCHED","kind":"ReportExport","scope":{{"Bundle":"{bundle_id}"}},"extends":null,"optimizer":null,"evaluator":null,"replay_cache":null,"report":{{"export_surfaces":["Qc0"],"include_policy_trace":true,"include_route_explanation":true,"include_obligation_logs":true}},"scheduler":{{"parallelization":"ParallelIndependent","max_workers":2,"allow_parallel_replay":false,"allow_parallel_certification":true,"allow_parallel_exports":true,"deterministic_ordering":true}},"canonicalizer_mode":null,"merge_policy":null,"notes":["parallel scheduler policy"]}}
 proof {{"id":"PS_PAR","kind":"Square","nodes":["a","b","c","d"],"edges":[{{"from":"a","to":"b","label":"f"}},{{"from":"b","to":"d","label":"g"}},{{"from":"a","to":"c","label":"h"}},{{"from":"c","to":"d","label":"i"}}],"equations":["g∘f=i∘h"],"target_equivalence":"eq","receipts":["r"],"gate":"Pass"}}
 bridge {{"id":"B_PAR","src":"R_TOP","tgt":"R_CALC","id_pres":"pres","eq_pres":"eq","forget":[],"enrich":["der"],"loss":[],"reversibility":"Enriching","receipts":["r"],"rollback":"allowed"}}
@@ -257,7 +257,7 @@ fn obligation_parallel_bundle(stem: &str, allow_parallel: bool) -> String {
     let bundle_id = format!("BND_{}", stem.to_ascii_uppercase().replace('-', "_"));
     let workers = if allow_parallel { 3 } else { 1 };
     format!(
-        r#"!qc0 {{"surface_kind":"Qc0","version":"1","policy_id":"POL_QC0_CORE","capability_id":"CAP_QC0_CORE"}}
+        r#"!l64-bundle v1
 policy-object {{"id":"MOP_{bundle_id}_SCHED","kind":"ReportExport","scope":{{"Bundle":"{bundle_id}"}},"extends":null,"optimizer":null,"evaluator":null,"replay_cache":null,"report":{{"export_surfaces":["Qc0"],"include_policy_trace":true,"include_route_explanation":true,"include_obligation_logs":true}},"scheduler":{{"parallelization":"ParallelIndependent","max_workers":2,"allow_parallel_replay":true,"allow_parallel_certification":true,"allow_parallel_exports":true,"deterministic_ordering":true,"allow_parallel_obligations":{allow_parallel},"max_obligation_workers":{workers},"allow_parallel_obligation_replay":{allow_parallel},"serialize_canonicalization_sensitive":true}},"canonicalizer_mode":null,"merge_policy":null,"notes":["obligation scheduler policy"]}}
 proof {{"id":"PS_OBL","kind":"Square","nodes":["a","b","c","d"],"edges":[{{"from":"a","to":"b","label":"f"}},{{"from":"b","to":"d","label":"g"}},{{"from":"a","to":"c","label":"h"}},{{"from":"c","to":"d","label":"i"}}],"equations":["g∘f=i∘h"],"target_equivalence":"eq","receipts":["r"],"gate":"Pass"}}
 bridge {{"id":"B_OBL","src":"R_TOP","tgt":"R_CALC","id_pres":"pres","eq_pres":"eq","forget":[],"enrich":["der"],"loss":[],"reversibility":"Enriching","receipts":["r"],"rollback":"allowed"}}
@@ -301,7 +301,7 @@ object {"id":"OPR_PROMOTED_OPR_CHAIN1","identity":{"tag":"OPR","cid":"cid:OPR_PR
         ""
     };
     format!(
-        r#"!qc0 {{"surface_kind":"Qc0","version":"1","policy_id":"POL_QC0_CORE","capability_id":"CAP_QC0_CORE"}}
+        r#"!l64-bundle v1
 {scheduler_policy}{evaluator_policy}{promoted_operator}
 theorem {{"id":"THS_CHAIN_RULE","statement":"DER(g∘f,x) ≈1 DER(g,f(x))∘DER(f,x)","hosts":["R_TOP","R_CALC"],"bridges":["B_TOP_TO_CALC"],"operators":["OPR.Chain1"],"target_equivalence":"first-order jet equivalence","obligations":["OblEq","OblAdm","OblLoc","OblRed"],"primary_zone":"PmzStructural","verdict":"Benchmarked","proof_shapes":["PS_SQUARE_TOPO"]}}
 obligation {{"id":"OBL_CHAIN_EQ","kind":"OblEq","description":"first-order slack equivalence preserved under composition","status":"Benchmarked"}}

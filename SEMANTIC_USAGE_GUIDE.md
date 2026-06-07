@@ -68,7 +68,13 @@ Current RNA syntax is structural and intentionally minimal. If the equation is t
 l64 normalize-rna .\distributed_tolman.gene.rna
 l64 compile-rna .\distributed_tolman.gene.rna --out .\distributed_tolman.gene.dna --artifact-class gene --persist-lineage
 l64 sequence-dna .\distributed_tolman.gene.dna
+l64 inspect-dna .\distributed_tolman.gene.dna
+l64 verify-roundtrip .\distributed_tolman.gene.rna --artifact-class gene
+l64 export-genome-release --rna .\distributed_tolman.gene.rna --out .\distributed_tolman.release --artifact-class gene
 ```
+
+`sequence-dna` returns canonical reconstructable RNA for fixed-point checks. `inspect-dna` returns inspection JSON and cannot be used as source RNA.
+`export-genome-release` emits coordinate-bearing review artifacts from RNA/DNA authority. Generated source/canonical RNA can be recompiled; generated views, claim pages, closure maps, stress maps, lineages, replay records, manifests, and receipts remain projection/record artifacts, use role-specific filenames, and are rejected as source.
 
 This creates a lower-chain record:
 
@@ -124,7 +130,7 @@ LINEAGE:
 distributed_tolman.gene.dna
 ```
 
-If using a `.qc0` bundle, represent these with surfaced `claim-packet`, `evidence-contract`, `benchmark-receipt`, `challenge-receipt`, `reproducibility-packet`, and `adequacy` entries.
+If using bundle-entry authoring text, represent these with `claim-packet`, `evidence-contract`, `benchmark-receipt`, `challenge-receipt`, `reproducibility-packet`, and `adequacy` entries, then compile the bundle text into `.dna` before certification.
 
 ### 4. Attach Evidence Contracts
 
@@ -286,7 +292,8 @@ cosmology-work/
   dna/
     distributed_tolman.gene.dna
   claims/
-    distributed_tolman.claim.qc0
+    distributed_tolman.claim.locus.rna
+    distributed_tolman.claim.dna
   benchmarks/
     tolman_surface_brightness.benchmark.json
     hubble_tension.benchmark.json
@@ -307,8 +314,9 @@ Locus64 can live separately and be called by scripts or ChatGPT-generated workfl
 # 1. Compile identity/derivation root.
 l64 compile-rna .\rna\distributed_tolman.gene.rna --out .\dna\distributed_tolman.gene.dna --artifact-class gene --persist-lineage
 
-# 2. Certify or validate surfaced bundle.
-l64 certify-bundle --file .\claims\distributed_tolman.claim.qc0 --conflict-policy exact-match
+# 2. Compile and certify the claim bundle.
+l64 compile-bundle .\claims\distributed_tolman.claim.locus.rna --out .\claims\distributed_tolman.claim.dna
+l64 certify-bundle --file .\claims\distributed_tolman.claim.dna --conflict-policy exact-match
 
 # 3. Inspect report.
 l64 observe-run --report REPORT_ID
@@ -319,8 +327,8 @@ l64 research-derive-from-report --report-id REPORT_ID --persist
 # 5. Check promotion readiness.
 l64 research-promotion-readiness REPORT_ID
 
-# 6. Export artifacts for review or ChatGPT handoff.
-l64 export-report --id REPORT_ID --to qc0
+# 6. Export DNA-backed artifacts for review or ChatGPT handoff.
+l64 export-report-dna --report-id REPORT_ID --out .\exports\reports\REPORT_ID.dna
 ```
 
 ## ChatGPT Integration Pattern

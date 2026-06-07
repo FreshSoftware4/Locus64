@@ -157,13 +157,38 @@ try {
 
             $rnaPath = Join-Path $nsDir "lower-chain.gene.rna"
             $dnaPath = Join-Path $nsDir "lower-chain.gene.dna"
+            $canonicalRnaPath = Join-Path $nsDir "lower-chain.canonical.gene.rna"
+            $recompiledDnaPath = Join-Path $nsDir "lower-chain.recompiled.gene.dna"
+            $inspectionPath = Join-Path $nsDir "lower-chain.inspection.gene.rna"
+            $rejectedDnaPath = Join-Path $nsDir "lower-chain.rejected.gene.dna"
+            $genomeReleaseDir = Join-Path $nsDir "lower-chain.release"
             Write-Utf8NoBom -Path $rnaPath -Content "i   :=   s   ||   k"
             Invoke-Mf -Namespace $ns -CommandArgs @("normalize-rna", $rnaPath) -CapturePath (Join-Path $nsDir "normalize-rna.json") | Out-Null
             Invoke-Mf -Namespace $ns -CommandArgs @("compile-rna", $rnaPath, "--out", $dnaPath, "--artifact-class", "gene", "--persist-lineage") -CapturePath (Join-Path $nsDir "compile-rna.json") | Out-Null
-            Invoke-Mf -Namespace $ns -CommandArgs @("sequence-dna", $dnaPath) -CapturePath (Join-Path $nsDir "sequence-dna.json") | Out-Null
+            $canonicalRna = Invoke-Mf -Namespace $ns -CommandArgs @("sequence-dna", $dnaPath) -CapturePath (Join-Path $nsDir "sequence-dna.rna")
+            Write-Utf8NoBom -Path $canonicalRnaPath -Content $canonicalRna
+            Invoke-Mf -Namespace $ns -CommandArgs @("compile-rna", $canonicalRnaPath, "--out", $recompiledDnaPath, "--artifact-class", "gene") -CapturePath (Join-Path $nsDir "compile-canonical-rna.json") | Out-Null
+            Invoke-Mf -Namespace $ns -CommandArgs @("verify-roundtrip", $rnaPath, "--artifact-class", "gene") -CapturePath (Join-Path $nsDir "verify-roundtrip.json") | Out-Null
+            $inspection = Invoke-Mf -Namespace $ns -CommandArgs @("inspect-dna", $dnaPath) -CapturePath (Join-Path $nsDir "inspect-dna.json")
+            Write-Utf8NoBom -Path $inspectionPath -Content $inspection
+            $rejected = $false
+            try {
+                Invoke-Mf -Namespace $ns -CommandArgs @("compile-rna", $inspectionPath, "--out", $rejectedDnaPath, "--artifact-class", "gene") -CapturePath (Join-Path $nsDir "compile-inspection-rejected.json") | Out-Null
+            } catch {
+                $rejected = $true
+            }
+            if (-not $rejected) {
+                throw "compile-rna accepted inspect-dna output as source RNA"
+            }
+            Invoke-Mf -Namespace $ns -CommandArgs @("export-genome-release", "--rna", $rnaPath, "--out", $genomeReleaseDir, "--artifact-class", "gene") -CapturePath (Join-Path $nsDir "export-genome-release.json") | Out-Null
+            $claimPage = Join-Path $genomeReleaseDir "claims\lower-chain.gene.claim"
+            if (-not (Test-Path $claimPage)) {
+                throw "export-genome-release did not emit claim page"
+            }
             $summary.rna_normalize_runs++
-            $summary.rna_compile_runs++
+            $summary.rna_compile_runs += 2
             $summary.dna_sequence_runs++
+            $summary.roundtrip_runs++
 
             foreach ($campaign in $campaigns) {
                 $stdout = Invoke-Mf -Namespace $ns -CommandArgs @("certify-derived", "--campaign", $campaign) -CapturePath (Join-Path $nsDir "$campaign-certify.json")

@@ -51,6 +51,9 @@ l64 certify-bundle --file samples/imported_claim_stress_gap_bundle.dna --conflic
 l64 normalize-rna sample.gene.rna
 l64 compile-rna sample.gene.rna --out sample.gene.dna --artifact-class gene --persist-lineage
 l64 sequence-dna sample.gene.dna
+l64 inspect-dna sample.gene.dna
+l64 verify-roundtrip sample.gene.rna --artifact-class gene
+l64 export-genome-release --rna sample.gene.rna --out sample-release --artifact-class gene
 ```
 
 The lower chain is ledgered as:
@@ -60,6 +63,27 @@ Tokenization -> RnaNormalization -> StructuralResolution -> CanonicalNormalizati
 ```
 
 DNA emission validates header truth, structural opcode law, and symbol-table non-authority before writing the artifact.
+
+`compile-rna` accepts source RNA only. It rejects inspection reports, receipts, generated views, closure maps, claim pages, stress maps, replay records, and JSON report/projection text.
+
+`sequence-dna` emits canonical reconstructable RNA suitable for recompilation. `inspect-dna` emits JSON inspection output and is not source. `verify-roundtrip` checks the fixed-point path:
+
+```text
+RNA -> DNA -> canonical RNA -> DNA
+```
+
+`export-genome-release` creates a derived release directory with:
+
+```text
+genome/
+spine/
+claims/
+frontier/
+replay/
+views/
+```
+
+Generated manifest, claim pages, dependency spines, closure maps, closure frontiers, stress maps, lineage records, replay records, views, and receipts are projection/record artifacts and are rejected by `compile-rna`. Generated source RNA and canonical RNA are the only release text artifacts intended to re-enter `compile-rna`; generated non-source artifacts use role-specific `.projection`, `.record`, or receipt filenames rather than `.locus` authority hints.
 
 ## Export, Import, Validate
 

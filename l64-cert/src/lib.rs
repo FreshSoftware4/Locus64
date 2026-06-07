@@ -7,8 +7,8 @@ use l64_core::{
     CoverageDecision, DeterministicExecutionEnvelope, DistressVector, EvidenceExactness,
     EvidencePreference, ExecutionClosureReceipt, FormatTransformReceipt, Frontier, FrontierLedger,
     GeneratedStatus, GenerationReceipt, GeneratorContract, GenomeArtifactClass, GenomeSurface,
-    HelpRequest, LocusCapabilityMask, LocusOpcode, LocusPacket, LocusPacketHeader,
-    LocusPacketKind, LocusSection, Obligation, ObligationCacheShard, ObligationCollisionReport,
+    HelpRequest, LocusCapabilityMask, LocusOpcode, LocusPacket, LocusPacketHeader, LocusPacketKind,
+    LocusSection, Obligation, ObligationCacheShard, ObligationCollisionReport,
     ObligationConcurrencyClass, ObligationDagEdge, ObligationDagNode, ObligationEvaluationMode,
     ObligationEvidenceReceipt, ObligationGroup, ObligationKind, ObligationLaneRecord,
     ObligationMergeReceipt, ObligationNamespaceReceipt, ObligationOrderingReceipt, ObligationPlan,
@@ -888,15 +888,10 @@ pub fn cache_stats() -> Result<CacheStats, CertError> {
 
 pub fn clear_cache(scope: Option<&str>) -> Result<(), CertError> {
     let path = execution_cache_path().map_err(|err| CertError::Message(err.to_string()))?;
-    let legacy =
-        execution_cache_legacy_path().map_err(|err| CertError::Message(err.to_string()))?;
     match scope {
         Some("all") | None | Some("reports") | Some("obligations") => {
             if path.exists() {
                 fs::remove_dir_all(&path).map_err(|err| CertError::Message(err.to_string()))?;
-            }
-            if legacy.exists() {
-                fs::remove_file(&legacy).map_err(|err| CertError::Message(err.to_string()))?;
             }
         }
         Some(_) => {}
@@ -4479,10 +4474,6 @@ fn execution_cache_root() -> Result<PathBuf, CertError> {
     ensure_cache_subdir("execution").map_err(CertError::Message)
 }
 
-fn execution_cache_legacy_path() -> Result<PathBuf, CertError> {
-    Ok(execution_cache_root()?.join("reports.json"))
-}
-
 fn execution_cache_entries_root() -> Result<PathBuf, CertError> {
     let root = execution_cache_root()?.join("reports");
     fs::create_dir_all(&root).map_err(|err| CertError::Message(err.to_string()))?;
@@ -4494,7 +4485,7 @@ fn execution_cache_path() -> Result<PathBuf, CertError> {
 }
 
 fn execution_cache_entry_path(cache_key: &str) -> Result<PathBuf, CertError> {
-    Ok(execution_cache_entries_root()?.join(format!("{}.locus", cache_key_filename(cache_key))))
+    Ok(execution_cache_entries_root()?.join(format!("{}.dna", cache_key_filename(cache_key))))
 }
 
 fn cache_key_filename(cache_key: &str) -> String {
@@ -4514,7 +4505,7 @@ fn load_execution_cache() -> Result<ExecutionCache, CertError> {
     for entry in fs::read_dir(&root).map_err(|err| CertError::Message(err.to_string()))? {
         let entry = entry.map_err(|err| CertError::Message(err.to_string()))?;
         let path = entry.path();
-        if path.extension().and_then(|item| item.to_str()) != Some("locus") {
+        if path.extension().and_then(|item| item.to_str()) != Some("dna") {
             continue;
         }
         saw_binary = true;
@@ -4528,21 +4519,8 @@ fn load_execution_cache() -> Result<ExecutionCache, CertError> {
             }
         }
     }
-    if saw_binary {
-        return Ok(cache);
-    }
-    let legacy = execution_cache_legacy_path()?;
-    if !legacy.exists() {
-        return Ok(cache);
-    }
-    let text = fs::read_to_string(&legacy).map_err(|err| CertError::Message(err.to_string()))?;
-    match serde_json::from_str(&text) {
-        Ok(cache) => Ok(cache),
-        Err(_) => {
-            let _ = fs::remove_file(&legacy);
-            Ok(ExecutionCache::default())
-        }
-    }
+    let _ = saw_binary;
+    Ok(cache)
 }
 
 fn load_cached_report(cache_key: &str) -> Result<Option<CachedCertificationReport>, CertError> {
@@ -5305,10 +5283,6 @@ pub fn report_cache_path(id: &str) -> Result<PathBuf, CertError> {
     Ok(report_cache_root()?.join(format!("{id}.dna")))
 }
 
-pub fn legacy_report_cache_path(id: &str) -> Result<PathBuf, CertError> {
-    Ok(report_cache_root()?.join(format!("{id}.locus")))
-}
-
 pub fn report_id(report: &CertificationReport) -> String {
     format!(
         "REPORT_{}_{}",
@@ -5630,12 +5604,6 @@ pub fn load_report_document_with_registry(
         let report = decode_locus_packet_report(&bytes)?;
         return report_to_document_with_registry(&report, registry);
     }
-    let legacy_path = legacy_report_cache_path(id)?;
-    if legacy_path.exists() {
-        let bytes = fs::read(legacy_path).map_err(|err| CertError::Message(err.to_string()))?;
-        let report = decode_locus_packet_report(&bytes)?;
-        return report_to_document_with_registry(&report, registry);
-    }
     Err(CertError::Message(format!("report packet not found: {id}")))
 }
 
@@ -5854,7 +5822,7 @@ mod tests {
             .lines()
             .filter_map(|line| {
                 let line = line.trim();
-                if line.is_empty() || line.starts_with("!qc0") {
+                if line.is_empty() || line.starts_with("!l64-bundle") {
                     return None;
                 }
                 let (kind, payload) = line.split_once(' ').unwrap();
@@ -6375,7 +6343,7 @@ mod tests {
         let file = dir.join("bundle.dna");
         write_bundle(
             &file,
-            r#"!qc0 {"surface_kind":"Qc0","version":"1","policy_id":"POL_QC0_CORE","capability_id":"CAP_QC0_CORE"}
+            r#"!l64-bundle v1
 policy-object {"id":"MOP_BND_BUNDLE_TEST_SCHED","kind":"ReportExport","scope":{"Bundle":"BND_BUNDLE"},"extends":null,"optimizer":null,"evaluator":null,"replay_cache":null,"report":{"export_surfaces":["Qc0"],"include_policy_trace":true,"include_route_explanation":true,"include_obligation_logs":true},"scheduler":{"parallelization":"ParallelIndependent","max_workers":2,"allow_parallel_replay":true,"allow_parallel_certification":true,"allow_parallel_exports":true,"deterministic_ordering":true,"allow_parallel_obligations":true,"max_obligation_workers":2,"allow_parallel_obligation_replay":true,"serialize_canonicalization_sensitive":true},"canonicalizer_mode":null,"merge_policy":null,"notes":["test scheduler"]}
 proof {"id":"PS_T","kind":"Square","nodes":["a","b","c","d"],"edges":[{"from":"a","to":"b","label":"f"},{"from":"b","to":"d","label":"g"},{"from":"a","to":"c","label":"h"},{"from":"c","to":"d","label":"i"}],"equations":["g∘f=i∘h"],"target_equivalence":"eq","receipts":["r"],"gate":"Pass"}
 bridge {"id":"B_T","src":"R_TOP","tgt":"R_CALC","id_pres":"pres","eq_pres":"eq","forget":[],"enrich":["der"],"loss":[],"reversibility":"Enriching","receipts":["r"],"rollback":"allowed"}
@@ -6417,7 +6385,7 @@ campaign {"id":"CPG_T","theorem":"THS_T","target_profile":"TGT_T","route_ledger"
         let file = dir.join("bundle.dna");
         write_bundle(
             &file,
-            r#"!qc0 {"surface_kind":"Qc0","version":"1","policy_id":"POL_QC0_CORE","capability_id":"CAP_QC0_CORE"}
+            r#"!l64-bundle v1
 policy-object {"id":"MOP_BND_PAR_SCHED","kind":"ReportExport","scope":{"Bundle":"BND_MULTI"},"extends":null,"optimizer":null,"evaluator":null,"replay_cache":null,"report":{"export_surfaces":["Qc0"],"include_policy_trace":true,"include_route_explanation":true,"include_obligation_logs":true},"scheduler":{"parallelization":"ParallelIndependent","max_workers":2,"allow_parallel_replay":false,"allow_parallel_certification":true,"allow_parallel_exports":true,"deterministic_ordering":true,"allow_parallel_obligations":true,"max_obligation_workers":2,"allow_parallel_obligation_replay":false,"serialize_canonicalization_sensitive":true},"canonicalizer_mode":null,"merge_policy":null,"notes":["parallel scheduler policy"]}
 proof {"id":"PS_PAR","kind":"Square","nodes":["a","b","c","d"],"edges":[{"from":"a","to":"b","label":"f"},{"from":"b","to":"d","label":"g"},{"from":"a","to":"c","label":"h"},{"from":"c","to":"d","label":"i"}],"equations":["g∘f=i∘h"],"target_equivalence":"eq","receipts":["r"],"gate":"Pass"}
 bridge {"id":"B_PAR","src":"R_TOP","tgt":"R_CALC","id_pres":"pres","eq_pres":"eq","forget":[],"enrich":["der"],"loss":[],"reversibility":"Enriching","receipts":["r"],"rollback":"allowed"}
@@ -6476,7 +6444,7 @@ campaign {"id":"CPG_PAR_B","theorem":"THS_PAR_B","target_profile":"TGT_PAR","rou
         let file = dir.join("bundle.dna");
         write_bundle(
             &file,
-            r#"!qc0 {"surface_kind":"Qc0","version":"1","policy_id":"POL_QC0_CORE","capability_id":"CAP_QC0_CORE"}
+            r#"!l64-bundle v1
 proof {"id":"PS_G1","kind":"Square","nodes":["a","b","c","d"],"edges":[{"from":"a","to":"b","label":"f"},{"from":"b","to":"d","label":"g"},{"from":"a","to":"c","label":"h"},{"from":"c","to":"d","label":"i"}],"equations":["g∘f=i∘h"],"target_equivalence":"eq","receipts":["r"],"gate":"Pass"}
 bridge {"id":"B_G1","src":"R_TOP","tgt":"R_CALC","id_pres":"pres","eq_pres":"eq","forget":[],"enrich":["der"],"loss":[],"reversibility":"Enriching","receipts":["r"],"rollback":"allowed"}
 atlas {"id":"A_G1","source_regime":"R_TOP","target_regime":"R_CALC","burden_class":"ImportedKernelClaim","proof_target":"kernel-claim","candidate_paths":[["B_G1"]],"normalized_winner":["B_G1"],"winner_state":"Candidate","loss_profile":{"items":[]},"proof_shapes_checked":["PS_G1"],"recipe_maturity":"Stable","failure_signatures":[],"side_conditions":[],"surface_transition":{"compatibility":"AuthorityPreserving","penalties":[],"total_penalty":0}}
@@ -6585,7 +6553,7 @@ adequacy {"id":"ADQ_G1_CHALLENGE","kind":"ChallengeInterpretation","regime_ids":
         let file = dir.join("bundle.dna");
         write_bundle(
             &file,
-            r#"!qc0 {"surface_kind":"Qc0","version":"1","policy_id":"POL_QC0_CORE","capability_id":"CAP_QC0_CORE"}
+            r#"!l64-bundle v1
 proof {"id":"PS_G2","kind":"Square","nodes":["a","b","c","d"],"edges":[{"from":"a","to":"b","label":"f"},{"from":"b","to":"d","label":"g"},{"from":"a","to":"c","label":"h"},{"from":"c","to":"d","label":"i"}],"equations":["g∘f=i∘h"],"target_equivalence":"eq","receipts":["r"],"gate":"Pass"}
 bridge {"id":"B_G2","src":"R_TOP","tgt":"R_CALC","id_pres":"pres","eq_pres":"eq","forget":[],"enrich":["der"],"loss":[],"reversibility":"Enriching","receipts":["r"],"rollback":"allowed"}
 atlas {"id":"A_G2","source_regime":"R_TOP","target_regime":"R_CALC","burden_class":"ImportedKernelClaim","proof_target":"kernel-claim","candidate_paths":[["B_G2"]],"normalized_winner":["B_G2"],"winner_state":"Candidate","loss_profile":{"items":[]},"proof_shapes_checked":["PS_G2"],"recipe_maturity":"Stable","failure_signatures":[],"side_conditions":[],"surface_transition":{"compatibility":"AuthorityPreserving","penalties":[],"total_penalty":0}}
