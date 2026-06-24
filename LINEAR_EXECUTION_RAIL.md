@@ -144,6 +144,13 @@ Rationale:
 
 If a future pass finds a higher-scoring slice, it must update this selector before implementing it.
 
+Performance slice rule:
+
+- Optimize active authority-path mechanisms before report/view/projection conveniences.
+- Preserve byte identity, canonical IDs, validation receipts, and fixed-point behavior.
+- Prefer capacity planning, shared deterministic encoders, and allocation reduction over speculative algorithm rewrites.
+- Do not optimize migration, forensic, legacy, or projection paths unless they remain load-bearing after native authority replacement.
+
 ## External Proving Slice Rule
 
 External proving projects are allowed only when they strengthen the main authority path.
@@ -243,6 +250,8 @@ Landed:
 - Default report policy and observe fallback policy no longer request removed Q export surfaces; report/export defaults now remain neutral unless a native DNA/report path explicitly supplies behavior.
 - CLI, admin, and cert scheduler/report policy fixtures now use neutral `export_surfaces: []`, so tests no longer preserve removed Q export-surface expectations.
 - Atlas inline policy resolution also uses neutral report export surfaces, so route selection no longer seeds removed Q projection outputs by default.
+- First authority-path performance slice has landed: canonical instruction byte encoding and locus packet encoding now preallocate from known structural sizes without changing encoded bytes, canonical identity, or packet semantics.
+- RNA tokenization, normalization, and SSR construction now preallocate hot-path buffers from source-size or byte-level structural estimates without adding semantic parsing passes or changing receipts.
 - `l64-surfaces`, `l64-qc0`, and `l64-qa0` have been removed from workspace membership and deleted from the codebase.
 - Bundle-entry text remains only as an authoring convenience compiled by `compile-bundle` into `.dna`; it is not a public authority surface.
 

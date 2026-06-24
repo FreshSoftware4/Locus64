@@ -4184,7 +4184,16 @@ fn canonical_kind_byte(kind: SsrNodeKind) -> u8 {
 }
 
 pub fn canonical_instruction_bytes(instructions: &[CanonicalInstruction]) -> Vec<u8> {
-    let mut bytes = Vec::new();
+    const CANONICAL_INSTRUCTION_HEADER_BYTES: usize = 6 + 8;
+    const MAX_CANONICAL_INSTRUCTION_BYTES: usize = 1 + 1 + 8 + 1 + 8;
+
+    let mut bytes = Vec::with_capacity(
+        CANONICAL_INSTRUCTION_HEADER_BYTES.saturating_add(
+            instructions
+                .len()
+                .saturating_mul(MAX_CANONICAL_INSTRUCTION_BYTES),
+        ),
+    );
     bytes.extend_from_slice(b"L64CI1");
     bytes.extend_from_slice(&(instructions.len() as u64).to_le_bytes());
     for instruction in instructions {
@@ -5326,7 +5335,7 @@ pub struct ResearchLineageRecord {
 const LOCUS_MAGIC: &[u8; 4] = b"LCS1";
 
 pub fn encode_locus_packet(packet: &LocusPacket) -> Result<Vec<u8>, String> {
-    let mut out = Vec::new();
+    let mut out = Vec::with_capacity(locus_packet_encoded_capacity(packet));
     out.extend_from_slice(LOCUS_MAGIC);
     out.push(packet.header.artifact_class as u8);
     out.push(packet.header.surface as u8);
@@ -5363,6 +5372,29 @@ pub fn encode_locus_packet(packet: &LocusPacket) -> Result<Vec<u8>, String> {
         push_sized_bytes(&mut out, &section.payload)?;
     }
     Ok(out)
+}
+
+fn locus_packet_encoded_capacity(packet: &LocusPacket) -> usize {
+    const FIXED_HEADER_BYTES: usize = 4 + 1 + 1 + 1 + 1 + 1 + 1 + 2 + 2 + 8 + 2;
+    const SECTION_FIXED_BYTES: usize = 1 + 2;
+
+    let sized = |len: usize| 4usize.saturating_add(len);
+    let mut capacity = FIXED_HEADER_BYTES
+        .saturating_add(sized(packet.header.grammar_id.len()))
+        .saturating_add(sized(packet.header.schema_hash.len()))
+        .saturating_add(sized(packet.header.integrity_hash.len()))
+        .saturating_add(sized(packet.header.root_subject_id.len()));
+
+    for strand in &packet.header.strand_manifest {
+        capacity = capacity.saturating_add(sized(strand.len()));
+    }
+    for section in &packet.sections {
+        capacity = capacity
+            .saturating_add(SECTION_FIXED_BYTES)
+            .saturating_add(sized(section.subject_id.len()))
+            .saturating_add(sized(section.payload.len()));
+    }
+    capacity
 }
 
 pub fn decode_locus_packet(bytes: &[u8]) -> Result<LocusPacket, String> {
@@ -6146,7 +6178,7 @@ pub fn tokenize_rna_bytes(bytes: &[u8]) -> Result<(TokenStream, TokenizationRece
 
 pub fn tokenize_rna(input: &str) -> Result<(TokenStream, TokenizationReceipt), String> {
     let source_text = input.replace("\r\n", "\n");
-    let mut tokens = Vec::new();
+    let mut tokens = Vec::with_capacity(source_text.len());
     let mut issues = Vec::new();
 
     for (span_start, ch) in source_text.char_indices() {
@@ -6221,7 +6253,7 @@ pub fn normalize_token_stream(
 fn normalize_rna_text(input: &str) -> Result<(NormalizedRna, RnaNormalizationReceipt), String> {
     let raw_text = input.replace("\r\n", "\n");
     let chars = raw_text.chars().collect::<Vec<_>>();
-    let mut normalized = String::new();
+    let mut normalized = String::with_capacity(raw_text.len());
     let mut issues = Vec::new();
     let mut splice_regions = Vec::new();
     let mut paren_depth = 0usize;
@@ -6380,12 +6412,19 @@ pub fn resolve_spliced_rna(normalized: &NormalizedRna) -> Result<(SsrGraph, SsrR
         "SSR_ROOT_{:x}",
         stable_hash_u64(&normalized.normalized_text)
     );
+    let estimated_token_count = normalized
+        .normalized_text
+        .bytes()
+        .filter(|byte| byte.is_ascii_whitespace())
+        .count()
+        .saturating_add(1);
     let mut nodes = vec![SsrNode {
         id: root_id.clone(),
         kind: SsrNodeKind::Root,
         text: normalized.normalized_text.clone(),
-        children: Vec::new(),
+        children: Vec::with_capacity(estimated_token_count),
     }];
+    nodes.reserve(estimated_token_count);
 
     for (idx, token) in normalized.normalized_text.split_whitespace().enumerate() {
         let kind = if token == "iei" || token == "eie" {
