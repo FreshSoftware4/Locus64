@@ -385,8 +385,10 @@ pub fn certify_derived_theorem_with_options(
                     .contains(&l64_core::ReversibilityClass::LossySupported),
                 require_proof: true,
             }),
-            target.surface_requirement.as_ref(),
-            target.preferred_surface_target.as_ref(),
+            // Old surface fields remain deserializable migration metadata, but
+            // certification route authority is now native policy/DNA scoped.
+            None,
+            None,
             Some(&resolved_policy.resolution),
             true,
         )
