@@ -161,6 +161,12 @@ impl ConstitutionKernel {
                 target.id
             )));
         }
+        if target.surface_requirement.is_some() || target.preferred_surface_target.is_some() {
+            return Err(KernelError::Message(format!(
+                "target profile `{}` uses deprecated surface-schema authority fields",
+                target.id
+            )));
+        }
         Ok(())
     }
 
@@ -598,7 +604,9 @@ mod tests {
     use super::*;
     use l64_core::{
         AliasFace, BridgeContract, ConstraintFace, EquivalenceClass, EvidenceFace, IdentityFace,
-        ObjectTag, ProofEdge, RegimePack, ReversibilityClass, StructuralFace,
+        ObjectTag, PromotionGoal, ProofEdge, ProofMechanismZone, RegimePack,
+        RequiredProofShapeFamily, ReversibilityClass, StructuralFace, SurfaceKind,
+        SurfaceRequirement, TargetProfile,
     };
     use l64_testkit::TestRegistryBuilder;
 
@@ -690,6 +698,37 @@ mod tests {
 
         let err = kernel.promote(&object, &registry).unwrap_err();
         assert!(err.contains("validated"));
+    }
+
+    #[test]
+    fn target_profile_rejects_deprecated_surface_schema_authority() {
+        let kernel = ConstitutionKernel;
+        let target = TargetProfile {
+            id: "TGT_SURFACE_TOMBSTONE".into(),
+            burden_class: l64_core::BurdenClass::General,
+            host_cluster: vec!["R_TOP".into(), "R_CALC".into()],
+            target_equivalence: "eq".into(),
+            allowed_bridge_classes: vec![ReversibilityClass::Enriching],
+            loss_ceiling: 1,
+            rollback_ceiling: 1,
+            required_receipt_class: "RC".into(),
+            required_proof_shape_family: RequiredProofShapeFamily::Square,
+            promotion_goal: PromotionGoal::PromoteOperator,
+            primary_zone: ProofMechanismZone::PmzStructural,
+            surface_requirement: Some(SurfaceRequirement {
+                required_input: Some(SurfaceKind::Qc0),
+                preferred_output: None,
+                require_symbolic_fidelity: true,
+                keyboard_projection_ingress_only: true,
+                transform_receipts_mandatory: true,
+            }),
+            preferred_surface_target: None,
+            optimizer_policy: None,
+            policy_binding_ids: Vec::new(),
+        };
+
+        let err = kernel.validate_target_profile(&target).unwrap_err();
+        assert!(err.to_string().contains("deprecated surface-schema"));
     }
 
     #[test]
