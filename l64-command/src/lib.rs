@@ -1,35 +1,5 @@
 use clap::ValueEnum;
-use l64_core::{BundleConflictPolicy, OptimizerPolicy, SurfaceKind};
-
-#[derive(Debug, Clone, ValueEnum)]
-pub enum SurfaceArg {
-    Qc0,
-    Qa0,
-}
-
-impl From<SurfaceArg> for SurfaceKind {
-    fn from(value: SurfaceArg) -> Self {
-        match value {
-            SurfaceArg::Qc0 => SurfaceKind::Qc0,
-            SurfaceArg::Qa0 => SurfaceKind::Qa0,
-        }
-    }
-}
-
-#[derive(Debug, Clone, ValueEnum)]
-pub enum AdminSurfaceArg {
-    Qc0,
-    Qa0,
-}
-
-impl From<AdminSurfaceArg> for SurfaceKind {
-    fn from(value: AdminSurfaceArg) -> Self {
-        match value {
-            AdminSurfaceArg::Qc0 => SurfaceKind::Qc0,
-            AdminSurfaceArg::Qa0 => SurfaceKind::Qa0,
-        }
-    }
-}
+use l64_core::{BundleConflictPolicy, OptimizerPolicy};
 
 #[derive(Debug, Clone, ValueEnum)]
 pub enum BundlePolicyArg {

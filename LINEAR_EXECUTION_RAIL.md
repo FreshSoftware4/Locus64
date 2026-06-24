@@ -239,6 +239,9 @@ Landed:
 - `compile-bundle --as`, `certify --file --as`, `run-bundle --as`, `certify-bundle --as`, `run-theorem --as`, `lock-bundle --as`, and `predict-impact --as` have been removed.
 - Report projection sidecars and report-surface flags have been removed from CLI commands.
 - Bundle substrate tests now use a shared theorem fixture constructor, reducing repeated migration-test boilerplate while keeping native `.dna` bundle behavior unchanged.
+- Stale `SurfaceArg` and `AdminSurfaceArg` Q-surface command enums have been removed from `l64-command`; the shared command crate now carries only active bundle and optimizer arguments.
+- Default report policy and observe fallback policy no longer request removed Q export surfaces; report/export defaults now remain neutral unless a native DNA/report path explicitly supplies behavior.
+- CLI, admin, and cert scheduler/report policy fixtures now use neutral `export_surfaces: []`, so tests no longer preserve removed Q export-surface expectations.
 - `l64-surfaces`, `l64-qc0`, and `l64-qa0` have been removed from workspace membership and deleted from the codebase.
 - Bundle-entry text remains only as an authoring convenience compiled by `compile-bundle` into `.dna`; it is not a public authority surface.
 

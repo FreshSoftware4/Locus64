@@ -3,8 +3,7 @@ use l64_core::{
     MechanizationPolicyObject, OptimizationAxis, OptimizerBackend, OptimizerPolicy,
     OptimizerPolicyConfig, PolicyBinding, PolicyConflict, PolicyResolution, PolicyScope,
     PolicyTrace, PolicyVerdict, RegistryLookup, ReplayCachePolicyConfig, ReplayLockManifest,
-    ReplayTrustClass, ReportPolicyConfig, SchedulerPolicyConfig, SurfaceKind,
-    UnsupportedHandlingMode,
+    ReplayTrustClass, ReportPolicyConfig, SchedulerPolicyConfig, UnsupportedHandlingMode,
 };
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -344,7 +343,7 @@ fn default_replay_cache() -> ReplayCachePolicyConfig {
 
 fn default_report() -> ReportPolicyConfig {
     ReportPolicyConfig {
-        export_surfaces: vec![SurfaceKind::Qc0, SurfaceKind::Qa0],
+        export_surfaces: Vec::new(),
         include_policy_trace: true,
         include_route_explanation: true,
         include_obligation_logs: true,

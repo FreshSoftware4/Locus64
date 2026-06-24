@@ -2648,7 +2648,7 @@ mod tests {
                     trust_class: ReplayTrustClass::ExactPolicyOnly,
                 },
                 report: ReportPolicyConfig {
-                    export_surfaces: vec![l64_core::SurfaceKind::Qc0],
+                    export_surfaces: Vec::new(),
                     include_policy_trace: true,
                     include_route_explanation: true,
                     include_obligation_logs: true,
