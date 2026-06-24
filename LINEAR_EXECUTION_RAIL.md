@@ -238,6 +238,7 @@ Landed:
 - Explicit bundle projection import has been removed from `l64-bundle`, `l64-cli`, and `l64-admin`; bundle execution inputs are `.dna` only.
 - `compile-bundle --as`, `certify --file --as`, `run-bundle --as`, `certify-bundle --as`, `run-theorem --as`, `lock-bundle --as`, and `predict-impact --as` have been removed.
 - Report projection sidecars and report-surface flags have been removed from CLI commands.
+- Bundle substrate tests now use a shared theorem fixture constructor, reducing repeated migration-test boilerplate while keeping native `.dna` bundle behavior unchanged.
 - `l64-surfaces`, `l64-qc0`, and `l64-qa0` have been removed from workspace membership and deleted from the codebase.
 - Bundle-entry text remains only as an authoring convenience compiled by `compile-bundle` into `.dna`; it is not a public authority surface.
 

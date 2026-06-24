@@ -1535,21 +1535,27 @@ mod tests {
     use super::*;
     use std::time::{SystemTime, UNIX_EPOCH};
 
-    #[test]
-    fn overlay_prefers_local_theorem() {
-        let mut local = RegistryBundle::default();
-        local.theorem_specs.push(TheoremSpec {
-            id: "THS_LOCAL".into(),
-            statement: "local".into(),
-            hosts: vec!["R_SET".into(), "R_SET".into()],
-            bridges: vec![],
+    fn test_theorem(id: &str, statement: &str, bridges: &[&str]) -> TheoremSpec {
+        TheoremSpec {
+            id: id.into(),
+            statement: statement.into(),
+            hosts: vec!["R_SET".into()],
+            bridges: bridges.iter().map(|bridge| (*bridge).into()).collect(),
             operators: vec![],
             target_equivalence: "eq".into(),
             obligations: vec![],
             primary_zone: l64_core::ProofMechanismZone::PmzSemantic,
             verdict: l64_core::CertificationVerdict::RouteFound,
             proof_shapes: vec![],
-        });
+        }
+    }
+
+    #[test]
+    fn overlay_prefers_local_theorem() {
+        let mut local = RegistryBundle::default();
+        local
+            .theorem_specs
+            .push(test_theorem("THS_LOCAL", "local", &[]));
         let overlay = OverlayRegistry {
             parent: SeedRegistry::load().unwrap(),
             bundle_id: "BND_TEST".into(),
@@ -1569,18 +1575,7 @@ mod tests {
 
     #[test]
     fn bundle_document_import_does_not_require_surface_parser() {
-        let theorem = TheoremSpec {
-            id: "THS_DOC_NATIVE".into(),
-            statement: "native document import".into(),
-            hosts: vec!["R_SET".into()],
-            bridges: vec![],
-            operators: vec![],
-            target_equivalence: "eq".into(),
-            obligations: vec![],
-            primary_zone: l64_core::ProofMechanismZone::PmzSemantic,
-            verdict: l64_core::CertificationVerdict::RouteFound,
-            proof_shapes: vec![],
-        };
+        let theorem = test_theorem("THS_DOC_NATIVE", "native document import", &[]);
         let document = QaDocument {
             entries: vec![QaEntry::TheoremSpec(theorem)],
         };
@@ -1607,18 +1602,7 @@ mod tests {
 
     #[test]
     fn bundle_document_lowers_entries_into_substrate_atoms() {
-        let theorem = TheoremSpec {
-            id: "THS_SUBSTRATE".into(),
-            statement: "substrate lowering".into(),
-            hosts: vec!["R_SET".into()],
-            bridges: vec![],
-            operators: vec![],
-            target_equivalence: "eq".into(),
-            obligations: vec![],
-            primary_zone: l64_core::ProofMechanismZone::PmzSemantic,
-            verdict: l64_core::CertificationVerdict::RouteFound,
-            proof_shapes: vec![],
-        };
+        let theorem = test_theorem("THS_SUBSTRATE", "substrate lowering", &[]);
         let document = QaDocument {
             entries: vec![QaEntry::TheoremSpec(theorem)],
         };
@@ -1643,18 +1627,7 @@ mod tests {
 
     #[test]
     fn bundle_document_lowers_entries_into_codec_envelopes() {
-        let theorem = TheoremSpec {
-            id: "THS_SUBSTRATE_ENVELOPE".into(),
-            statement: "substrate envelope lowering".into(),
-            hosts: vec!["R_SET".into()],
-            bridges: vec![],
-            operators: vec![],
-            target_equivalence: "eq".into(),
-            obligations: vec![],
-            primary_zone: l64_core::ProofMechanismZone::PmzSemantic,
-            verdict: l64_core::CertificationVerdict::RouteFound,
-            proof_shapes: vec![],
-        };
+        let theorem = test_theorem("THS_SUBSTRATE_ENVELOPE", "substrate envelope lowering", &[]);
         let document = QaDocument {
             entries: vec![QaEntry::TheoremSpec(theorem)],
         };
@@ -1679,18 +1652,11 @@ mod tests {
 
     #[test]
     fn bundle_substrate_parity_preserves_dependency_edges_as_bonds() {
-        let theorem = TheoremSpec {
-            id: "THS_DEP_SUBSTRATE".into(),
-            statement: "substrate lowering with dependencies".into(),
-            hosts: vec!["R_SET".into()],
-            bridges: vec!["BR_DEP".into()],
-            operators: vec![],
-            target_equivalence: "eq".into(),
-            obligations: vec![],
-            primary_zone: l64_core::ProofMechanismZone::PmzSemantic,
-            verdict: l64_core::CertificationVerdict::RouteFound,
-            proof_shapes: vec![],
-        };
+        let theorem = test_theorem(
+            "THS_DEP_SUBSTRATE",
+            "substrate lowering with dependencies",
+            &["BR_DEP"],
+        );
         let document = QaDocument {
             entries: vec![QaEntry::TheoremSpec(theorem)],
         };
@@ -1735,18 +1701,11 @@ mod tests {
 
     #[test]
     fn bundle_substrate_parity_follows_namespace_rewrites() {
-        let theorem = TheoremSpec {
-            id: "THS_NAMESPACE_SUBSTRATE".into(),
-            statement: "substrate lowering with namespace".into(),
-            hosts: vec!["R_SET".into()],
-            bridges: vec!["BR_NAMESPACE".into()],
-            operators: vec![],
-            target_equivalence: "eq".into(),
-            obligations: vec![],
-            primary_zone: l64_core::ProofMechanismZone::PmzSemantic,
-            verdict: l64_core::CertificationVerdict::RouteFound,
-            proof_shapes: vec![],
-        };
+        let theorem = test_theorem(
+            "THS_NAMESPACE_SUBSTRATE",
+            "substrate lowering with namespace",
+            &["BR_NAMESPACE"],
+        );
         let document = namespace_document(
             QaDocument {
                 entries: vec![QaEntry::TheoremSpec(theorem)],
@@ -1831,18 +1790,7 @@ mod tests {
 
     #[test]
     fn bundle_dna_file_import_bypasses_surface_parser() {
-        let theorem = TheoremSpec {
-            id: "THS_DNA_NATIVE".into(),
-            statement: "dna-native document import".into(),
-            hosts: vec!["R_SET".into()],
-            bridges: vec![],
-            operators: vec![],
-            target_equivalence: "eq".into(),
-            obligations: vec![],
-            primary_zone: l64_core::ProofMechanismZone::PmzSemantic,
-            verdict: l64_core::CertificationVerdict::RouteFound,
-            proof_shapes: vec![],
-        };
+        let theorem = test_theorem("THS_DNA_NATIVE", "dna-native document import", &[]);
         let document = QaDocument {
             entries: vec![QaEntry::TheoremSpec(theorem)],
         };
