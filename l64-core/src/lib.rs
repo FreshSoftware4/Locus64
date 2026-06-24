@@ -3271,10 +3271,7 @@ pub fn normalize_path_receipt(path: &Path) -> Result<PathNormalizationReceipt, S
         notes.push("path remains external to project root".into());
     }
     Ok(PathNormalizationReceipt {
-        id: format!(
-            "PNR_{:x}",
-            stable_hash_u64(&normalized.display().to_string())
-        ),
+        id: receipt_id("PNR", &normalized.display().to_string()),
         original_path: original,
         normalized_path: normalized.display().to_string(),
         project_relative_path: relative,
@@ -3376,6 +3373,22 @@ pub fn role_digest_serialized<T: Serialize>(role: DigestRole, value: &T) -> Role
 
 pub fn role_digest_value<T: Serialize>(role: DigestRole, value: &T) -> String {
     role_digest_serialized(role, value).value
+}
+
+fn prefixed_role_digest<T: Serialize>(prefix: &str, role: DigestRole, value: &T) -> String {
+    format!("{prefix}_{}", role_digest_value(role, value))
+}
+
+fn receipt_id<T: Serialize>(prefix: &str, value: &T) -> String {
+    prefixed_role_digest(prefix, DigestRole::ReceiptId, value)
+}
+
+fn authority_id<T: Serialize>(prefix: &str, value: &T) -> String {
+    prefixed_role_digest(prefix, DigestRole::AuthorityId, value)
+}
+
+fn payload_commitment<T: Serialize>(value: &T) -> String {
+    role_digest_value(DigestRole::PayloadCommitment, value)
 }
 
 pub fn cache_hash_v1_str(input: &str) -> String {
@@ -5422,12 +5435,13 @@ pub fn decode_locus_packet_with_mode(
 
 pub fn dna_header_receipt(packet: &LocusPacket) -> DnaHeaderReceipt {
     DnaHeaderReceipt {
-        id: format!(
-            "DNA_HDR_{:x}",
-            stable_hash_u64(&format!(
-                "{}:{}:{}",
-                packet.header.grammar_id, packet.header.schema_hash, packet.header.integrity_hash
-            ))
+        id: receipt_id(
+            "DNA_HDR",
+            &(
+                &packet.header.grammar_id,
+                &packet.header.schema_hash,
+                &packet.header.integrity_hash,
+            ),
         ),
         surface: packet.header.surface,
         grammar_id: packet.header.grammar_id.clone(),
@@ -6201,7 +6215,7 @@ pub fn tokenize_rna(input: &str) -> Result<(TokenStream, TokenizationReceipt), S
     }
 
     let receipt = TokenizationReceipt {
-        id: format!("TOK_{:x}", stable_hash_u64(&source_text)),
+        id: receipt_id("TOK", &source_text),
         token_count: tokens.len(),
         byte_len: source_text.len(),
         issues,
@@ -6245,7 +6259,7 @@ pub fn normalize_token_stream(
     stream: &TokenStream,
 ) -> Result<(NormalizedRna, RnaNormalizationReceipt), String> {
     let (normalized, mut receipt) = normalize_rna_text(&stream.source_text)?;
-    receipt.token_stream_id = format!("TOK_{:x}", stable_hash_u64(&stream.source_text));
+    receipt.token_stream_id = receipt_id("TOK", &stream.source_text);
     receipt.shorthand_eliminated = !normalized.normalized_text.contains("  ");
     Ok((normalized, receipt))
 }
@@ -6383,7 +6397,7 @@ fn normalize_rna_text(input: &str) -> Result<(NormalizedRna, RnaNormalizationRec
     };
 
     let receipt = RnaNormalizationReceipt {
-        id: format!("RNR_{:x}", stable_hash_u64(&normalized)),
+        id: receipt_id("RNR", &normalized),
         token_stream_id: String::new(),
         state,
         normalized_text: normalized.clone(),
@@ -6408,10 +6422,7 @@ fn normalize_rna_text(input: &str) -> Result<(NormalizedRna, RnaNormalizationRec
 }
 
 pub fn resolve_spliced_rna(normalized: &NormalizedRna) -> Result<(SsrGraph, SsrReceipt), String> {
-    let root_id = format!(
-        "SSR_ROOT_{:x}",
-        stable_hash_u64(&normalized.normalized_text)
-    );
+    let root_id = authority_id("SSR_ROOT", &normalized.normalized_text);
     let estimated_token_count = normalized
         .normalized_text
         .bytes()
@@ -6440,7 +6451,7 @@ pub fn resolve_spliced_rna(normalized: &NormalizedRna) -> Result<(SsrGraph, SsrR
         } else {
             SsrNodeKind::Atom
         };
-        let id = format!("SSR_{:x}", stable_hash_u64(&format!("{idx}:{token}")));
+        let id = authority_id("SSR", &(idx, token));
         nodes[0].children.push(id.clone());
         nodes.push(SsrNode {
             id,
@@ -6456,13 +6467,13 @@ pub fn resolve_spliced_rna(normalized: &NormalizedRna) -> Result<(SsrGraph, SsrR
         strand_partition: vec!["core".into()],
     };
     let receipt = SsrReceipt {
-        id: format!("SSR_RCP_{:x}", stable_hash_u64(&graph.root_id)),
+        id: receipt_id("SSR_RCP", &graph.root_id),
         root_id,
         node_count: graph.nodes.len(),
         transition_count: graph.nodes.len().saturating_sub(1),
         transition_table_hash: hash_serialized(&ssr_transition_specs()),
         ephemeral: true,
-        normalized_rna_id: format!("RNR_{:x}", stable_hash_u64(&normalized.normalized_text)),
+        normalized_rna_id: receipt_id("RNR", &normalized.normalized_text),
     };
     Ok((graph, receipt))
 }
@@ -6548,10 +6559,7 @@ pub fn canonicalize_structural_form(
         instructions,
     };
     let receipt = CnormReceipt {
-        id: format!(
-            "CNR_STRUCT_{:x}",
-            stable_hash_u64(&structure.canonical_hash)
-        ),
+        id: receipt_id("CNR_STRUCT", &structure.canonical_hash),
         root_id: structure.root_id.clone(),
         canonical_hash,
         rule_table_hash: structural_canonical_law_hash(),
@@ -6566,7 +6574,7 @@ pub fn execute_lower_chain(rna: &str) -> Result<LowerChainExecution, SystemFailu
 
     let token_out = kernel.execute(
         PhaseId::Tokenization,
-        format!("{:x}", stable_hash_u64(rna)),
+        payload_commitment(&rna),
         Vec::new(),
         Some("retain raw RNA bytes".into()),
         || tokenize_rna(rna),
@@ -6637,7 +6645,7 @@ pub fn execute_lower_chain(rna: &str) -> Result<LowerChainExecution, SystemFailu
         },
     )?;
     let (normalized, rn_receipt) = rn_out;
-    let normalized_hash = format!("{:x}", stable_hash_u64(&normalized.normalized_text));
+    let normalized_hash = payload_commitment(&normalized.normalized_text);
 
     let ssr_out = kernel.execute(
         PhaseId::StructuralResolution,

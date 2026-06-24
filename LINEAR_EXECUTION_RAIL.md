@@ -293,6 +293,7 @@ Landed:
 - Certification report documents no longer synthesize `Qc0 -> Qc0` transform receipts as pseudo-lineage; lock receipts now point at replay-lock manifest evidence instead.
 - `l64-locus` synthesized RNA/DNA lowering and sequenced receipt IDs now use `DigestRole::ReceiptId` role-separated digests instead of display-style `stable_hash_u64` IDs.
 - `l64-bundle` molecular dependency bond IDs now use `DigestRole::AuthorityId` role-separated digests instead of display-style `stable_hash_u64` IDs.
+- `l64-core` lower-chain tokenization, RNORM, SSR, CNORM, DNA-header, and path-normalization receipt IDs now use role-separated digest constructors; remaining `stable_hash_u64` use is confined to structural numeric fallback or generic serialized table/state hashes pending later schema-specific classification.
 - `l64-surfaces`, `l64-qc0`, and `l64-qa0` have been removed from workspace membership and deleted from the codebase.
 - Bundle-entry text remains only as an authoring convenience compiled by `compile-bundle` into `.dna`; it is not a public authority surface.
 
