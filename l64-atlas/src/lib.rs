@@ -1,7 +1,7 @@
 use l64_core::{
     AtlasCell, Budget, BurdenClass, CertificationVerdict, ComposeBridge, OptimizationAxis,
     OptimizerBackend, OptimizerPolicy, PolicyResolution, RegistryLookup, ReversibilityClass,
-    RouteExplanation, RouteScoreVector, RouteSelection, SurfaceCompatibilityClass, SurfaceKind,
+    RouteExplanation, RouteScoreVector, RouteSelection, SurfaceCompatibilityClass,
     SurfacePreferredTarget, SurfaceRequirement, SurfaceTransitionCost, WinnerState,
 };
 use l64_kernel::ConstitutionKernel;
@@ -248,7 +248,7 @@ impl CompiledAtlas {
                 trust_class: l64_core::ReplayTrustClass::ExactPolicyOnly,
             },
             report: l64_core::ReportPolicyConfig {
-                export_surfaces: vec![SurfaceKind::Qc0, SurfaceKind::Qa0],
+                export_surfaces: Vec::new(),
                 include_policy_trace: true,
                 include_route_explanation: true,
                 include_obligation_logs: true,
