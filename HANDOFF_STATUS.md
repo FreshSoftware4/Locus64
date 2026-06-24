@@ -71,14 +71,14 @@ Windows target used by this release pass: `x86_64-pc-windows-msvc`.
 - Bundle-entry authoring text must contain at least one entry.
 - Bundle import rejects non-closed native substrate parity before persisting `BundleWorld`.
 - Bundle substrate parity now carries duplex pair counts, locally valid pair counts, domain closure, and deterministic merge evidence.
-- Under memory pressure, use low-memory verification settings:
+- Under memory pressure, use the low-memory verification wrapper:
 
 ```powershell
-$env:CARGO_BUILD_JOBS='1'
-$env:CARGO_INCREMENTAL='0'
-$env:CARGO_PROFILE_DEV_DEBUG='0'
-$env:CARGO_PROFILE_TEST_DEBUG='0'
+.\scripts\verify-low-memory.ps1 -Scope workspace
+.\scripts\verify-low-memory.ps1 -Scope all
 ```
+
+The wrapper sets `CARGO_BUILD_JOBS=1`, disables incremental compilation, strips dev/test debug info, and runs formatting plus `git diff --check` unless explicitly skipped.
 
 ## Cleanup Policy Used
 
@@ -98,4 +98,5 @@ They are not hard-deleted.
 - `SEMANTIC_USAGE_GUIDE.md`: semantic usage guide for claim governance, branch/challenge tracking, and research-framework integration
 - `LINEAR_EXECUTION_RAIL.md`: authoritative linear execution rail and phase sequence
 - `scripts/torture-test.ps1`: regression/torture harness
+- `scripts/verify-low-memory.ps1`: low-memory cargo verification wrapper for large `l64-core` rebuilds
 - `Cargo.toml`: workspace members and release profiles

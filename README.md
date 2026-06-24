@@ -23,6 +23,13 @@ cargo build --release -p l64 -p l64-cli -p l64-admin
 .\target\release\l64.exe observe-run --report REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE
 ```
 
+If the local machine is under memory pressure during a full rebuild, use the low-memory verifier:
+
+```powershell
+.\scripts\verify-low-memory.ps1 -Scope workspace
+.\scripts\verify-low-memory.ps1 -Scope all
+```
+
 Expected seeded verdicts:
 
 - `Integrated`: `CPG_CHAIN_RULE`, `CPG_CHAIN_RULE_RECIPE`, `CPG_CHAIN_RULE_TRANSPORT`
