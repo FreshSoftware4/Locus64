@@ -30,7 +30,6 @@ pub struct OverlayRegistry {
     pub bundle_id: String,
     pub local: RegistryBundle,
     pub merge_report: BundleMergeReport,
-    pub import_receipts: Vec<FormatTransformReceipt>,
 }
 
 #[derive(Debug, Clone)]
@@ -46,7 +45,6 @@ struct CachedBundleWorld {
     bundle_id: String,
     local: RegistryBundle,
     merge_report: BundleMergeReport,
-    import_receipts: Vec<FormatTransformReceipt>,
     #[serde(default)]
     substrate_parity: BundleSubstrateParityReport,
 }
@@ -65,7 +63,6 @@ pub fn load_bundle_world(bundle_id: &str) -> Result<BundleWorld> {
             bundle_id: cached.bundle_id,
             local: cached.local,
             merge_report: cached.merge_report,
-            import_receipts: cached.import_receipts,
         },
         substrate_parity: cached.substrate_parity,
     })
@@ -78,7 +75,6 @@ pub fn persist_bundle_world(world: &BundleWorld) -> Result<()> {
         bundle_id: world.overlay.bundle_id.clone(),
         local: world.overlay.local.clone(),
         merge_report: world.overlay.merge_report.clone(),
-        import_receipts: world.overlay.import_receipts.clone(),
         substrate_parity: world.substrate_parity.clone(),
     };
     fs::write(path, serde_json::to_string_pretty(&cached)?)?;
@@ -334,7 +330,6 @@ pub fn overlay_registry_from_document(
             conflicts: Vec::new(),
             namespaced_entries: 0,
         },
-        import_receipts: Vec::new(),
     }
 }
 
@@ -404,14 +399,13 @@ pub fn import_bundle_file(
         .and_then(|value| value.to_str())
         .map(|value| format!("BND_{}", value.to_ascii_uppercase().replace('-', "_")))
         .unwrap_or_else(|| "BND_IMPORTED".into());
-    import_bundle_document(parent, bundle_id, document, Vec::new(), policy, namespace)
+    import_bundle_document(parent, bundle_id, document, policy, namespace)
 }
 
 pub fn import_bundle_document(
     parent: SeedRegistry,
     bundle_id: String,
     document: QaDocument,
-    import_receipts: Vec<FormatTransformReceipt>,
     policy: BundleConflictPolicy,
     namespace: Option<&str>,
 ) -> Result<BundleWorld> {
@@ -466,10 +460,7 @@ pub fn import_bundle_document(
                 .collect(),
             campaign_ids: local.campaigns.iter().map(|item| item.id.clone()).collect(),
             overlay_id: format!("BOVR_{bundle_id}"),
-            import_receipt_ids: import_receipts
-                .iter()
-                .map(|receipt| receipt.id.clone())
-                .collect(),
+            import_receipt_ids: Vec::new(),
             merge_report_id: format!("BMER_{bundle_id}"),
         },
     };
@@ -480,7 +471,6 @@ pub fn import_bundle_document(
             bundle_id,
             local,
             merge_report,
-            import_receipts,
         },
         substrate_parity,
     };
@@ -1567,7 +1557,6 @@ mod tests {
                 namespaced_entries: 0,
                 conflicts: Vec::new(),
             },
-            import_receipts: Vec::new(),
         };
         assert!(overlay.get_theorem_spec("THS_LOCAL").is_some());
         assert!(overlay.get_theorem_spec("THS_CHAIN_RULE").is_some());
@@ -1583,7 +1572,6 @@ mod tests {
             SeedRegistry::load().unwrap(),
             "BND_DOC_NATIVE".into(),
             document,
-            Vec::new(),
             BundleConflictPolicy::Reject,
             None,
         )
@@ -1591,7 +1579,6 @@ mod tests {
         assert_eq!(world.manifest.id, "BND_DOC_NATIVE");
         assert_eq!(world.manifest.entries.len(), 1);
         assert!(world.overlay.get_theorem_spec("THS_DOC_NATIVE").is_some());
-        assert!(world.overlay.import_receipts.is_empty());
         assert!(
             world.substrate_parity.valid,
             "{:?}",
@@ -1749,7 +1736,6 @@ mod tests {
             parent,
             "BND_EXACT_MATCH".into(),
             document,
-            Vec::new(),
             BundleConflictPolicy::ExactMatch,
             None,
         )
@@ -1780,7 +1766,6 @@ mod tests {
             parent,
             "BND_REJECT_CONFLICT".into(),
             document,
-            Vec::new(),
             BundleConflictPolicy::Reject,
             None,
         )
@@ -1818,7 +1803,6 @@ mod tests {
             load_bundle_world(&world.manifest.id).expect("load persisted dna bundle world");
         let _ = fs::remove_file(&path);
         assert!(world.overlay.get_theorem_spec("THS_DNA_NATIVE").is_some());
-        assert!(world.overlay.import_receipts.is_empty());
         assert!(
             world.substrate_parity.valid,
             "{:?}",

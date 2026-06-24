@@ -282,12 +282,7 @@ fn real_main() -> Result<()> {
                 lock_id: lock.id.clone(),
                 manifest_id: manifest.id.clone(),
                 bundle_id: world.manifest.id.clone(),
-                receipt_ids: world
-                    .overlay
-                    .import_receipts
-                    .iter()
-                    .map(|item| item.id.clone())
-                    .collect(),
+                receipt_ids: Vec::new(),
                 verdict: resolved.resolution.verdict.clone(),
             };
             println!(
