@@ -556,7 +556,7 @@ fn bundle_commands_work_for_overlay_bundle() {
             ),
             qa_entry(
                 "target",
-                r#"{"id":"TGT_LOCAL_BUNDLE","burden_class":"DerivativeLocalWitnessExtraction","host_cluster":["R_TOP","R_CALC"],"target_equivalence":"eq","allowed_bridge_classes":["Enriching"],"loss_ceiling":1,"rollback_ceiling":1,"required_receipt_class":"RC","required_proof_shape_family":"Square","promotion_goal":"PromoteOperator","primary_zone":"PmzStructural","surface_requirement":{"required_input":"Qc0","preferred_output":"Qa0","require_symbolic_fidelity":true,"keyboard_projection_ingress_only":true,"transform_receipts_mandatory":true},"preferred_surface_target":{"surface_kind":"Qa0"}}"#,
+                r#"{"id":"TGT_LOCAL_BUNDLE","burden_class":"DerivativeLocalWitnessExtraction","host_cluster":["R_TOP","R_CALC"],"target_equivalence":"eq","allowed_bridge_classes":["Enriching"],"loss_ceiling":1,"rollback_ceiling":1,"required_receipt_class":"RC","required_proof_shape_family":"Square","promotion_goal":"PromoteOperator","primary_zone":"PmzStructural","surface_requirement":null,"preferred_surface_target":null,"optimizer_policy":null,"policy_binding_ids":[]}"#,
             ),
             qa_entry(
                 "atlas",
