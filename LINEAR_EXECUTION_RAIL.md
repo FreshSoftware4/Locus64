@@ -3179,6 +3179,21 @@ Step sequence:
    - old rejection/failure behavior remains explicit
    - old-allowed-but-now-category-wrong inputs are newly rejected
 5. Move representative docs/fixtures to substrate-backed bundle DNA path.
+6. Replace remaining surface-schema authority fields before bundle deletion:
+   - `SurfaceKind`
+   - `SurfaceRequirement`
+   - `SurfacePreferredTarget`
+   - `FormatTransformReceipt`
+   - `RoundTripReport`
+   - `CapabilityMatrix`
+   - registry trait lookups for transform/capability/roundtrip records
+7. Re-express each lawful surface-schema capability through native roles:
+   - artifact role
+   - phase/admission law
+   - duplex pair or domain closure law
+   - witness/receipt form
+   - explicit projection-loss record where needed
+8. Keep `QaDocument`/`QaEntry::from_surface_json` as migration AST only until native bundle authoring can ingest the same behavior without JSON-body authority.
 
 Invariants:
 
@@ -3187,6 +3202,8 @@ Invariants:
 - bundle object boundaries do not define final substrate primitive boundaries
 - temporary old workflow structs are adapters, not authority
 - parity probes are not runtime authority gates until this node exits
+- old surface-schema objects cannot decide promotion, identity, or authority admission after their native replacement exists
+- JSON-body bundle records remain migration ingress only and must not become a third public source language
 
 Tests:
 
@@ -3194,10 +3211,13 @@ Tests:
 - representative invalid bundle flow remains invalid
 - report/product/witness-as-source category error rejects
 - namespace/conflict/dependency behavior matches old path where old behavior was valid
+- native replacement tests for every still-lawful capability formerly represented by surface requirement, preferred target, transform receipt, roundtrip report, or capability matrix
+- negative tests proving surface-schema objects cannot promote or admit authority without native DNA/receipt backing
 
 Exit condition:
 
 - representative bundle/certification workflows pass through molecular substrate with positive and negative behavior parity
+- every old surface-schema field is classified as replaced, migration-only with deletion condition, or rejected
 
 Downstream payoff:
 
@@ -3337,12 +3357,26 @@ Step sequence:
    - default native inspection emits product records where applicable
    - JSON requires `--json` or `--foreign json`
 4. Delete docs/samples that teach transitional outputs as public authority.
+5. Quarantine or delete explicit legacy packet decode modes:
+   - `LocusDecodeMode::Migration`
+   - `LocusDecodeMode::Forensic`
+   - legacy packet decode tests and fixtures
+   - keep only if an explicit migration command owns them and emits migration receipts
+6. Quarantine research/admin JSON as projection/tooling only:
+   - research sample JSON remains foreign import material until native RNA/DNA research records exist
+   - admin JSON output remains tool inspection unless product records replace it
+   - no JSON sample or output may define authority, promotion, identity, or source truth
+7. Remove dead bundle compatibility state already proven non-load-bearing:
+   - empty bundle import receipt plumbing is deleted
+   - future compatibility-shaped fields require an owner node and deletion condition before being added
 
 Invariants:
 
 - legacy paths cannot silently become authority
 - JSON is foreign/debug unless explicitly admitted by a legacy adapter
 - compatibility imports are removed unless backed by a concrete active requirement and deletion condition
+- migration/forensic packet decode is never automatic authority fallback
+- research/admin JSON must be regenerable from or importable into RNA/DNA-backed authority before any promotion claim depends on it
 
 Tests:
 
@@ -3350,11 +3384,14 @@ Tests:
 - transitional `.record`/`.projection` release artifacts are absent from native release output
 - JSON inspection requires explicit foreign/debug mode
 - docs/examples use source RNA, DNA, substrate-backed bundle DNA, or expressed products only
+- authority decode rejects legacy packets unless explicit migration/forensic mode is requested
+- research/admin JSON artifacts are rejected as source and cannot promote without DNA-backed replay or import receipt
 - workspace, torture, and representative certification tests pass
 
 Exit condition:
 
 - transitional release artifacts and JSON-body bundle authoring are clipped without removing load-bearing behavior
+- legacy packet decode and research/admin JSON are either deleted or explicitly owned by migration/projection commands with receipt-backed boundaries
 
 Downstream payoff:
 
@@ -4276,6 +4313,35 @@ This change chain corrects the next-order substrate mistake before implementatio
 13. Witnesses are derived from substrate state, not authored as truth. Public product identity becomes canonical witness form; hashes remain memo/cache bindings.
 14. `express` becomes the product-generation command only as a wrapper/rename over the proven release product path.
 15. Node 11F quarantines/deletes transitional `.record`, `.projection`, default JSON inspection, and JSON bundle-body paths after replacement behavior is proven.
+
+## 32A. Remaining Deprecation Placement Chain
+
+This chain fixes the execution order for the remaining deprecated authority flows:
+
+1. Surface-schema replacement belongs in Node 11D, not Node 11F:
+   - reason: `SurfaceKind`, surface requirements, preferred targets, transform receipts, roundtrip reports, and capability matrices still describe behavior-bearing bundle/certification expectations
+   - action: replace each lawful behavior with native artifact roles, phase/admission law, duplex/domain closure, witness forms, and projection-loss records
+   - deletion condition: no promotion, identity, admission, or capability decision depends on the old surface schema
+2. Bundle JSON-body ingress belongs at the end of Node 11D and deletion belongs in Node 11F:
+   - reason: `!l64-bundle v1` removed Q headers but still uses JSON-shaped bodies as migration AST
+   - action: prove native bundle authoring and `.dna` bundle execution carry the same valid behavior and sharper category-error rejection
+   - deletion condition: `compile-bundle` no longer needs JSON bodies for representative workflows
+3. Explicit legacy packet decode belongs in Node 11F:
+   - reason: `Migration` and `Forensic` modes are not silent authority fallback, so they are lower-risk than schema replacement
+   - action: keep only behind explicit migration/forensic commands with receipts, or delete after fixtures regenerate under current packet law
+   - deletion condition: authority decode and tests no longer require legacy packet readers
+4. Research/admin JSON belongs after native research/product expression exists:
+   - reason: these JSON paths are tooling/projection/import material, not lower-chain authority, but some workflows still use them
+   - action: route research records through RNA/DNA-backed import or product records before deleting JSON convenience outputs
+   - deletion condition: JSON samples/outputs cannot source, promote, or define identity, and any retained JSON is explicit foreign/debug projection
+5. Already amputated dead state stays deleted:
+   - bundle import-receipt lineage plumbing is gone because projection import is rejected, `.dna` bundle import carries native substrate parity, and empty import-transform receipt lists were misleading
+
+Execution rule:
+
+- do not delete a deprecated mechanism until its native replacement seam proves the lawful behavior it carried
+- do delete empty or misleading compatibility state once tests prove it carries no behavior
+- every retained deprecated path must name its owner node and deletion condition
 
 ## 33. Definition Of Done
 
