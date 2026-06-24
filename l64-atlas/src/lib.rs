@@ -2,7 +2,7 @@ use l64_core::{
     AtlasCell, Budget, BurdenClass, CertificationVerdict, ComposeBridge, OptimizationAxis,
     OptimizerBackend, OptimizerPolicy, PolicyResolution, RegistryLookup, ReversibilityClass,
     RouteExplanation, RouteScoreVector, RouteSelection, SurfaceCompatibilityClass,
-    SurfacePreferredTarget, SurfaceRequirement, SurfaceTransitionCost, WinnerState,
+    SurfaceTransitionCost, WinnerState,
 };
 use l64_kernel::ConstitutionKernel;
 use serde::{Deserialize, Serialize};
@@ -68,7 +68,7 @@ impl CompiledAtlas {
                     .surface_transition
                     .as_ref()
                     .map(|item| item.total_penalty)
-                    .unwrap_or_else(|| infer_surface_penalty(&cell, None)),
+                    .unwrap_or_else(|| infer_surface_penalty(&cell)),
                 reversibility,
                 proof_shapes: cell.proof_shapes_checked.clone(),
                 winner_state: cell.winner_state.clone(),
@@ -111,8 +111,6 @@ impl CompiledAtlas {
         tgt: &str,
         burden_class: Option<&BurdenClass>,
         budget: Option<&Budget>,
-        surface_requirement: Option<&SurfaceRequirement>,
-        preferred_target: Option<&SurfacePreferredTarget>,
         resolution: Option<&PolicyResolution>,
         bundle_resolution_ok: bool,
     ) -> Result<RouteSelection, AtlasError> {
@@ -137,11 +135,6 @@ impl CompiledAtlas {
                     .unwrap_or(true)
             })
             .collect::<Vec<_>>();
-
-        for edge in &mut candidate_edges {
-            edge.surface_penalty =
-                score_surface_penalty(edge, surface_requirement, preferred_target);
-        }
 
         let policy = resolution
             .map(|item| item.optimizer.optimizer_policy.clone())
@@ -209,8 +202,6 @@ impl CompiledAtlas {
         tgt: &str,
         burden_class: Option<&BurdenClass>,
         budget: Option<&Budget>,
-        surface_requirement: Option<&SurfaceRequirement>,
-        preferred_target: Option<&SurfacePreferredTarget>,
         optimizer_policy: OptimizerPolicy,
         bundle_resolution_ok: bool,
     ) -> Result<RouteSelection, AtlasError> {
@@ -272,8 +263,6 @@ impl CompiledAtlas {
             tgt,
             burden_class,
             budget,
-            surface_requirement,
-            preferred_target,
             Some(&resolution),
             bundle_resolution_ok,
         )
@@ -486,16 +475,8 @@ pub fn run_seed_theorem<R: RegistryLookup + ?Sized>(
         .ok_or(AtlasError::NoRoute)?;
     let src = theorem.hosts.first().ok_or(AtlasError::NoRoute)?;
     let tgt = theorem.hosts.last().ok_or(AtlasError::NoRoute)?;
-    let route = atlas.select_lexicographic(
-        src,
-        tgt,
-        None,
-        None,
-        None,
-        None,
-        OptimizerPolicy::Conservative,
-        true,
-    )?;
+    let route =
+        atlas.select_lexicographic(src, tgt, None, None, OptimizerPolicy::Conservative, true)?;
     let selected = route.winner.ok_or(AtlasError::NoRoute)?;
     let kernel = ConstitutionKernel;
     let path = selected.normalized_winner.clone();
@@ -514,7 +495,7 @@ pub fn run_seed_theorem<R: RegistryLookup + ?Sized>(
     })
 }
 
-fn infer_surface_penalty(cell: &AtlasCell, requirement: Option<&SurfaceRequirement>) -> usize {
+fn infer_surface_penalty(cell: &AtlasCell) -> usize {
     let mut penalty = 0usize;
     if cell
         .loss_profile
@@ -531,45 +512,6 @@ fn infer_surface_penalty(cell: &AtlasCell, requirement: Option<&SurfaceRequireme
     {
         penalty += 2;
     }
-    if requirement
-        .map(|item| item.require_symbolic_fidelity)
-        .unwrap_or(false)
-        && cell
-            .loss_profile
-            .items
-            .iter()
-            .any(|item| item.contains("ascii") || item.contains("debug"))
-    {
-        penalty += 4;
-    }
-    penalty
-}
-
-fn score_surface_penalty(
-    edge: &CompiledEdge,
-    requirement: Option<&SurfaceRequirement>,
-    preferred_target: Option<&SurfacePreferredTarget>,
-) -> usize {
-    let mut penalty = edge.surface_penalty;
-    if let Some(requirement) = requirement {
-        if requirement.require_symbolic_fidelity
-            && matches!(
-                edge.surface_transition
-                    .as_ref()
-                    .map(|item| &item.compatibility),
-                Some(
-                    SurfaceCompatibilityClass::DebugMirrorOnly
-                        | SurfaceCompatibilityClass::IngressProjectionOnly
-                )
-            )
-        {
-            penalty += 6;
-        }
-        if requirement.transform_receipts_mandatory && edge.surface_transition.is_none() {
-            penalty += 3;
-        }
-    }
-    let _ = preferred_target;
     penalty
 }
 
@@ -586,8 +528,6 @@ mod tests {
             .select_lexicographic(
                 "R_TYP",
                 "R_SET",
-                None,
-                None,
                 None,
                 None,
                 OptimizerPolicy::Conservative,

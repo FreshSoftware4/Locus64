@@ -296,6 +296,7 @@ Landed:
 - `l64-core` lower-chain tokenization, RNORM, SSR, CNORM, DNA-header, and path-normalization receipt IDs now use role-separated digest constructors; remaining `stable_hash_u64` use is confined to structural numeric fallback or generic serialized table/state hashes pending later schema-specific classification.
 - Bundle import-receipt lineage plumbing has been amputated from active bundle execution state: projection imports are already rejected, `.dna` bundle import carries native substrate parity, and bundle locks no longer project empty import receipt lists as if import transforms were live evidence.
 - Certification route selection no longer passes deprecated `SurfaceRequirement` or `SurfacePreferredTarget` target fields into atlas scoring; those fields remain migration metadata until Node 11D replaces or deletes their schema, but they no longer affect authority route choice.
+- `l64-atlas` route-selection APIs no longer accept deprecated `SurfaceRequirement` or `SurfacePreferredTarget` parameters, preventing future callers from reintroducing old surface-schema authority into certification route scoring.
 - `l64-surfaces`, `l64-qc0`, and `l64-qa0` have been removed from workspace membership and deleted from the codebase.
 - Bundle-entry text remains only as an authoring convenience compiled by `compile-bundle` into `.dna`; it is not a public authority surface.
 
