@@ -252,6 +252,7 @@ Landed:
 - Atlas inline policy resolution also uses neutral report export surfaces, so route selection no longer seeds removed Q projection outputs by default.
 - First authority-path performance slice has landed: canonical instruction byte encoding and locus packet encoding now preallocate from known structural sizes without changing encoded bytes, canonical identity, or packet semantics.
 - RNA tokenization, normalization, and SSR construction now preallocate hot-path buffers from source-size or byte-level structural estimates without adding semantic parsing passes or changing receipts.
+- DNA packet decoding now preallocates strand and section vectors from already-decoded counts, preserving decode semantics while reducing allocation churn on authority and explicit migration paths.
 - Certification report documents no longer synthesize `Qc0 -> Qc0` transform receipts as pseudo-lineage; lock receipts now point at replay-lock manifest evidence instead.
 - `l64-surfaces`, `l64-qc0`, and `l64-qa0` have been removed from workspace membership and deleted from the codebase.
 - Bundle-entry text remains only as an authoring convenience compiled by `compile-bundle` into `.dna`; it is not a public authority surface.

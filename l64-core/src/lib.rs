@@ -5577,7 +5577,7 @@ fn decode_locus_packet_current(bytes: &[u8]) -> Result<LocusPacket, String> {
             .try_into()
             .map_err(|_| "bad strand count".to_string())?,
     );
-    let mut strand_manifest = Vec::new();
+    let mut strand_manifest = Vec::with_capacity(strand_count as usize);
     for _ in 0..strand_count {
         strand_manifest.push(
             String::from_utf8(read_sized_bytes(bytes, &mut cursor)?)
@@ -5596,7 +5596,7 @@ fn decode_locus_packet_current(bytes: &[u8]) -> Result<LocusPacket, String> {
             .try_into()
             .map_err(|_| "bad section count".to_string())?,
     );
-    let mut sections = Vec::new();
+    let mut sections = Vec::with_capacity(section_count as usize);
     for _ in 0..section_count {
         let opcode = decode_opcode(*read_exact(bytes, &mut cursor, 1)?.first().unwrap())?;
         let flags = u16::from_le_bytes(
@@ -5665,7 +5665,7 @@ fn decode_locus_packet_legacy(bytes: &[u8]) -> Result<LocusPacket, String> {
             .try_into()
             .map_err(|_| "bad section count".to_string())?,
     );
-    let mut sections = Vec::new();
+    let mut sections = Vec::with_capacity(section_count as usize);
     for _ in 0..section_count {
         let opcode = decode_opcode(*read_exact(bytes, &mut cursor, 1)?.first().unwrap())?;
         let flags = u16::from_le_bytes(
