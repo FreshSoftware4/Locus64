@@ -353,6 +353,14 @@ pub fn bundle_document_from_entry_text(text: &str) -> Result<QaDocument> {
         let (kind, payload) = line
             .split_once(' ')
             .ok_or_else(|| anyhow!("bundle entry is missing JSON payload: `{line}`"))?;
+        if matches!(
+            kind,
+            "transform-receipt" | "roundtrip-report" | "capability"
+        ) {
+            return Err(anyhow!(
+                "deprecated surface-schema bundle entry `{kind}` is not admitted by bundle-entry text"
+            ));
+        }
         entries.push(
             QaEntry::from_surface_json(kind, payload)
                 .map_err(|err| anyhow!("invalid `{kind}` bundle entry: {err}"))?,
@@ -1832,6 +1840,17 @@ theorem {"id":"THS_OLD_HEADER","statement":"old header","hosts":["R_SET"],"bridg
         assert!(
             err.to_string()
                 .contains("obsolete projection bundle header")
+        );
+    }
+
+    #[test]
+    fn bundle_entry_text_rejects_deprecated_surface_schema_entries() {
+        let text = r#"!l64-bundle v1
+capability {"id":"CAP_OLD","surface_kind":"Qc0","supported_packs":[],"import_support":true,"export_support":true,"transcode_support":[],"roundtrip_support":false,"known_limits":[]}"#;
+        let err = bundle_document_from_entry_text(text).unwrap_err();
+        assert!(
+            err.to_string()
+                .contains("deprecated surface-schema bundle entry")
         );
     }
 
