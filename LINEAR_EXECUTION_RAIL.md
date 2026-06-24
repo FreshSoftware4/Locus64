@@ -144,6 +144,43 @@ Rationale:
 
 If a future pass finds a higher-scoring slice, it must update this selector before implementing it.
 
+## Persistent Execution Mandate
+
+The rail is not a suggestion list. When development resumes, execute until the highest-scoring available slice is complete, verified, recorded, and committed, unless a real blocker appears.
+
+Default execution loop:
+
+1. Inspect the current worktree and recent rail ledger.
+2. Select the highest burden-reduction slice using the Active Work Selector.
+3. If the selector is stale, update the rail before touching code.
+4. Implement the smallest slice that materially reduces future burden.
+5. Run the narrowest meaningful verification first, then the phase-appropriate broader check.
+6. Apply housekeeping that is directly exposed by the slice:
+   - formatting
+   - dead imports
+   - stale fixture strings
+   - misleading rail ledger entries
+   - obsolete command/docs references that now point at removed behavior
+7. Commit the completed slice with a message naming the burden removed.
+8. Continue to the next slice only if it is clearly bounded, dependency-correct, and not likely to collide with a larger unresolved design decision.
+
+Stop only when one of these is true:
+
+- all clearly available high-score slices are complete
+- the next slice requires a new architectural decision not already encoded in the rail
+- verification exposes a real blocker that cannot be fixed without changing the rail
+- the remaining work is schema replacement, public contract migration, or deletion requiring a dedicated node
+
+Do not stop merely because one useful edit landed. Do not continue merely to create activity. The correct stopping point is the last verified slice before the next unresolved authority decision.
+
+"As done as possible" means:
+
+- no dirty worktree unless explicitly blocked
+- rail ledger reflects what actually landed
+- verification command and scope are known
+- obsolete residue introduced or exposed by the slice is either removed or classified
+- remaining work has a named rail location rather than living as vague future cleanup
+
 Performance slice rule:
 
 - Optimize active authority-path mechanisms before report/view/projection conveniences.
