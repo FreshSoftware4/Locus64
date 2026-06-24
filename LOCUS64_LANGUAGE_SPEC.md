@@ -676,7 +676,17 @@ If validation fails:
 Use:
 
 - RNA for canonical symbolic roots.
-- QC0 for semantic/certification/governance records.
-- DNA as generated machine artifact, not hand-authored input.
+- Bundle-entry text only as a transitional authoring convenience that must be compiled with `l64 compile-bundle`.
+- DNA as the generated machine authority artifact.
+- Inspection, projection, record, receipt, report, and release artifacts only in their declared non-source roles.
 
-For indirect integration, the main language you need is **QC0**.
+Do not use QC0, QA0, QM0, or QK0 as public interaction languages. Their useful structure has been ported into RNA/DNA authority, bundle-entry authoring, inspection/projection outputs, receipts, policies, and deficiencies.
+
+For indirect integration, the active route is:
+
+```text
+authored bundle-entry text
+-> l64 compile-bundle
+-> .dna bundle packet
+-> l64 certify-bundle / import-bundle / run-bundle
+```

@@ -2,13 +2,14 @@
 
 Locus64 is a Rust command-line certification framework for routed mathematical campaigns, lower-chain RNA/DNA compilation, adequacy checking, replayable execution, proof coverage, and governed research artifacts.
 
-The primary binary is `l64`. It routes commands to the CLI or admin implementation as needed. `l64-cli` and `l64-admin` are still shipped for compatibility and scripting.
+The primary binary is `l64`. It routes commands to the CLI or admin implementation as needed. `l64-cli` and `l64-admin` are still shipped as direct entry points for automation and lower-level debugging.
 
 ## Current Architecture
 
 - **Locus Kernel**: cold semantic authority for certification, adequacy, replay, and promotion decisions.
-- **RNA/DNA lower chain**: transitional `TOKENIZE -> RNORM -> SSR -> CNORM -> DNA` support exists, but the active rail now treats SSR/CNORM/DNA as substrate-inversion targets rather than fully closed final architecture.
-- **Locus Genome**: current `.dna` artifacts are proto-DNA during the inversion; `.locus` remains readable during compatibility rollout.
+- **RNA/DNA lower chain**: `TOKENIZE -> RNORM -> SSR -> CNORM -> DNA` is the active authority path. SSR remains ephemeral; CNORM now consumes explicit distinction/equivalence law and emits versioned canonical instructions.
+- **Locus Genome**: `.dna` is the machine authority artifact. Legacy packet decoding is explicit migration/forensic behavior, not an ambient authority fallback.
+- **Bundle substrate migration**: `.dna` bundle imports must pass native molecular-envelope parity, duplex local validation, domain closure, and deterministic merge evidence before persistence.
 - **Research Host**: governed task, signature, review, challenge, lineage, promotion, handoff, and remediation surfaces.
 - **Tower/Coverage**: proof coverage dispatch, lawful reuse receipts, residual verification, distress/help, recipes, and promotion candidates.
 
@@ -60,6 +61,8 @@ If you have bundle-entry text, compile it into a `.dna` packet before using it a
 ```powershell
 .\target\release\l64.exe compile-bundle .\bundle.locus.rna --out .\bundle.dna
 ```
+
+Bundle-entry text must start with `!l64-bundle v1` and contain at least one entry. Obsolete `!qc0`/`!qa0` headers and header-only bundles are rejected.
 
 ## Torture Test
 

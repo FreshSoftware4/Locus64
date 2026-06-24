@@ -69,6 +69,44 @@ pub struct CanonicalId(pub String);
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct DnaDigest(pub String);
 
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum DigestRole {
+    AuthorityId,
+    PayloadCommitment,
+    ReceiptId,
+    CacheKey,
+    DisplayShortId,
+    WitnessId,
+    CodecDigest,
+}
+
+impl DigestRole {
+    pub fn domain_label(self) -> &'static [u8] {
+        match self {
+            DigestRole::AuthorityId => b"authority-id",
+            DigestRole::PayloadCommitment => b"payload-commitment",
+            DigestRole::ReceiptId => b"receipt-id",
+            DigestRole::CacheKey => b"cache-key",
+            DigestRole::DisplayShortId => b"display-short-id",
+            DigestRole::WitnessId => b"witness-id",
+            DigestRole::CodecDigest => b"codec-digest",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct RoleDigest {
+    pub role: DigestRole,
+    pub value: String,
+}
+
+impl RoleDigest {
+    pub fn new(role: DigestRole, value: String) -> Self {
+        Self { role, value }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct LineageId(pub String);
 
@@ -97,7 +135,7 @@ pub fn canonical_id_from_binary_structure(bytes: &[u8]) -> CanonicalId {
 }
 
 pub fn dna_digest_from_bytes(bytes: &[u8]) -> DnaDigest {
-    DnaDigest(blake3::hash(bytes).to_hex().to_string())
+    DnaDigest(role_digest_bytes(DigestRole::PayloadCommitment, bytes).value)
 }
 
 pub type ObjectId = String;
@@ -3318,6 +3356,39 @@ pub fn stable_hash_u64(input: &str) -> u64 {
     hash
 }
 
+pub fn role_digest_bytes(role: DigestRole, input: &[u8]) -> RoleDigest {
+    let mut hasher = blake3::Hasher::new();
+    hasher.update(b"l64-role-digest-v1\0");
+    hasher.update(role.domain_label());
+    hasher.update(b"\0");
+    hasher.update(input);
+    RoleDigest::new(role, hasher.finalize().to_hex().to_string())
+}
+
+pub fn role_digest_str(role: DigestRole, input: &str) -> RoleDigest {
+    role_digest_bytes(role, input.as_bytes())
+}
+
+pub fn role_digest_serialized<T: Serialize>(role: DigestRole, value: &T) -> RoleDigest {
+    let encoded = serde_json::to_vec(value).unwrap_or_else(|_| b"<unserializable>".to_vec());
+    role_digest_bytes(role, &encoded)
+}
+
+pub fn role_digest_value<T: Serialize>(role: DigestRole, value: &T) -> String {
+    role_digest_serialized(role, value).value
+}
+
+pub fn cache_hash_v1_str(input: &str) -> String {
+    cache_hash_v1_bytes(input.as_bytes())
+}
+
+pub fn cache_hash_v1_bytes(input: &[u8]) -> String {
+    let mut hasher = blake3::Hasher::new();
+    hasher.update(b"l64-cache-v1\0");
+    hasher.update(input);
+    hasher.finalize().to_hex().to_string()
+}
+
 fn sanitize_namespace(input: &str) -> String {
     input
         .chars()
@@ -3462,6 +3533,13 @@ pub enum GenomeSurface {
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
+pub enum LocusDecodeMode {
+    CurrentAuthority,
+    Migration,
+    Forensic,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
 #[repr(u8)]
 pub enum LocusOpcode {
     Header = 1,
@@ -3499,12 +3577,23 @@ pub struct DnaHeaderReceipt {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct DnaSectionCommitment {
+    pub opcode: LocusOpcode,
+    pub subject_id: String,
+    pub payload_commitment: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct DnaValidationReport {
     pub id: String,
     pub reversible: bool,
     pub header_truth_complete: bool,
     #[serde(default)]
     pub canonical_payload_digest_valid: bool,
+    #[serde(default)]
+    pub section_payload_commitments_valid: bool,
+    #[serde(default)]
+    pub section_payload_commitments: Vec<DnaSectionCommitment>,
     pub symbol_table_semantic_authority: bool,
     #[serde(default)]
     pub failures: Vec<String>,
@@ -3880,18 +3969,65 @@ pub enum StructuralRelationKind {
 pub struct EquivalenceLawSpec {
     pub id: String,
     pub relation: StructuralRelationKind,
+    pub transition_law_id: String,
     pub ordering_significant: bool,
     pub grouping_significant: bool,
     pub flattening_allowed: bool,
     pub sorting_allowed: bool,
     pub reference_identity_preserved: bool,
+    pub preserved_distinctions: Vec<DistinctionClass>,
+    pub collapsed_distinctions: Vec<DistinctionClass>,
     pub minimal_invariants: Vec<String>,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
+pub enum DistinctionClass {
+    AuthorityBearing,
+    ProjectionOnly,
+    FormatLocal,
+    CollapseEligible,
+    CollapseForbidden,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct DistinctionLawSpec {
+    pub id: String,
+    pub class: DistinctionClass,
+    pub carrier: String,
+    pub collapse_allowed: bool,
+    pub preserved_invariants: Vec<String>,
+    pub transition_law_id: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct TransitionLawSpec {
+    pub id: String,
+    pub source_phase: PhaseId,
+    pub target_phase: PhaseId,
+    pub allowed_distinction_classes: Vec<DistinctionClass>,
+    pub forbidden_distinction_classes: Vec<DistinctionClass>,
+    pub required_receipts: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct CanonicalStructureItem {
     pub kind: SsrNodeKind,
     pub structural_value: u64,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
+pub enum CanonicalInstructionTag {
+    HeaderV1 = 1,
+    ItemV1 = 2,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct CanonicalInstruction {
+    pub tag: CanonicalInstructionTag,
+    pub version: u8,
+    pub ordinal: u64,
+    pub kind: Option<SsrNodeKind>,
+    pub structural_value: Option<u64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -3902,6 +4038,101 @@ pub struct CanonicalStructure {
     pub canonical_bytes: Vec<u8>,
     #[serde(default)]
     pub items: Vec<CanonicalStructureItem>,
+    #[serde(default)]
+    pub instructions: Vec<CanonicalInstruction>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct SemanticStrand {
+    pub id: String,
+    pub canonical_structure_id: String,
+    pub authority_scope: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct AuthorityComplement {
+    pub id: String,
+    pub authority_scope: String,
+    pub admission_law_id: String,
+    pub exclusions: Vec<String>,
+    pub invariants: Vec<String>,
+    pub dependency_burdens: Vec<String>,
+    pub required_witness_forms: Vec<String>,
+    pub closure_requirements: Vec<String>,
+    pub rollback_law_id: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct PairLaw {
+    pub id: String,
+    pub required_semantic_scope: String,
+    pub required_complement_scope: String,
+    pub required_admission_law_id: String,
+    pub strand_only_promotion_allowed: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct DuplexPair {
+    pub semantic: SemanticStrand,
+    pub complement: AuthorityComplement,
+    pub pair_law: PairLaw,
+    pub commitment: String,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
+pub enum DuplexPairStatus {
+    Unpaired,
+    Malformed,
+    LocallyValid,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct DuplexPairValidation {
+    pub status: DuplexPairStatus,
+    pub pair_commitment: Option<String>,
+    pub failures: Vec<String>,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
+pub enum CyclePolicyResult {
+    Acyclic,
+    LawfulCycle,
+    RejectedCycle,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct OpenObligation {
+    pub id: String,
+    pub description: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct BridgeBurden {
+    pub id: String,
+    pub description: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct DomainClosureReport {
+    pub locally_valid_pairs: Vec<String>,
+    pub open_frontier: Vec<OpenObligation>,
+    pub external_burdens: Vec<BridgeBurden>,
+    pub cycle_result: CyclePolicyResult,
+    pub promotable: bool,
+    pub promotion_receipt_required: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct CanonicalWorkUnit {
+    pub coordinate: String,
+    pub payload_commitment: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct DeterministicAuthorityMerge {
+    pub ordered_coordinates: Vec<String>,
+    pub ordered_payload_commitments: Vec<String>,
+    pub report_digest: String,
 }
 
 pub fn canonical_rna_token_for_item(item: &CanonicalStructureItem) -> String {
@@ -3941,6 +4172,167 @@ fn canonical_structure_item_from_rna_token(token: &str) -> Option<CanonicalStruc
         kind,
         structural_value,
     })
+}
+
+fn canonical_kind_byte(kind: SsrNodeKind) -> u8 {
+    match kind {
+        SsrNodeKind::Root => 0,
+        SsrNodeKind::Atom => 1,
+        SsrNodeKind::Group => 2,
+        SsrNodeKind::Splice => 3,
+    }
+}
+
+pub fn canonical_instruction_bytes(instructions: &[CanonicalInstruction]) -> Vec<u8> {
+    let mut bytes = Vec::new();
+    bytes.extend_from_slice(b"L64CI1");
+    bytes.extend_from_slice(&(instructions.len() as u64).to_le_bytes());
+    for instruction in instructions {
+        bytes.push(instruction.tag as u8);
+        bytes.push(instruction.version);
+        bytes.extend_from_slice(&instruction.ordinal.to_le_bytes());
+        match instruction.tag {
+            CanonicalInstructionTag::HeaderV1 => {
+                bytes.extend_from_slice(&instruction.structural_value.unwrap_or(0).to_le_bytes());
+            }
+            CanonicalInstructionTag::ItemV1 => {
+                let kind = instruction.kind.unwrap_or(SsrNodeKind::Atom);
+                bytes.push(canonical_kind_byte(kind));
+                bytes.extend_from_slice(&instruction.structural_value.unwrap_or(0).to_le_bytes());
+            }
+        }
+    }
+    bytes
+}
+
+pub fn duplex_pair_commitment(
+    semantic: &SemanticStrand,
+    complement: &AuthorityComplement,
+    pair_law: &PairLaw,
+) -> String {
+    role_digest_value(DigestRole::AuthorityId, &(semantic, complement, pair_law))
+}
+
+pub fn assemble_duplex_pair(
+    semantic: SemanticStrand,
+    complement: AuthorityComplement,
+    pair_law: PairLaw,
+) -> DuplexPair {
+    let commitment = duplex_pair_commitment(&semantic, &complement, &pair_law);
+    DuplexPair {
+        semantic,
+        complement,
+        pair_law,
+        commitment,
+    }
+}
+
+pub fn validate_duplex_pair(pair: Option<&DuplexPair>) -> DuplexPairValidation {
+    let Some(pair) = pair else {
+        return DuplexPairValidation {
+            status: DuplexPairStatus::Unpaired,
+            pair_commitment: None,
+            failures: vec!["duplex pair is missing semantic strand or authority complement".into()],
+        };
+    };
+    let mut failures = Vec::new();
+    if pair.semantic.authority_scope != pair.pair_law.required_semantic_scope {
+        failures.push("semantic strand authority scope does not satisfy pair law".into());
+    }
+    if pair.complement.authority_scope != pair.pair_law.required_complement_scope {
+        failures.push("authority complement scope does not satisfy pair law".into());
+    }
+    if pair.complement.admission_law_id != pair.pair_law.required_admission_law_id {
+        failures.push("authority complement admission law does not satisfy pair law".into());
+    }
+    if pair.pair_law.strand_only_promotion_allowed {
+        failures.push("pair law illegally permits strand-only promotion".into());
+    }
+    if pair.complement.invariants.is_empty() {
+        failures.push("authority complement has no invariants".into());
+    }
+    if pair.complement.required_witness_forms.is_empty() {
+        failures.push("authority complement has no required witness forms".into());
+    }
+    let expected = duplex_pair_commitment(&pair.semantic, &pair.complement, &pair.pair_law);
+    if pair.commitment != expected {
+        failures
+            .push("duplex pair commitment does not match semantic/complement/law payload".into());
+    }
+    DuplexPairValidation {
+        status: if failures.is_empty() {
+            DuplexPairStatus::LocallyValid
+        } else {
+            DuplexPairStatus::Malformed
+        },
+        pair_commitment: Some(expected),
+        failures,
+    }
+}
+
+pub fn evaluate_domain_closure(
+    pair_validations: &[DuplexPairValidation],
+    open_frontier: Vec<OpenObligation>,
+    external_burdens: Vec<BridgeBurden>,
+    cycle_result: CyclePolicyResult,
+) -> DomainClosureReport {
+    let locally_valid_pairs = pair_validations
+        .iter()
+        .filter(|validation| validation.status == DuplexPairStatus::LocallyValid)
+        .filter_map(|validation| validation.pair_commitment.clone())
+        .collect::<Vec<_>>();
+    let all_pairs_locally_valid = !pair_validations.is_empty()
+        && pair_validations
+            .iter()
+            .all(|validation| validation.status == DuplexPairStatus::LocallyValid);
+    let cycle_accepted = matches!(
+        cycle_result,
+        CyclePolicyResult::Acyclic | CyclePolicyResult::LawfulCycle
+    );
+    let promotable = all_pairs_locally_valid
+        && open_frontier.is_empty()
+        && external_burdens.is_empty()
+        && cycle_accepted;
+    DomainClosureReport {
+        locally_valid_pairs,
+        open_frontier,
+        external_burdens,
+        cycle_result,
+        promotable,
+        promotion_receipt_required: promotable,
+    }
+}
+
+pub fn deterministic_authority_merge(
+    work_units: &[CanonicalWorkUnit],
+    _worker_count: usize,
+) -> DeterministicAuthorityMerge {
+    let mut ordered = work_units.to_vec();
+    ordered.sort_by(|left, right| {
+        left.coordinate
+            .cmp(&right.coordinate)
+            .then_with(|| left.payload_commitment.cmp(&right.payload_commitment))
+    });
+    let ordered_coordinates = ordered
+        .iter()
+        .map(|unit| unit.coordinate.clone())
+        .collect::<Vec<_>>();
+    let ordered_payload_commitments = ordered
+        .iter()
+        .map(|unit| unit.payload_commitment.clone())
+        .collect::<Vec<_>>();
+    let report_digest = role_digest_value(
+        DigestRole::ReceiptId,
+        &(
+            ordered_coordinates.clone(),
+            ordered_payload_commitments.clone(),
+        ),
+    );
+    DeterministicAuthorityMerge {
+        ordered_coordinates,
+        ordered_payload_commitments,
+        report_digest,
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -4974,10 +5366,26 @@ pub fn encode_locus_packet(packet: &LocusPacket) -> Result<Vec<u8>, String> {
 }
 
 pub fn decode_locus_packet(bytes: &[u8]) -> Result<LocusPacket, String> {
-    decode_locus_packet_current(bytes).or_else(|current_err| {
-        decode_locus_packet_legacy(bytes)
-            .map_err(|legacy_err| format!("{current_err}; legacy decode also failed: {legacy_err}"))
-    })
+    decode_locus_packet_with_mode(bytes, LocusDecodeMode::Migration)
+}
+
+pub fn decode_locus_packet_with_mode(
+    bytes: &[u8],
+    mode: LocusDecodeMode,
+) -> Result<LocusPacket, String> {
+    match mode {
+        LocusDecodeMode::CurrentAuthority => decode_locus_packet_current(bytes),
+        LocusDecodeMode::Migration => decode_locus_packet_current(bytes).or_else(|current_err| {
+            decode_locus_packet_legacy(bytes).map_err(|legacy_err| {
+                format!("{current_err}; legacy decode also failed: {legacy_err}")
+            })
+        }),
+        LocusDecodeMode::Forensic => decode_locus_packet_current(bytes).or_else(|current_err| {
+            decode_locus_packet_legacy(bytes).map_err(|legacy_err| {
+                format!("{current_err}; forensic legacy decode also failed: {legacy_err}")
+            })
+        }),
+    }
 }
 
 pub fn dna_header_receipt(packet: &LocusPacket) -> DnaHeaderReceipt {
@@ -5002,10 +5410,24 @@ pub fn dna_header_receipt(packet: &LocusPacket) -> DnaHeaderReceipt {
     }
 }
 
+pub fn dna_section_payload_commitments(packet: &LocusPacket) -> Vec<DnaSectionCommitment> {
+    packet
+        .sections
+        .iter()
+        .map(|section| DnaSectionCommitment {
+            opcode: section.opcode,
+            subject_id: section.subject_id.clone(),
+            payload_commitment: dna_digest_from_bytes(&section.payload).0,
+        })
+        .collect()
+}
+
 pub fn validate_dna_packet(packet: &LocusPacket) -> DnaValidationReport {
     let mut failures = Vec::new();
     let header = dna_header_receipt(packet);
     let mut canonical_payload_digest_valid = packet.header.schema_hash != "canonical_structure.v1";
+    let section_payload_commitments = dna_section_payload_commitments(packet);
+    let mut section_payload_commitments_valid = !section_payload_commitments.is_empty();
     if !header.header_truth_complete {
         failures.push("header truth is incomplete".into());
     }
@@ -5021,6 +5443,14 @@ pub fn validate_dna_packet(packet: &LocusPacket) -> DnaValidationReport {
     }
     if packet.sections.is_empty() {
         failures.push("packet has no structural sections".into());
+        section_payload_commitments_valid = false;
+    }
+    if packet.header.schema_hash != "canonical_structure.v1" && packet.sections.len() == 1 {
+        let expected = &section_payload_commitments[0].payload_commitment;
+        if packet.header.integrity_hash != *expected {
+            section_payload_commitments_valid = false;
+            failures.push("section payload commitment does not match header integrity".into());
+        }
     }
     if packet.header.schema_hash == "canonical_structure.v1" {
         match packet
@@ -5056,10 +5486,15 @@ pub fn validate_dna_packet(packet: &LocusPacket) -> DnaValidationReport {
         failures.push("opcode registry contains non-structural opcode".into());
     }
     DnaValidationReport {
-        id: format!("DNA_VAL_{:x}", stable_hash_u64(&hash_serialized(packet))),
+        id: format!(
+            "DNA_VAL_{}",
+            role_digest_value(DigestRole::ReceiptId, packet)
+        ),
         reversible: failures.is_empty(),
         header_truth_complete: header.header_truth_complete,
         canonical_payload_digest_valid,
+        section_payload_commitments_valid,
+        section_payload_commitments,
         symbol_table_semantic_authority: packet.sections.iter().any(|section| {
             section.opcode == LocusOpcode::SymbolTable && section.flags & 0x0001 != 0
         }),
@@ -5509,11 +5944,14 @@ pub fn structural_equivalence_law_specs() -> Vec<EquivalenceLawSpec> {
         EquivalenceLawSpec {
             id: "EQ_SEQ_ORDERED_V1".into(),
             relation: StructuralRelationKind::OrderedSequence,
+            transition_law_id: "TR_STRUCTURAL_FORM_TO_CNORM_V1".into(),
             ordering_significant: true,
             grouping_significant: true,
             flattening_allowed: false,
             sorting_allowed: false,
             reference_identity_preserved: true,
+            preserved_distinctions: vec![DistinctionClass::AuthorityBearing],
+            collapsed_distinctions: vec![DistinctionClass::FormatLocal],
             minimal_invariants: vec![
                 "item-kind".into(),
                 "item-structural-value".into(),
@@ -5523,14 +5961,132 @@ pub fn structural_equivalence_law_specs() -> Vec<EquivalenceLawSpec> {
         EquivalenceLawSpec {
             id: "EQ_FORMAT_ERASED_V1".into(),
             relation: StructuralRelationKind::NonCollapsible,
+            transition_law_id: "TR_STRUCTURAL_FORM_TO_CNORM_V1".into(),
             ordering_significant: false,
             grouping_significant: false,
             flattening_allowed: false,
             sorting_allowed: false,
             reference_identity_preserved: true,
+            preserved_distinctions: vec![DistinctionClass::AuthorityBearing],
+            collapsed_distinctions: vec![
+                DistinctionClass::FormatLocal,
+                DistinctionClass::ProjectionOnly,
+            ],
             minimal_invariants: vec!["normalized-token-sequence".into()],
         },
     ]
+}
+
+pub fn transition_law_specs() -> Vec<TransitionLawSpec> {
+    vec![TransitionLawSpec {
+        id: "TR_STRUCTURAL_FORM_TO_CNORM_V1".into(),
+        source_phase: PhaseId::StructuralResolution,
+        target_phase: PhaseId::CanonicalNormalization,
+        allowed_distinction_classes: vec![
+            DistinctionClass::ProjectionOnly,
+            DistinctionClass::FormatLocal,
+            DistinctionClass::CollapseEligible,
+        ],
+        forbidden_distinction_classes: vec![
+            DistinctionClass::AuthorityBearing,
+            DistinctionClass::CollapseForbidden,
+        ],
+        required_receipts: vec!["SSR_RECEIPT".into(), "CNORM_RECEIPT".into()],
+    }]
+}
+
+pub fn distinction_law_specs() -> Vec<DistinctionLawSpec> {
+    vec![
+        DistinctionLawSpec {
+            id: "DIST_ITEM_POSITION_AUTHORITY_V1".into(),
+            class: DistinctionClass::AuthorityBearing,
+            carrier: "canonical-structure-item-position".into(),
+            collapse_allowed: false,
+            preserved_invariants: vec!["item-position".into(), "ordered-sequence".into()],
+            transition_law_id: "TR_STRUCTURAL_FORM_TO_CNORM_V1".into(),
+        },
+        DistinctionLawSpec {
+            id: "DIST_ITEM_KIND_AUTHORITY_V1".into(),
+            class: DistinctionClass::AuthorityBearing,
+            carrier: "canonical-structure-item-kind".into(),
+            collapse_allowed: false,
+            preserved_invariants: vec!["item-kind".into()],
+            transition_law_id: "TR_STRUCTURAL_FORM_TO_CNORM_V1".into(),
+        },
+        DistinctionLawSpec {
+            id: "DIST_ITEM_VALUE_AUTHORITY_V1".into(),
+            class: DistinctionClass::AuthorityBearing,
+            carrier: "canonical-structure-item-value".into(),
+            collapse_allowed: false,
+            preserved_invariants: vec!["item-structural-value".into()],
+            transition_law_id: "TR_STRUCTURAL_FORM_TO_CNORM_V1".into(),
+        },
+        DistinctionLawSpec {
+            id: "DIST_RNA_FORMAT_LOCAL_V1".into(),
+            class: DistinctionClass::FormatLocal,
+            carrier: "rna-whitespace-and-line-ending-layout".into(),
+            collapse_allowed: true,
+            preserved_invariants: vec!["normalized-token-sequence".into()],
+            transition_law_id: "TR_STRUCTURAL_FORM_TO_CNORM_V1".into(),
+        },
+        DistinctionLawSpec {
+            id: "DIST_INSPECTION_VIEW_PROJECTION_V1".into(),
+            class: DistinctionClass::ProjectionOnly,
+            carrier: "inspection-report-field-order-and-rendering".into(),
+            collapse_allowed: true,
+            preserved_invariants: vec!["source-authority-unchanged".into()],
+            transition_law_id: "TR_STRUCTURAL_FORM_TO_CNORM_V1".into(),
+        },
+    ]
+}
+
+pub fn transition_law_allows_distinction(class: DistinctionClass) -> bool {
+    transition_law_specs().iter().any(|law| {
+        law.allowed_distinction_classes.contains(&class)
+            && !law.forbidden_distinction_classes.contains(&class)
+    })
+}
+
+pub fn structural_canonical_law_hash() -> String {
+    hash_serialized(&(
+        structural_equivalence_law_specs(),
+        transition_law_specs(),
+        distinction_law_specs(),
+    ))
+}
+
+pub fn validate_structural_equivalence_laws() -> Result<(), String> {
+    let transitions = transition_law_specs();
+    for law in structural_equivalence_law_specs() {
+        let transition = transitions
+            .iter()
+            .find(|candidate| candidate.id == law.transition_law_id)
+            .ok_or_else(|| {
+                format!(
+                    "equivalence law `{}` references unknown transition law `{}`",
+                    law.id, law.transition_law_id
+                )
+            })?;
+        for class in &law.collapsed_distinctions {
+            if !transition.allowed_distinction_classes.contains(class)
+                || transition.forbidden_distinction_classes.contains(class)
+            {
+                return Err(format!(
+                    "equivalence law `{}` illegally collapses {:?}",
+                    law.id, class
+                ));
+            }
+        }
+        for class in &law.preserved_distinctions {
+            if law.collapsed_distinctions.contains(class) {
+                return Err(format!(
+                    "equivalence law `{}` both preserves and collapses {:?}",
+                    law.id, class
+                ));
+            }
+        }
+    }
+    Ok(())
 }
 
 pub fn token_map_entries() -> Vec<TokenMapEntry> {
@@ -5876,10 +6432,26 @@ pub fn canonicalize_structural_form(
     graph: &SsrGraph,
 ) -> Result<(CanonicalStructure, CnormReceipt), String> {
     let law_specs = structural_equivalence_law_specs();
+    let distinction_specs = distinction_law_specs();
+    validate_structural_equivalence_laws()?;
     if law_specs.iter().any(|law| {
         matches!(law.relation, StructuralRelationKind::OrderedSequence) && law.sorting_allowed
     }) {
         return Err("ordered sequence equivalence law cannot permit sorting".into());
+    }
+    if distinction_specs
+        .iter()
+        .any(|law| !law.collapse_allowed && transition_law_allows_distinction(law.class))
+    {
+        return Err(
+            "transition law cannot permit collapse of authority-bearing distinctions".into(),
+        );
+    }
+    if distinction_specs
+        .iter()
+        .any(|law| law.collapse_allowed && !transition_law_allows_distinction(law.class))
+    {
+        return Err("collapse-eligible distinction is not admitted by transition law".into());
     }
 
     let root = graph
@@ -5888,11 +6460,15 @@ pub fn canonicalize_structural_form(
         .find(|node| node.id == graph.root_id)
         .ok_or_else(|| "structural form missing root".to_string())?;
     let mut items = Vec::new();
-    let mut canonical_bytes = Vec::new();
-    canonical_bytes.extend_from_slice(b"L64CS1");
-    canonical_bytes.extend_from_slice(&(root.children.len() as u64).to_le_bytes());
+    let mut instructions = vec![CanonicalInstruction {
+        tag: CanonicalInstructionTag::HeaderV1,
+        version: 1,
+        ordinal: 0,
+        kind: None,
+        structural_value: Some(root.children.len() as u64),
+    }];
 
-    for child_id in &root.children {
+    for (ordinal, child_id) in root.children.iter().enumerate() {
         let node = graph
             .nodes
             .iter()
@@ -5903,24 +6479,24 @@ pub fn canonicalize_structural_form(
             .as_ref()
             .map(|item| item.kind)
             .unwrap_or(node.kind);
-        let kind_byte = match kind {
-            SsrNodeKind::Root => 0,
-            SsrNodeKind::Atom => 1,
-            SsrNodeKind::Group => 2,
-            SsrNodeKind::Splice => 3,
-        };
         let structural_value = reconstructed
             .as_ref()
             .map(|item| item.structural_value)
             .unwrap_or_else(|| stable_hash_u64(&node.text));
-        canonical_bytes.push(kind_byte);
-        canonical_bytes.extend_from_slice(&structural_value.to_le_bytes());
+        instructions.push(CanonicalInstruction {
+            tag: CanonicalInstructionTag::ItemV1,
+            version: 1,
+            ordinal: ordinal as u64,
+            kind: Some(kind),
+            structural_value: Some(structural_value),
+        });
         items.push(CanonicalStructureItem {
             kind,
             structural_value,
         });
     }
 
+    let canonical_bytes = canonical_instruction_bytes(&instructions);
     let canonical_id = canonical_id_from_binary_structure(&canonical_bytes);
     let canonical_hash = canonical_id.0.clone();
     let canonical_root_id = format!("CNS_ROOT_{}", canonical_hash);
@@ -5930,6 +6506,7 @@ pub fn canonicalize_structural_form(
         canonical_hash: canonical_hash.clone(),
         canonical_bytes,
         items,
+        instructions,
     };
     let receipt = CnormReceipt {
         id: format!(
@@ -5938,7 +6515,7 @@ pub fn canonicalize_structural_form(
         ),
         root_id: structure.root_id.clone(),
         canonical_hash,
-        rule_table_hash: hash_serialized(&law_specs),
+        rule_table_hash: structural_canonical_law_hash(),
         idempotent: true,
         erased_variations: vec!["formatting".into()],
     };
@@ -6114,6 +6691,31 @@ mod genome_foundation_tests {
     use super::*;
 
     #[test]
+    fn role_digests_are_domain_separated() {
+        let payload = "same structural payload";
+        let authority = role_digest_str(DigestRole::AuthorityId, payload);
+        let receipt = role_digest_str(DigestRole::ReceiptId, payload);
+        let witness = role_digest_str(DigestRole::WitnessId, payload);
+        let authority_again = role_digest_str(DigestRole::AuthorityId, payload);
+
+        assert_eq!(authority.role, DigestRole::AuthorityId);
+        assert_eq!(authority.value, authority_again.value);
+        assert_ne!(authority.value, receipt.value);
+        assert_ne!(authority.value, witness.value);
+        assert_ne!(receipt.value, witness.value);
+    }
+
+    #[test]
+    fn substrate_witness_ids_use_witness_digest_role() {
+        let witness = derive_substrate_witness("subject", vec![], vec![], vec![], "receipt");
+        let witness_digest = role_digest_str(DigestRole::WitnessId, "subject:receipt");
+        let codec_digest = role_digest_str(DigestRole::CodecDigest, "subject:receipt");
+
+        assert_eq!(witness.id, format!("WIT_{}", witness_digest.value));
+        assert_ne!(witness.id, format!("WIT_{}", codec_digest.value));
+    }
+
+    #[test]
     fn tokenization_classifies_ascii_and_unicode_without_semantic_authority() {
         let (stream, receipt) = tokenize_rna("A.ι ≔ σ ‖ κ").expect("tokenization");
         assert_eq!(receipt.token_count, stream.tokens.len());
@@ -6150,6 +6752,13 @@ mod genome_foundation_tests {
     }
 
     #[test]
+    fn cache_hash_v1_is_domain_separated_and_stable() {
+        assert_eq!(cache_hash_v1_str("abc"), cache_hash_v1_bytes(b"abc"));
+        assert_ne!(cache_hash_v1_str("abc"), cache_hash_v1_str("abcd"));
+        assert_eq!(cache_hash_v1_str("abc").len(), 64);
+    }
+
+    #[test]
     fn normalize_rna_is_deterministic_under_spacing_variation() {
         let (left, _) = normalize_rna("ι   ≔   σ   ‖   κ").expect("left normalization");
         let (right, _) = normalize_rna("ι ≔ σ ‖ κ").expect("right normalization");
@@ -6183,15 +6792,56 @@ mod genome_foundation_tests {
             .iter()
             .find(|law| matches!(law.relation, StructuralRelationKind::OrderedSequence))
             .expect("ordered sequence law");
+        assert_eq!(ordered.transition_law_id, "TR_STRUCTURAL_FORM_TO_CNORM_V1");
         assert!(ordered.ordering_significant);
         assert!(!ordered.sorting_allowed);
         assert!(ordered.reference_identity_preserved);
+        assert!(
+            ordered
+                .preserved_distinctions
+                .contains(&DistinctionClass::AuthorityBearing)
+        );
+        assert!(
+            !ordered
+                .collapsed_distinctions
+                .contains(&DistinctionClass::AuthorityBearing)
+        );
         assert!(
             ordered
                 .minimal_invariants
                 .iter()
                 .any(|item| item == "item-position")
         );
+        validate_structural_equivalence_laws().expect("equivalence laws validate");
+    }
+
+    #[test]
+    fn distinction_law_classifies_collapse_before_equivalence() {
+        let distinctions = distinction_law_specs();
+        let transitions = transition_law_specs();
+        assert!(transitions.iter().any(|law| {
+            law.id == "TR_STRUCTURAL_FORM_TO_CNORM_V1"
+                && law
+                    .forbidden_distinction_classes
+                    .contains(&DistinctionClass::AuthorityBearing)
+                && law
+                    .allowed_distinction_classes
+                    .contains(&DistinctionClass::FormatLocal)
+        }));
+        assert!(distinctions.iter().any(|law| {
+            law.id == "DIST_ITEM_POSITION_AUTHORITY_V1"
+                && law.class == DistinctionClass::AuthorityBearing
+                && !law.collapse_allowed
+        }));
+        assert!(distinctions.iter().any(|law| {
+            law.id == "DIST_RNA_FORMAT_LOCAL_V1"
+                && law.class == DistinctionClass::FormatLocal
+                && law.collapse_allowed
+                && transition_law_allows_distinction(law.class)
+        }));
+        assert!(!transition_law_allows_distinction(
+            DistinctionClass::AuthorityBearing
+        ));
     }
 
     #[test]
@@ -6217,8 +6867,151 @@ mod genome_foundation_tests {
         );
         assert!(!left_structure.canonical_bytes.is_empty());
         assert_eq!(
+            left_structure.canonical_bytes,
+            canonical_instruction_bytes(&left_structure.instructions)
+        );
+        assert_eq!(
+            left_structure
+                .instructions
+                .first()
+                .map(|instruction| instruction.tag),
+            Some(CanonicalInstructionTag::HeaderV1)
+        );
+        assert!(
+            left_structure
+                .instructions
+                .iter()
+                .skip(1)
+                .all(|instruction| instruction.tag == CanonicalInstructionTag::ItemV1)
+        );
+        assert_eq!(
             left_receipt.rule_table_hash,
-            hash_serialized(&structural_equivalence_law_specs())
+            structural_canonical_law_hash()
+        );
+    }
+
+    #[test]
+    fn duplex_pair_validation_requires_semantic_and_complement_strands() {
+        let missing = validate_duplex_pair(None);
+        assert_eq!(missing.status, DuplexPairStatus::Unpaired);
+
+        let semantic = SemanticStrand {
+            id: "SEM_CKI".into(),
+            canonical_structure_id: "CNS_1".into(),
+            authority_scope: "root-structure".into(),
+        };
+        let complement = AuthorityComplement {
+            id: "CMP_CKI".into(),
+            authority_scope: "root-structure".into(),
+            admission_law_id: "ADM_CANONICAL_STRUCTURE_V1".into(),
+            exclusions: vec!["strand-only-promotion".into()],
+            invariants: vec!["canonical-instruction-bytes-stable".into()],
+            dependency_burdens: vec!["domain-closure-pending".into()],
+            required_witness_forms: vec!["cnorm-receipt".into()],
+            closure_requirements: vec!["closed-domain-slice".into()],
+            rollback_law_id: "RBK_REJECT_PAIR_V1".into(),
+        };
+        let pair_law = PairLaw {
+            id: "PAIR_CANONICAL_STRUCTURE_V1".into(),
+            required_semantic_scope: "root-structure".into(),
+            required_complement_scope: "root-structure".into(),
+            required_admission_law_id: "ADM_CANONICAL_STRUCTURE_V1".into(),
+            strand_only_promotion_allowed: false,
+        };
+        let pair = assemble_duplex_pair(semantic.clone(), complement.clone(), pair_law.clone());
+        let valid = validate_duplex_pair(Some(&pair));
+        assert_eq!(valid.status, DuplexPairStatus::LocallyValid);
+        assert_eq!(valid.pair_commitment, Some(pair.commitment));
+
+        let mut bad_law = pair_law;
+        bad_law.strand_only_promotion_allowed = true;
+        let malformed = assemble_duplex_pair(semantic, complement, bad_law);
+        let malformed_validation = validate_duplex_pair(Some(&malformed));
+        assert_eq!(malformed_validation.status, DuplexPairStatus::Malformed);
+        assert!(
+            malformed_validation
+                .failures
+                .iter()
+                .any(|failure| failure.contains("strand-only promotion"))
+        );
+    }
+
+    #[test]
+    fn domain_closure_blocks_promotion_on_open_frontier() {
+        let semantic = SemanticStrand {
+            id: "SEM_CKI".into(),
+            canonical_structure_id: "CNS_1".into(),
+            authority_scope: "root-structure".into(),
+        };
+        let complement = AuthorityComplement {
+            id: "CMP_CKI".into(),
+            authority_scope: "root-structure".into(),
+            admission_law_id: "ADM_CANONICAL_STRUCTURE_V1".into(),
+            exclusions: vec!["strand-only-promotion".into()],
+            invariants: vec!["canonical-instruction-bytes-stable".into()],
+            dependency_burdens: vec![],
+            required_witness_forms: vec!["cnorm-receipt".into()],
+            closure_requirements: vec!["closed-domain-slice".into()],
+            rollback_law_id: "RBK_REJECT_PAIR_V1".into(),
+        };
+        let pair_law = PairLaw {
+            id: "PAIR_CANONICAL_STRUCTURE_V1".into(),
+            required_semantic_scope: "root-structure".into(),
+            required_complement_scope: "root-structure".into(),
+            required_admission_law_id: "ADM_CANONICAL_STRUCTURE_V1".into(),
+            strand_only_promotion_allowed: false,
+        };
+        let pair = assemble_duplex_pair(semantic, complement, pair_law);
+        let validation = validate_duplex_pair(Some(&pair));
+        assert_eq!(validation.status, DuplexPairStatus::LocallyValid);
+
+        let blocked = evaluate_domain_closure(
+            &[validation.clone()],
+            vec![OpenObligation {
+                id: "OBL_DOMAIN_CLOSURE".into(),
+                description: "domain closure witness still pending".into(),
+            }],
+            vec![],
+            CyclePolicyResult::Acyclic,
+        );
+        assert!(!blocked.promotable);
+        assert_eq!(blocked.locally_valid_pairs.len(), 1);
+        assert_eq!(blocked.open_frontier.len(), 1);
+
+        let closed =
+            evaluate_domain_closure(&[validation], vec![], vec![], CyclePolicyResult::Acyclic);
+        assert!(closed.promotable);
+        assert!(closed.promotion_receipt_required);
+    }
+
+    #[test]
+    fn deterministic_authority_merge_excludes_worker_count_and_input_order() {
+        let units = vec![
+            CanonicalWorkUnit {
+                coordinate: "pair:002".into(),
+                payload_commitment: "b".into(),
+            },
+            CanonicalWorkUnit {
+                coordinate: "pair:001".into(),
+                payload_commitment: "a".into(),
+            },
+            CanonicalWorkUnit {
+                coordinate: "pair:003".into(),
+                payload_commitment: "c".into(),
+            },
+        ];
+        let mut reversed = units.clone();
+        reversed.reverse();
+
+        let serial = deterministic_authority_merge(&units, 1);
+        let two_workers = deterministic_authority_merge(&reversed, 2);
+        let many_workers = deterministic_authority_merge(&units, 16);
+
+        assert_eq!(serial, two_workers);
+        assert_eq!(serial, many_workers);
+        assert_eq!(
+            serial.ordered_coordinates,
+            vec!["pair:001", "pair:002", "pair:003"]
         );
     }
 
@@ -6314,6 +7107,105 @@ mod genome_foundation_tests {
                 .iter()
                 .any(|failure| failure.contains("canonical structure payload digest"))
         );
+    }
+
+    #[test]
+    fn dna_validation_report_id_uses_receipt_digest_role() {
+        let payload = b"payload".to_vec();
+        let packet = LocusPacket {
+            header: LocusPacketHeader {
+                artifact_class: GenomeArtifactClass::Gene,
+                surface: GenomeSurface::Dna,
+                kind: LocusPacketKind::CanonicalTransfer,
+                version_major: 1,
+                version_minor: 0,
+                authority_tier: 1,
+                capabilities: LocusCapabilityMask::default(),
+                grammar_id: "rna.v1".into(),
+                schema_hash: "legacy_graph_projection.v1".into(),
+                integrity_hash: dna_digest_from_bytes(&payload).0,
+                strand_manifest: vec!["core".into()],
+                feature_flags: 0,
+                root_subject_id: "SUBJ".into(),
+            },
+            sections: vec![LocusSection {
+                opcode: LocusOpcode::CanonicalPayload,
+                flags: 0,
+                subject_id: "SUBJ".into(),
+                payload,
+            }],
+        };
+
+        let report = validate_dna_packet(&packet);
+        let receipt_digest = role_digest_value(DigestRole::ReceiptId, &packet);
+        let payload_digest = role_digest_value(DigestRole::PayloadCommitment, &packet);
+        let authority_digest = role_digest_value(DigestRole::AuthorityId, &packet);
+
+        assert_eq!(report.id, format!("DNA_VAL_{receipt_digest}"));
+        assert_ne!(receipt_digest, payload_digest);
+        assert_ne!(receipt_digest, authority_digest);
+    }
+
+    #[test]
+    fn generic_dna_packet_validates_section_payload_commitment() {
+        let payload = b"payload".to_vec();
+        let mut packet = LocusPacket {
+            header: LocusPacketHeader {
+                artifact_class: GenomeArtifactClass::Gene,
+                surface: GenomeSurface::Dna,
+                kind: LocusPacketKind::CanonicalTransfer,
+                version_major: 1,
+                version_minor: 0,
+                authority_tier: 1,
+                capabilities: LocusCapabilityMask::default(),
+                grammar_id: "rna.v1".into(),
+                schema_hash: "execution_manifest.v1".into(),
+                integrity_hash: dna_digest_from_bytes(&payload).0,
+                strand_manifest: vec!["core".into()],
+                feature_flags: 0,
+                root_subject_id: "SUBJ".into(),
+            },
+            sections: vec![LocusSection {
+                opcode: LocusOpcode::CanonicalPayload,
+                flags: 0,
+                subject_id: "SUBJ".into(),
+                payload,
+            }],
+        };
+
+        let valid = validate_dna_packet(&packet);
+        assert!(valid.section_payload_commitments_valid);
+        assert_eq!(valid.section_payload_commitments.len(), 1);
+        assert!(valid.failures.is_empty());
+
+        packet.sections[0].payload = b"tampered".to_vec();
+        let invalid = validate_dna_packet(&packet);
+        assert!(!invalid.section_payload_commitments_valid);
+        assert!(invalid.failures.iter().any(|failure| {
+            failure.contains("section payload commitment does not match header integrity")
+        }));
+    }
+
+    #[test]
+    fn legacy_packet_decode_requires_explicit_migration_or_forensic_mode() {
+        let mut legacy = Vec::new();
+        legacy.extend_from_slice(b"LCS1");
+        legacy.push(LocusPacketKind::CanonicalTransfer as u8);
+        legacy.push(1);
+        legacy.push(0);
+        legacy.push(1);
+        legacy.extend_from_slice(&0u16.to_le_bytes());
+        push_sized_bytes(&mut legacy, b"legacy_graph_projection.v1").expect("schema");
+        push_sized_bytes(&mut legacy, b"SUBJ").expect("root");
+        legacy.extend_from_slice(&1u16.to_le_bytes());
+        legacy.push(LocusOpcode::CanonicalPayload as u8);
+        legacy.extend_from_slice(&0u16.to_le_bytes());
+        push_sized_bytes(&mut legacy, b"SUBJ").expect("subject");
+        push_sized_bytes(&mut legacy, b"payload").expect("payload");
+
+        assert!(decode_locus_packet_with_mode(&legacy, LocusDecodeMode::CurrentAuthority).is_err());
+        assert!(decode_locus_packet_with_mode(&legacy, LocusDecodeMode::Migration).is_ok());
+        assert!(decode_locus_packet_with_mode(&legacy, LocusDecodeMode::Forensic).is_ok());
     }
 
     #[test]

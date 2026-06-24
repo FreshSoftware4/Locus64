@@ -10,7 +10,8 @@ use l64_command::{BundlePolicyArg, OptimizerPolicyArg};
 use l64_core::{
     ArtifactContract, ArtifactKind, ArtifactLocator, BundleLock, CapabilityReadiness,
     CertificationReport, CommandContract, LockDiff, LockReceipt, MechanizationPolicyObject,
-    NamespaceScope, OptimizerPolicy, RegistryLookup, locate_artifact, runtime_root_report,
+    NamespaceScope, OptimizerPolicy, RegistryLookup, cache_hash_v1_bytes, cache_hash_v1_str,
+    locate_artifact, runtime_root_report,
 };
 use l64_locus::{
     load_bundle_lock, load_execution_manifest, manifest_cache_root, persist_bundle_lock,
@@ -258,7 +259,7 @@ fn real_main() -> Result<()> {
             );
             persist_execution_manifest(&manifest)?;
             let lock = BundleLock {
-                id: format!("BLK_{:x}", fxhash(&manifest.id)),
+                id: format!("BLK_{}", cache_hash_v1_str(&manifest.id)),
                 bundle_id: world.manifest.id.clone(),
                 bundle_hash: options.bundle_hash.clone(),
                 policy_resolution_id: resolved.resolution.id.clone(),
@@ -277,7 +278,7 @@ fn real_main() -> Result<()> {
                 &manifest.bundle_hash,
             );
             let receipt = LockReceipt {
-                id: format!("LRC_{:x}", fxhash(&lock.id)),
+                id: format!("LRC_{}", cache_hash_v1_str(&lock.id)),
                 lock_id: lock.id.clone(),
                 manifest_id: manifest.id.clone(),
                 bundle_id: world.manifest.id.clone(),
@@ -405,7 +406,7 @@ fn real_main() -> Result<()> {
                 changed_fields.push("report_ids".into());
             }
             let diff = LockDiff {
-                id: format!("LDF_{:x}", fxhash(&(left.clone() + &right))),
+                id: format!("LDF_{}", cache_hash_v1_str(&(left.clone() + &right))),
                 left_lock_id: left,
                 right_lock_id: right,
                 changed_fields,
@@ -963,14 +964,11 @@ fn build_cert_options(
     let input = fs::read(file).with_context(|| format!("failed to read `{file}`"))?;
     Ok(CertificationOptions {
         optimizer_policy: optimizer_policy.clone(),
-        bundle_hash: format!("{:x}", fxhash_bytes(&input)),
-        policy_hash: format!(
-            "{:x}",
-            fxhash(&format!(
-                "{optimizer_policy:?}|evaluator={:?}|cache={:?}|strict={strict_policy}",
-                evaluator_policy, cache_policy
-            ))
-        ),
+        bundle_hash: cache_hash_v1_bytes(&input),
+        policy_hash: cache_hash_v1_str(&format!(
+            "{optimizer_policy:?}|evaluator={:?}|cache={:?}|strict={strict_policy}",
+            evaluator_policy, cache_policy
+        )),
         bundle_id: Some(bundle_id.to_string()),
         evaluator_policy,
         cache_policy,
@@ -1525,22 +1523,4 @@ fn dump_cache_namespaces() -> Result<Vec<String>> {
         .collect::<Vec<_>>();
     items.sort();
     Ok(items)
-}
-
-fn fxhash(input: &str) -> u64 {
-    let mut hash: u64 = 0xcbf29ce484222325;
-    for byte in input.as_bytes() {
-        hash ^= u64::from(*byte);
-        hash = hash.wrapping_mul(0x100000001b3);
-    }
-    hash
-}
-
-fn fxhash_bytes(input: &[u8]) -> u64 {
-    let mut hash: u64 = 0xcbf29ce484222325;
-    for byte in input {
-        hash ^= u64::from(*byte);
-        hash = hash.wrapping_mul(0x100000001b3);
-    }
-    hash
 }

@@ -6,30 +6,32 @@ The workspace builds and tests as a Rust workspace with the unified `l64` wrappe
 
 The source crate/package/binary prefix rename from `mf` to `l64` has been executed. Remaining `mf` mentions should be limited to historical rail notes or explicitly documented transitional residue.
 
-The active lower chain is implemented as a transitional path:
+The active lower chain is the authority path:
 
 ```text
 Tokenization -> RnaNormalization -> StructuralResolution -> CanonicalNormalization -> DNA emission
 ```
 
-Implemented transitional substrates include:
+Implemented lower-chain substrates include:
 
 - token classes, token streams, tokenization receipts, token specs
 - RNORM diagnostic specs and token-grounded normalization receipts
 - SSR transition specs and ephemeral SSR receipts
-- CNORM rule specs, idempotence receipts, canonical hashes
-- DNA header receipts and validation reports
+- distinction, transition, and equivalence law tables consumed by CNORM
+- versioned canonical instruction records used to derive canonical bytes and canonical identity
+- DNA header receipts, section payload commitments, explicit decode modes, and validation reports
+- duplex semantic/complement pair validation, domain closure reports, and deterministic authority merge records
 - execution exactness and execution closure receipts
 - proof coverage dispatch with reuse legality, reuse decisions, and residual verification receipts
 - research lineage records that carry canonical hash, lowering receipt id, phase ids, and phase ledger
 
-The current `LINEAR_EXECUTION_RAIL.md` supersedes earlier completion framing. It classifies the current system as graph-persistence/proto-DNA infrastructure that must be inverted into true structural execution substrate before upper-stack expansion continues.
+The current `LINEAR_EXECUTION_RAIL.md` supersedes earlier completion framing. It now routes remaining transitional bundle/product/campaign paths through native authority products before further deletion or upper-stack expansion.
 
 ## Shipping Entry Points
 
 - `l64`: canonical wrapper
-- `l64-cli`: direct CLI compatibility binary
-- `l64-admin`: direct admin compatibility binary
+- `l64-cli`: direct CLI binary for automation and lower-level debugging
+- `l64-admin`: direct admin binary for automation and lower-level debugging
 
 Release packages include all three because `l64` dispatches to sibling `l64-cli` or `l64-admin`.
 
@@ -55,7 +57,7 @@ Windows target used by this release pass: `x86_64-pc-windows-msvc`.
 ## Known Constraints
 
 - The repo is a Git repository connected to GitHub.
-- `.locus` decode remains as a compatibility path; `.dna` is the preferred machine artifact language.
+- `.dna` is the machine authority artifact. Legacy packet decoding is explicit migration/forensic behavior only.
 - Q-surface crates have been removed from the workspace. Public doctrine is RNA/DNA; remaining Q-surface mentions are historical notes, negative regressions, or documented tombstones only.
 - SSR is intentionally ephemeral and must not become a persisted semantic authority layer.
 - `sequence-dna` emits canonical reconstructable RNA; `inspect-dna` owns JSON inspection output.
@@ -66,6 +68,17 @@ Windows target used by this release pass: `x86_64-pc-windows-msvc`.
 - Certification execution cache entries now use `.dna` filenames rather than `.locus` filenames. Rebuild `l64-cli` and `l64-admin` together before running admin tests that use CLI-produced cache entries.
 - Observe persistence entries now use `.dna` filenames rather than `.locus` filenames for observation/diff/prediction/plan/explanation/assessment/execution/reconciliation records.
 - Bundle-entry authoring text now uses the native `!l64-bundle v1` header. `compile-bundle` rejects obsolete `!qc0`/`!qa0` headers.
+- Bundle-entry authoring text must contain at least one entry.
+- Bundle import rejects non-closed native substrate parity before persisting `BundleWorld`.
+- Bundle substrate parity now carries duplex pair counts, locally valid pair counts, domain closure, and deterministic merge evidence.
+- Under memory pressure, use low-memory verification settings:
+
+```powershell
+$env:CARGO_BUILD_JOBS='1'
+$env:CARGO_INCREMENTAL='0'
+$env:CARGO_PROFILE_DEV_DEBUG='0'
+$env:CARGO_PROFILE_TEST_DEBUG='0'
+```
 
 ## Cleanup Policy Used
 

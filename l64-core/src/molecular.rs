@@ -1,8 +1,9 @@
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    CodonHeader, CodonPhase, SubstrateWitness, codon_admitted_in_phase, hash_serialized,
+    CodonHeader, CodonPhase, DigestRole, SubstrateWitness, codon_admitted_in_phase,
     phase_admission_rule, resolve_codon_symbol_or_alias, resolve_lexon_symbol_or_alias,
+    role_digest_value,
 };
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
@@ -182,7 +183,7 @@ pub fn validate_molecular_codec_record(
 
     MolecularCodecValidationReport {
         valid: failures.is_empty(),
-        codec_digest: hash_serialized(record),
+        codec_digest: role_digest_value(DigestRole::CodecDigest, record),
         failures,
     }
 }
@@ -265,7 +266,7 @@ pub fn validate_molecular_codec_envelope(
 
     MolecularCodecEnvelopeValidationReport {
         valid: failures.is_empty(),
-        codec_digest: hash_serialized(envelope),
+        codec_digest: role_digest_value(DigestRole::CodecDigest, envelope),
         failures,
     }
 }

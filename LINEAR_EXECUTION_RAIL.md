@@ -97,6 +97,53 @@ RNA source
 
 Any command, fixture, report, receipt, or projection that can cross that membrane without a role check is now the highest-priority debt source.
 
+## Active Work Selector
+
+When choosing the next implementation slice, optimize for burden reduction per development effort. The rail decides the next slice with this scoring order:
+
+```text
+highest score =
+  authority effect
+  * fanout
+  * ambiguity removed
+  * testability
+  * reversibility
+  / implementation size
+```
+
+Use the following decision order:
+
+1. **Authority effect first**
+   - Fix mechanisms that define, admit, validate, promote, or migrate authority before mechanisms that only display, cache, report, or document it.
+2. **Fanout second**
+   - Prefer one small substrate membrane used by many paths over a large fix inside one leaf workflow.
+3. **Ambiguity removed third**
+   - Prefer changes that make future code illegal or mechanically typed over changes that merely document intent.
+4. **Testability fourth**
+   - Prefer slices with direct unit or conformance tests over slices that require broad interpretation to verify.
+5. **Reversibility fifth**
+   - Prefer additive membranes and narrow reroutes before broad deletions unless the obsolete path is already proven non-load-bearing.
+6. **Implementation size last**
+   - If two slices reduce similar burden, choose the one with fewer files, fewer public API changes, and less fixture churn.
+
+Current active selector output:
+
+```text
+Band F strategic migration membrane
+-> route remaining transitional bundle/product/campaign paths through native authority products
+-> remove or quarantine residual transitional fields once native products carry equivalent evidence
+```
+
+Rationale:
+
+- Digest-role separation, DNA payload commitments, and authority decode modes have landed as the current packet membrane.
+- Production authority paths now use current-authority decoding; migration/forensic decoding is explicit rather than ambient.
+- Node 07A/08, canonical instruction, duplex local admission, domain closure, deterministic merge, and first bundle migration slices have landed enough lower-chain law for the first real structure family: distinction classes, transition law, equivalence coupling, versioned canonical instruction bytes, local semantic/complement pair validation, promotion-blocking domain closure, worker-count-independent authority merge, and bundle parity evidence over native authority products now exist.
+- The next burden reducer is routing remaining transitional bundle/product/campaign paths through native authority products because bundle parity now carries duplex, closure, and deterministic merge evidence.
+- Any migration slice must preserve capability but reject category errors exposed by the new role, distinction, duplex, closure, deterministic merge, and bundle parity law.
+
+If a future pass finds a higher-scoring slice, it must update this selector before implementing it.
+
 ## External Proving Slice Rule
 
 External proving projects are allowed only when they strengthen the main authority path.
@@ -194,7 +241,7 @@ Landed:
 - `l64-surfaces`, `l64-qc0`, and `l64-qa0` have been removed from workspace membership and deleted from the codebase.
 - Bundle-entry text remains only as an authoring convenience compiled by `compile-bundle` into `.dna`; it is not a public authority surface.
 
-Still active extraction targets:
+Still active refinement targets:
 
 - None for QC0/QA0/surfaces. Remaining references to removed projection command names are negative regression tests or historical rail notes only.
 - Node 11 membrane confusion patch has landed: source RNA, canonical RNA, DNA authority, and inspection/report artifacts now have separate command behavior.
@@ -202,8 +249,10 @@ Still active extraction targets:
 - `inspect-dna` owns JSON inspection output.
 - `compile-rna` rejects JSON/report/projection artifacts before lower-chain tokenization.
 - `verify-roundtrip` exposes the public `RNA -> DNA -> canonical RNA -> DNA` fixed-point gate.
-- The next active extraction target is Node 11B codon/lexon law: release artifacts, bundle records, and future products must be governed by native symbol/phase/admission law before they are rewritten as molecular substrate or expression products.
-- CKI `cki_registry.genome.rna` remains the best regression fixture for the next release-artifact spine because it is nontrivial, dependency-explicit, and already exposes the source/authority/projection distinction.
+- Node 11B codon/lexon/macro-codon law has exited, but its symbolic law must now be enforced by downstream molecular, bundle, product, and campaign paths rather than treated as an isolated registry.
+- Node 11D behavior-bearing reroute is intentionally paused until Node 11D0 freezes the architectural constitution and classifies current code as authority, scaffold, parity evidence, migration-only, deferred, or rejected.
+- Node 07A distinction/transition law is the lower-chain counterpart to Node 11D0: it must define which differences survive or collapse before EQUIV/CNORM can claim canonical sameness.
+- CKI `fixtures/cki_registry.genome.rna` remains the best regression fixture for source/canonical/projection separation because it is nontrivial, dependency-explicit, and already exposes the source/authority/projection distinction.
 
 Current verified gate:
 
@@ -288,6 +337,472 @@ Current verified gate:
 - Node 11C codec envelope slice has landed: `MolecularCodecEnvelope` binds a codon header to a molecular codec record, validates header/record phase and subject agreement, validates canonical/admitted header codons, and roundtrips deterministically. `cargo test -p l64-core`, `cargo check --workspace`, and `cargo fmt --check` pass after this slice.
 - Node 11D first authority-reroute slice has landed: bundle document lowering now produces molecular codec envelopes, and substrate parity validates the envelope membrane rather than validating bare records only. `cargo test -p l64-bundle`, `cargo check --workspace`, and `cargo fmt --check` pass after this slice.
 - Node 11D import-evidence slice has landed: `BundleWorld` and its persisted cache now carry native substrate parity evidence derived from bundle document lowering, including `.dna` import reload parity. `cargo test -p l64-bundle`, `cargo check --workspace`, and `cargo fmt --check` pass after this slice.
+- Immediate audit-fix slice has landed: `LOCUS64_LANGUAGE_SPEC.md` no longer recommends QC0 as the indirect integration language, and the `l64` wrapper no longer routes removed admin verbs as live commands. `compare-executions` remains routed because it is still implemented.
+- First hash-policy untangling slice has landed: `l64-core` now exposes domain-separated `cache_hash_v1_*` helpers, and CLI/admin/cert cross-binary cache/report/lock hashes use the shared helper instead of local `DefaultHasher`/FNV variants.
+- First packet-integrity untangling slice has landed: generic `encode_section_packet` DNA packets now bind `integrity_hash` to serialized payload bytes instead of substituting the schema hash. `l64-locus` has a regression proving same-schema different-payload packets get different integrity hashes.
+- `cargo test -p l64-locus -p l64-core -p l64-cli -p l64-admin -p l64-cert`, `cargo check --workspace`, and `cargo fmt --check` pass after the immediate fixes, shared cache digest helper, and generic packet integrity hardening.
+- New architecture-freeze correction: deeper Node 11D behavior-bearing reroute is blocked until Node 11D0 creates `LOCUS64_ARCHITECTURAL_CONSTITUTION_V1.md`, maps current code to constitutional law, and classifies codon/lexon/molecular/bundle/product/campaign code as authority, scaffold, parity evidence, migration-only, deferred, or rejected.
+- New lower-chain correction: Node 07A distinction/transition law now sits between structural form and equivalence. EQUIV/CNORM may not infer sameness from raw shape, source text, graph layout, or hash equality; they must consume explicit distinction, invariant, transition, and collapse law.
+- First digest-role enforcement slice has landed: `l64-core` now exposes `DigestRole`, `RoleDigest`, and role-separated BLAKE3 digest helpers; substrate witness IDs use `WitnessId` domain separation; molecular codec validation digests use `CodecDigest` domain separation. `cargo test -p l64-core` and `cargo check --workspace` pass after this slice.
+- DNA validation receipt-ID slice has landed: `validate_dna_packet` now derives `DnaValidationReport.id` through `DigestRole::ReceiptId`, with a regression proving the validation receipt id is distinct from `PayloadCommitment` and `AuthorityId` domains. `cargo fmt --check`, `cargo test -p l64-core`, and `cargo check --workspace` pass after this slice.
+- DNA payload commitment and decode-mode slice has landed: generic packet payload integrity now uses `DigestRole::PayloadCommitment`; `DnaValidationReport` emits per-section payload commitments and validates generic single-section packet integrity against the section payload commitment; `LocusDecodeMode` separates current-authority, migration, and forensic packet decoding; production authority-facing locus/CLI/cert decode paths use current-authority mode instead of implicit migration fallback. Remaining migration-compatible decoder calls are test inspection helpers plus the compatibility wrapper. `cargo fmt --check`, `cargo test -p l64-core`, `cargo test -p l64-locus`, `cargo test -p l64-cli`, `cargo test -p l64-cert`, and `cargo check --workspace` pass after this slice.
+- Node 07A first distinction/transition-law slice has landed: `DistinctionClass`, `DistinctionLawSpec`, and `TransitionLawSpec` define the first structural-form-to-CNORM distinction membrane; CNORM receipt rule-table hashes now bind equivalence, transition, and distinction law together; tests prove format-local/projection distinctions may collapse while authority-bearing item position/kind/value distinctions may not. `cargo test -p l64-core` and `cargo check --workspace` pass after this slice.
+- Node 08 first equivalence-coupling slice has landed: `EquivalenceLawSpec` now cites the transition law it consumes and lists preserved versus collapsed distinction classes; `validate_structural_equivalence_laws` rejects unknown transition laws, illegal collapses, and preserve/collapse contradictions; CNORM invokes that validation before canonicalizing. `cargo test -p l64-core` and `cargo check --workspace` pass after this slice.
+- Canonical instruction first slice has landed: `CanonicalInstructionTag` and `CanonicalInstruction` define the first versioned instruction stream for canonical structure; CNORM now derives `canonical_bytes` from explicit header/item instructions instead of inline ad hoc item-byte appends; tests prove canonical bytes equal encoded instructions while formatting collapses and order remains authority-bearing. `cargo fmt --check`, `cargo test -p l64-core`, `cargo check --workspace`, and `git diff --check` pass after this slice.
+- Duplex local-admission first slice has landed: `SemanticStrand`, `AuthorityComplement`, `PairLaw`, `DuplexPair`, and `DuplexPairValidation` define the first paired-authority unit; pair commitments use `DigestRole::AuthorityId`; validation distinguishes `Unpaired`, `Malformed`, and `LocallyValid`; tests reject missing pairs and strand-only promotion while accepting a valid semantic/complement/law pair. `cargo test -p l64-core` and `cargo check --workspace` pass after this slice.
+- Domain closure first slice has landed: `DomainClosureReport`, `OpenObligation`, `BridgeBurden`, and `CyclePolicyResult` distinguish local pair validity from promotable closed-domain authority; `evaluate_domain_closure` blocks promotion on open obligations, external burdens, rejected cycles, missing pairs, or malformed pairs, and requires a promotion receipt when promotable. `cargo fmt --check`, `cargo test -p l64-core`, `cargo check --workspace`, and `git diff --check` pass after this slice.
+- Deterministic merge first slice has landed: `CanonicalWorkUnit`, `DeterministicAuthorityMerge`, and `deterministic_authority_merge` define canonical coordinate ordering and receipt digest derivation that excludes worker count, lane timing, and input completion order; tests prove worker counts `1`, `2`, and `16` plus reversed input order produce identical ordered authority reports. `cargo test -p l64-core` and `cargo check --workspace` pass after this slice.
+- Strategic bundle migration first slice has landed: `BundleSubstrateParityReport` now carries duplex pair counts, locally valid pair counts, a `DomainClosureReport`, and a `DeterministicAuthorityMerge`; bundle molecular envelopes lower into semantic/complement duplex pairs under `PAIR_BUNDLE_SUBSTRATE_V1`; parity tests prove dependency bonds produce locally valid pairs, closed domain evidence, and deterministic merge coordinates, while empty/non-promotable parity remains blocked from domain promotion. Low-memory verification used `CARGO_BUILD_JOBS=1`, `CARGO_INCREMENTAL=0`, and debug-stripped profiles after rustc OOM under normal memory pressure; `cargo test -p l64-core --lib`, `cargo test -p l64-bundle`, `cargo check -p l64-bundle`, and `cargo fmt --check` pass.
+- Strategic bundle admission slice has landed: bundle-entry authoring text now rejects header-only empty bundles; bundle import now rejects non-closed native substrate parity before persisting `BundleWorld`; active `.dna` bundle import and CLI certification flows still pass. Low-memory verification used `CARGO_BUILD_JOBS=1`, `CARGO_INCREMENTAL=0`, and `CARGO_PROFILE_TEST_DEBUG=0`; `cargo test -p l64-bundle`, `cargo test -p l64-cli`, `cargo fmt --check`, and `git diff --check` pass after this slice.
+
+## Convergence Refinement Spine
+
+The recent documents converge on the same mechanism through different vocabularies: role separation, constitutional authority, symbolic law, molecular substrate, packet hardening, campaign governance, and projection quarantine. They must be aligned by dependency, not by whichever surface vocabulary is most recent.
+
+Use this spine whenever a future change appears to fit multiple paths:
+
+1. **Role/admission membrane**
+   - source RNA, canonical RNA, DNA authority, reports, projections, receipts, products, and release views must be typed before any path consumes them
+   - no file extension, command habit, or readable marker may decide authority by itself
+   - admission must eventually move from marker rejection into header/role law
+2. **Constitution freeze**
+   - freeze the cross-cutting authority doctrine before deeper reroutes
+   - classify existing code as authority, scaffold, parity evidence, migration-only, deferred, or rejected
+   - do not turn provisional codon, lexon, molecular, bundle, or product scaffolds into behavior-bearing law by momentum
+3. **Symbolic law enforcement**
+   - codons define structural class, phase legality, arity/admission, and opcode allocation
+   - lexons are scoped symbolic bindings to canonical targets, not aliases or gloss
+   - macro-codons govern recurring transition/product/receipt patterns
+   - authored text is one-way ingress into symbols; compiled artifacts do not owe original prose reconstruction
+4. **Distinction/transition law**
+   - structural form is a recoverable representation, not authority
+   - distinction extraction determines which differences are authority-bearing, projection-only, format-local, collapse-eligible, or collapse-forbidden
+   - transition law must precede equivalence and canonicalization
+5. **Equivalence and CNORM**
+   - EQUIV may collapse only distinctions permitted by transition law
+   - CNORM produces canonical structure under declared law, not canonicalized presentation, graph layout, or raw hash equality
+   - fixed-point gates must prove `RNA -> DNA -> canonical RNA -> DNA` stability plus canonical identity preservation
+6. **DNA and packet authority hardening**
+   - distinguish canonical DNA, validation bundle DNA, report DNA, record DNA, and product/package DNA by role and admission
+   - every persisted authority or cross-binary digest must bind actual payload content, not schema identity or local process hash policy alone
+   - generic section packets are containers until their payload role and validation law make them authority-bearing
+7. **Molecular substrate and witness-normal authority**
+   - molecular records must consume symbolic law and codec envelope law before they govern downstream behavior
+   - witnesses are derived from substrate state and receipts, never authored as truth
+   - public identity should be witness-shaped where products or campaigns are exposed
+8. **Bundle reroute as parity path**
+   - existing bundle workflows lower into substrate primitives for behavior parity
+   - bundle object families do not become ontology or substrate primitives by default
+   - no runtime import/certification/promotion path may depend on bundle substrate parity until constitution, symbolic law, packet hardening, and transition law are sufficiently enforced
+9. **Campaign, reuse, and release products**
+   - campaigns certify governed routes over lineage and witnesses, not generic theorem authority
+   - reuse requires canonical identity, lineage validity, replay permission, and satisfied invariants
+   - `.pep`, `.prot`, `.ptome`, `.cell`, claim pages, closure maps, stress maps, replay records, and views are products/projections unless explicitly reconstructed under source or canonical RNA role
+10. **Deletion/quarantine**
+   - delete or quarantine only after the replacement authority path carries the beam
+   - use git history for old forms; keep no compatibility shim unless an active test proves a current required transition still depends on it
+
+Priority rule:
+
+```text
+role membrane
+-> constitution
+-> symbolic law
+-> distinction/transition law
+-> equivalence/CNORM
+-> packet authority hardening
+-> molecular/witness authority
+-> bundle parity reroute
+-> campaign/reuse/product expression
+-> deletion/quarantine
+```
+
+If two paths conflict, prefer the one that eliminates an authority bypass or prevents a scaffold from becoming law. If a path only improves naming, presentation, or ergonomics, it waits unless the current name is causing coordination failure or public authority confusion.
+
+## Approval-Gated Duplex Authority Mutation
+
+This mutation supersedes the prior assumption that Node 11D0 can freeze the architecture from documentation alone. Node 11D remains blocked until the authority chain below has executable evidence. Existing Node 11B/11C molecular work is retained as provisional scaffolding and extraction material; it is not constitutional authority.
+
+Authoritative temporal sequence:
+
+```text
+verified checkpoint
+-> approval-gate ledger
+-> distinction/transition law
+-> equivalence law
+-> canonical instruction encoding and identity
+-> bounded, role-validated DNA admission
+-> symbolic-law compilation
+-> duplex pair authority
+-> domain closure
+-> deterministic parallel equivalence
+-> strategic bundle/certification migration
+-> bounded Boollet sidecar pilot
+-> constitutional promotion
+-> legacy deletion/quarantine
+-> Node 11D behavior-bearing reroute
+```
+
+Execution rules:
+
+1. Every architectural ruling begins as a candidate gate in `L64_APPROVAL_GATES.md`.
+2. A candidate gate becomes proven only when linked to a compiler rejection, fixed-point, DNA validation, migration, deterministic-parallel, projection-loss, or external-adapter test.
+3. Only proven gates may enter `LOCUS64_ARCHITECTURAL_CONSTITUTION_V1.md`.
+4. Functional capability is migrated strategically; legacy serialization, cache layout, graph shape, naming, and cross-compatibility are not parity requirements.
+5. The duplex pair is the smallest locally authoritative unit. Neither strand is independently promotable.
+6. Pair-local validity is only an admission precondition. Promotion requires a closed domain or genome slice and a promotion receipt.
+7. Codon symbols and lexon names are authoring/registry handles. Canonical structural instructions, scoped bindings, and admission law carry authority.
+8. Graphs, grooves, fold maps, indexes, scheduler plans, and diagnostic views are derived representations and remain outside canonical identity.
+9. Parallel execution is lawful only when worker counts `1`, `2`, and `N` produce byte-identical canonical DNA, canonical RNA, ordered diagnostics, receipts, and report digests. Timing and worker telemetry are non-authoritative.
+10. Bundle JSON and remaining Q-shaped records are migration ingress or migration ASTs only. Migration is complete only when native DNA execution carries their lawful functional capability and the old authority path is removed.
+11. Boollet may enter only as a transition-memory sidecar. It can remember validated transitions, denials, challenges, remediations, operator decay, and replay identity; it cannot decide Locus64 authority, canonical identity, DNA validity, or promotion.
+
+Immediate implementation bands:
+
+### Band A - Candidate Gate Ledger And Maturity Classification
+
+1. Verify and checkpoint the current worktree.
+2. Create the 50-gate candidate ledger with stable IDs, proof classes, dependencies, code targets, and status.
+3. Classify current molecular, bundle, DNA, canonicalization, certification, report, cache, and projection mechanisms as authority, scaffold, parity evidence, migration-only, derived, deferred, or rejected.
+4. Mark every constitution section candidate until its proof reference exists.
+
+Exit gate:
+
+- no architectural law can be frozen by prose alone
+- every behavior-bearing Node 11D dependency has an explicit candidate gate and proof obligation
+
+Current audit findings:
+
+| Mechanism | Current state | Rail classification | Required next move |
+|---|---|---|---|
+| `L64_APPROVAL_GATES.md` | present with 50 candidate gates | enforcement artifact, not constitution | keep first in sequence; promote gates only with executable evidence |
+| `CanonicalStructureItem` / token-hash structure | still uses compact structural values in the lower chain | scaffold | replace with explicit canonical instructions before final identity law |
+| `stable_hash_u64` / `hash_serialized` | still used for receipts, graph hashes, witness IDs, and some packet-related fields | display/cache/scaffold depending on call site | classify by `DigestRole`; remove from authority identity |
+| `bincode` payloads | still used for canonical payloads, molecular records, reports, and cached packets | transport/cache scaffold | introduce canonical encoding before expanding authority-bearing DNA sections |
+| `decode_section_payload` | decodes packets and deserializes payload by opcode | authority bypass risk | split authority/cache/projection decode APIs and require validation for authority payloads |
+| raw `authority_tier`, `feature_flags`, `strand_manifest` | present in DNA packet headers | untyped scaffold | replace or wrap with typed authority tier, feature admission, and strand-role law |
+| automatic legacy decode fallback | still present in packet decoding path | migration ambiguity | require explicit current-authority, migration, or forensic decode mode |
+| `MolecularCodecRecord` / `MolecularCodecEnvelope` | useful typed substrate serialization spine | provisional scaffold and parity evidence | rekey into duplex pair/complement law; do not constitutionalize record names |
+| `SubstrateWitness` | derived flag exists, but IDs still use display-style hashes | useful scaffold | make witness identity witness-shaped and authority-digest backed |
+| `QaDocument` / `QaEntry` | still central to bundle/certification migration flows | migration AST | preserve functional capability only until native pair/domain execution replaces it |
+| bundle JSON body format | still admitted through `!l64-bundle v1` migration text | migration ingress | require migration receipt and deletion condition |
+| namespacing by string rewrite | still broad in bundle migration code | bridge-law gap | add receipted namespace bridge before treating rewritten IDs as authority |
+| `l64-cert` threaded obligation waves | already sorts parallel results by wave offset | useful parity pattern | generalize to canonical work-unit waves and byte-equivalence tests |
+| report/research derivation | reports can still generate research/cached records | projection risk | require DNA digest, authority scope, projection loss, and replay for promotion |
+| Boollet Python reference | external transition-memory kernel with passing Python tests and non-compiling Rust skeleton | integration candidate and sidecar scaffold | port only after fixture parity; use to reduce remediation/replay/operator burden, not to define Locus64 authority |
+
+Audit conclusion:
+
+```text
+The workspace is aligned in direction but not yet aligned in enforcement.
+The rail must treat current molecular/bundle/DNA/certification code as useful scaffolding and parity evidence, not as completed substrate law.
+The next efficient path is not deletion, naming, or broad crate surgery; it is turning the current authority-shaped seams into typed, tested membranes in dependency order.
+```
+
+Current formalization frontier:
+
+The project is now past broad doctrine and before full implementation closure. The remaining work to formalize is the set of contracts that prevent implementation momentum from turning scaffolds into law.
+
+| Frontier | Must become | Minimal end state | Blocks |
+|---|---|---|---|
+| distinction/transition law | Rust enums/tables/fixtures for preserved, erased, local, projection, and forbidden distinctions | equivalence consumes explicit transition law, not shape, text, layout, or hash equality | CNORM, canonical identity, DNA fixed point |
+| equivalence law | table-driven relation law for the first real RNA/DNA structure family | each collapse is lawful, named, tested positive and negative, and tied to preserved invariants | CNORM, duplex pairing, reuse |
+| canonical identity | domain-separated digest roles and canonical structural instruction bytes | `AuthorityId`, `PayloadCommitment`, `ReceiptId`, `CacheKey`, and display IDs cannot be substituted for each other | DNA admission, witness identity, release products |
+| DNA admission | typed artifact role, decode mode, scope, feature, tier, and bounded validation contracts | authority decoding is impossible before complete packet validation and payload commitment checks | duplex DNA, migration, source/projection membrane |
+| duplex local authority | semantic strand + authority complement + pair law + pair commitment types | no strand-only promotion and no receipt-only complement can compile or validate as authority | domain closure, compiled symbolic law |
+| domain closure | closed-domain report over pairs, dependencies, burdens, cycles, open obligations, and promotion eligibility | local pair validity never promotes without domain closure receipt | certification, reuse, research records |
+| deterministic parallelism | canonical work-unit waves and ordered writer merge law | workers `1`, `2`, and `N` produce byte-identical authority outputs and diagnostics | scalable validation, Boollet sidecar evidence |
+| migration membrane | native capability map plus deletion-bound migration receipts | bundle/Q/JSON capabilities either re-express through native authority or become deletion targets | legacy removal, Node 11D reroute |
+| Boollet sidecar boundary | fixture-parity Rust port and Locus64 adapter contract | Boollet ranks/remembers transitions only; Locus64 remains sole authority for verdicts and promotion | remediation acceleration, not substrate closure |
+
+Deduction rule:
+
+If a current mechanism is unclear, classify it by the strongest authority effect it can currently cause:
+
+```text
+defines identity
+> admits authority
+> validates authority
+> promotes authority
+> migrates into authority
+> records authority history
+> projects authority
+> caches authority
+> displays authority
+```
+
+Formalize higher-effect mechanisms first. Lower-effect mechanisms are allowed to remain ugly if they are boxed out of authority flow by typed gates.
+
+Recovered K2 equivalence standard:
+
+The old Math Framework docs contain one standard worth porting directly into Node 07A/08:
+
+```text
+no naked equality
+only declared equivalence under an active regime/transition law
+equivalent objects collapse to one canonical representative only under that declared law
+bridge/path comparability requires explicit equivalence transport
+equivalence transport must carry preservation, loss, reversibility, receipts, and rollback
+commuting proof objects are emitted when alternate paths agree under the target equivalence
+```
+
+Locus64 translation:
+
+- `EqLaw` is not global equality.
+- `EqLaw` is a scoped law object consumed by EQUIV/CNORM.
+- `EqLaw` must name its active regime or transition context.
+- `EqLaw` must state preserved invariants, erased distinctions, forbidden collapses, loss class, reversibility class, required receipts, and rollback law.
+- `EqLaw` may be used for canonical collapse only after Node 07A has classified the relevant distinctions.
+- `target_equivalence` survives as a domain/campaign field, but root substrate equivalence remains structural and scoped.
+- bridge/campaign equivalence is a higher-layer transport obligation over canonical DNA, not a substitute for root canonical identity.
+- if a path cannot state equivalence transport explicitly, it is not promotable.
+
+Recovered K2 standards worth porting, with corrections:
+
+| Old K2 standard | Locus64 use | Required correction |
+| --- | --- | --- |
+| Canonical truth stays small | Authority lives in canonical DNA, scoped law objects, and receipts only. | Do not let reports, projections, labels, caches, or convenience views define authority. |
+| Detail survives by facet | Place each implementation-bearing detail in the one rail node or contract that owns it. | Do not duplicate the same rule across docs, CLI help, fixtures, and crate comments as competing mini-specs. |
+| Repeated algebra compiles into machinery | Shared law families should drive admission, equivalence, transport, closure, promotion, replay, and rollback. | Do not implement one-off route/campaign exceptions when a reusable law object can carry the burden. |
+| Honest frontier | Every blocker must name the missing law, receipt, witness, obligation, or authority boundary. | Do not allow generic "unsupported" or "adequacy missing" when a sharper deficiency applies. |
+| Discernment/stability/repair profile | Domain closure may use `(AdmAxes, EqAxes, PromAxes, Budgets, Failures, Priority)` as a compact scoped law-pack shape. | This is a domain-closure profile, not a root substrate replacement for RNA/DNA authority. |
+| Bridge contract tuple | Transport contracts need source, target, identity preservation, equivalence preservation, loss, reversibility, receipts, and rollback. | Bridge law sits above canonical DNA; it cannot define canonical identity by itself. |
+| Proof-shape batteries | Square, triangle, diamond, pentagon, and hexagon checks are useful witness forms for commutation and route adequacy. | Proof shapes are validation receipts, not semantic authority on their own. |
+| Surface transform receipts | Import/export/round-trip transforms require explicit receipts, unsupported-feature failures, and capability disclosure. | Resurrect the receipt discipline, not QC0/QM0/QK0/QA0 as public surfaces. |
+
+Route and campaign selection must be lexicographic when multiple lawful paths exist:
+
+1. lawfulness and admission
+2. satisfiable adequacy or complement obligations
+3. explicit equivalence transport
+4. typed loss classes below the active ceiling
+5. rollback and replay viability
+6. sufficient proof-shape battery
+7. minimal route complexity
+8. maximum lawful reuse payoff
+
+Recovered obligation families should map into duplex complements and domain closure, not into root parser behavior:
+
+- `OBL_EQ`: equivalence transport
+- `OBL_ADM`: admissibility and typing
+- `OBL_LOC`: locality or structural-context correctness
+- `OBL_GLU`: gluing/descent or composition law
+- `OBL_TOL`: aggregation/toll law
+- `OBL_RED`: reduction and normalization preservation
+- `OBL_BRG`: bridge contract correctness
+- `OBL_RBK`: rollback viability
+- `OBL_ADE`: adequacy assumptions
+- `OBL_FIN`: finiteness, boundedness, and normalization side conditions
+- `OBL_OBS`: observable-interface specification
+- `OBL_KNT`: obstruction handling
+
+Recovered deficiency leaves should become precise diagnostics where applicable:
+
+- `D_eq`: equivalence law underspecified
+- `D_loss`: loss classes untyped or above ceiling
+- `D_commute`: expected commutation/proof-shape receipt missing
+- `D_roundtrip`: round-trip law untested or failed
+- `D_bad_eq_transport`: declared transport does not preserve required invariants
+- `D_rollback_cliff`: rollback law is absent or too lossy for promotion
+- `D_no_commuting_proof`: alternate paths lack a required agreement witness
+
+Recovered limits to preserve in documentation and release gates:
+
+- finite executable fragments are not full domain semantics
+- semantic comparison is not proof-artifact identity
+- prediction is not theorem-level simulation
+- recomputation plans are not schedulers until executed and receipted
+- sidecar projections are not source unless admitted through the surface-role gate
+
+Porting rule:
+
+Old standards may be ported only when they reduce ambiguity in the RNA/DNA authority chain, duplex complement burden, domain closure, or release conformance. Anything that primarily revives old surface names, old document authority, or old compatibility expectations remains history.
+
+Compatibility membrane for K2 standards, duplex authority, and Boollet:
+
+These three threads are compatible only if each occupies a different authority layer.
+
+| Thread | Allowed authority effect | Forbidden authority effect | Integration point |
+| --- | --- | --- | --- |
+| Recovered K2 equivalence/bridge standards | Define scoped law packs, obligations, route-selection order, proof-shape receipts, and precise deficiencies. | Define root identity, revive Q surfaces, or make bridge/campaign equality substitute for canonical structure. | Bands B-E, especially EQUIV/CNORM, duplex complements, and domain closure. |
+| Duplex authority | Bind semantic strand and authority complement into the smallest locally valid authority unit. | Promote a strand alone, promote receipt-only evidence, or collapse domain closure into pair-local validity. | Band D, then Band E for closure and deterministic parallel validation. |
+| Boollet | Remember transitions, denials, stale validators, operator decay, and remediation candidates as sidecar memory. | Decide canonical identity, DNA validity, domain closure, promotion, or constitutional status. | Band F1, after Bands B-E produce native transition events that Boollet can observe. |
+
+Conflict-resolution rules:
+
+1. If K2 bridge logic and duplex local law disagree, duplex/local admission blocks promotion until a domain closure law states the bridge burden explicitly.
+2. If Boollet ranks a remediation that violates a K2 obligation or duplex complement, Locus64 rejects the proposal and Boollet records the denial as sidecar memory.
+3. If Boollet replay identity and Locus64 canonical identity disagree, Locus64 canonical identity wins; Boollet may only flag replay drift.
+4. If a K2 proof-shape receipt succeeds but DNA admission or canonical fixed-point validation fails, the proof shape is projection evidence only.
+5. If a recovered K2 standard would require old document, report, JSON, or Q-surface authority, port only its receipt/law discipline and reject the old surface role.
+
+Implementation consequence:
+
+- K2 value enters as law, obligation, route, and diagnosis structure.
+- Duplex enters as native authority structure.
+- Boollet enters as transition-memory and remediation-ordering structure.
+- None of the three may become a third public surface, a global semantic registry, or a shortcut around `RNA -> DNA -> canonical RNA -> DNA`.
+
+### Band B - Lower Authority Repair
+
+1. Complete Node 07A distinction and transition law over the first real RNA/DNA structure family.
+2. Make Node 08 equivalence consume transition law instead of raw shape, text, graph layout, or hash equality.
+3. Replace `CanonicalStructureItem` token-hash authority with explicit canonical instructions.
+4. Define versioned canonical encoding, bounded lengths, deterministic ordering, normalized strings, and domain-separated BLAKE3 commitments.
+5. Separate authority IDs, payload commitments, receipt IDs, cache keys, and display IDs.
+
+Band B implementation order for digest and identity debt:
+
+1. Add role-separated digest APIs in `l64-core`.
+2. Migrate witness-shaped and codec-shaped digests first because they are already behavior-facing and easy to confuse with authority IDs.
+3. Migrate DNA payload commitments and validation report IDs next because they gate admission.
+4. Migrate canonical structure identity only after Node 07A/08 distinction and equivalence law can say what bytes are canonical.
+5. Leave display IDs, temporary cache keys, and historical hashes in place until their authority effect is classified; do not churn cosmetic IDs before authority IDs are safe.
+
+Exit gate:
+
+- canonical identity derives only from explicit canonical structural bytes under declared distinction/equivalence law
+- `bincode`, JSON, `stable_hash_u64`, formatting, and scheduler state cannot define authority identity
+
+### Band C - DNA Admission And Reconstruction
+
+1. Type artifact roles, authority scopes, decode modes, graph roles, feature admission, and mechanically earned authority tiers.
+2. Bind every authority section to its payload, schema, encoding version, role, and bounded length.
+3. Require complete packet validation before authority payload decoding.
+4. Replace automatic legacy fallback with explicit migration or forensic decode modes.
+5. Enforce packet, section, string, strand, and obligation limits before allocation.
+6. Prove `RNA -> DNA -> canonical RNA -> DNA` identity and byte fixed points.
+
+Exit gate:
+
+- malformed, truncated, oversized, role-confused, legacy, and tampered packets fail deterministically before authority admission
+- canonical reconstruction promises canonical RNA only, never original authored RNA
+
+### Band D - Compiled Symbolic And Duplex Law
+
+1. Compile codons into opcode, phase, arity, admission, structural operation, and required complement burdens.
+2. Compile lexons into scoped bindings with authority source, valid phase, loss law, and binding receipt.
+3. Compile macro-codons into reaction law with input/output roles, pair-state requirements, witness forms, failure modes, canonical receipt shape, and rollback behavior.
+4. Reclassify current molecular nouns as provisional mappings onto substrate roles.
+5. Implement semantic strands, constitutive authority complements, pair laws, and canonical pair commitments.
+6. Reject strand-only promotion, receipt-ID-only complements, invalid pair classes, and authored witness authority.
+
+Exit gate:
+
+- a pair is locally authoritative only when semantic structure and constitutive admissibility law are bound under one canonical commitment
+- no symbol, label, receipt coordinate, or molecular implementation name can become authority independently
+
+### Band E - Domain Closure And Deterministic Parallelism
+
+1. Compute dependency-safe canonical work waves from immutable pair/domain inputs.
+2. Decode and validate independent semantic/complement lanes and independent pairs concurrently.
+3. Merge worker results through one canonical ordered writer.
+4. Aggregate diagnostics by stable domain, pair, gate, and error-code coordinates rather than completion order.
+5. Evaluate dependency closure, external bridge burdens, cycle law, open obligations, and promotion eligibility after local pair validation.
+6. Exclude worker plans, lane assignments, timings, and telemetry from authority.
+
+Exit gate:
+
+- serial and parallel execution are byte-equivalent across canonical DNA, canonical RNA, receipts, diagnostics, and report digests
+- locally valid but globally open domains remain non-promotable
+
+### Band F - Strategic Capability Migration
+
+1. Inventory lawful bundle, policy, namespace, dependency, conflict, certification, adequacy, replay, and execution capabilities.
+2. Re-express those capabilities through native roles, duplex pairs, domain closure, witnesses, and DNA execution.
+3. Preserve lawful success and lawful rejection; add rejection for category errors exposed by native authority law.
+4. Require migration receipts for bundle JSON and Q-shaped migration ASTs.
+5. Prove cold-cache operation and delete disposable graph/document cache dependencies from authority paths.
+6. Split authored obligation intent from evaluator-produced evidence, attach authority scope to verdicts, and make evaluator implementations explicit and named.
+
+Exit gate:
+
+- native authority carries the required functional capability without preserving legacy wire forms or path-dependent object boundaries
+- reports and research records are projections unless replayed from admitted DNA authority
+
+### Band F1 - Boollet Transition-Memory Sidecar Pilot
+
+Boollet is a useful warm-memory organism only if it remains subordinate to Locus64 authority. It enters after native authority, domain closure, deterministic parallelism, and strategic migration seams are explicit enough that Boollet cannot accidentally become the decision engine.
+
+Integration rule:
+
+- Boollet does not move earlier than Bands B-E in the Locus64 dependency order.
+- Boollet work may proceed early only as an external Rust parity port against Boollet fixtures, with no Locus64 authority imports and no Locus64 public command surface.
+- Locus64 integration begins only when there is a native Locus64 transition for Boollet to observe: admitted DNA, phase/gate identity, validator/evaluator identity, result, diagnostics, and replay identity.
+- Boollet can reduce burden by remembering failed or repeated transition attempts, ranking remediation candidates, detecting stale validators/toolchains, and surfacing operator decay. It cannot reduce burden by skipping a Locus64 gate proof.
+- If Boollet output would affect canonical state, domain closure, promotion, DNA validity, or constitutional status, it must re-enter as a Locus64 proposal or witness coordinate and pass the normal Locus64 gate.
+
+Planned-change smoothing points:
+
+1. During Band F migration, Boollet records repeated migration failures and ranks the next remediation candidate without changing migration verdicts.
+2. During deterministic parallelism work, Boollet may compare replay identities across worker-count runs as sidecar evidence, while Locus64 byte-equivalence tests remain the authority.
+3. During certification rekeying, Boollet may detect stale evaluator fingerprints and scope drift, while Locus64 receipts define authority scope.
+4. During release/source integrity work, Boollet may remember projection-as-source category errors, while Locus64 admission gates perform rejection.
+5. During legacy deletion, Boollet may preserve deletion rationale and failure history as transition memory, while git history remains the archival source and Locus64 tests prove replacement.
+
+Allowed role:
+
+- remember Locus64 transition attempts, validation receipts, denials, challenges, remediations, stale-validator warnings, operator promotion candidates, operator decay, and replay identities
+- rank future remediation or tactic candidates under explicit authority ceilings
+- expose repeated failures, negative scopes, stale toolchain/validator fingerprints, and functional pressure
+- provide fixture-backed Rust parity targets for future embedding
+
+Forbidden role:
+
+- decide canonical identity
+- validate DNA packets
+- promote duplex pairs or domains
+- define codon/lexon/macro-codon law
+- replace Locus64 certification, adequacy, or replay authority
+- introduce a third public surface or another canonical artifact language
+
+Step sequence:
+
+1. Treat `C:\Users\Fresh\Projects\boollet` as an external reference until its Rust port compiles and passes fixture parity.
+2. Add a Boollet integration packet to the rail only after Band F has a native Locus64 transition to observe.
+3. Define the adapter boundary:
+   - input from Locus64: DNA digest, canonical ID, phase/gate, transition attempt, validator/evaluator identity, result, diagnostics, residue, remediation candidate, replay identity
+   - output to Locus64: ranked proposal, challenge memory, remediation suggestion, stale-evidence warning, operator candidate, or decay warning
+4. Require every Boollet output to re-enter Locus64 as a proposal or witness coordinate, never as authority.
+5. Port the Boollet Rust core against fixture hashes before embedding:
+   - `BoolState`
+   - `StateDelta`
+   - `TransitionContract`
+   - `ValidationReceipt`
+   - `CommitRecord`
+   - `ChallengeRecord`
+   - `RemediationRecord`
+   - `OperatorCandidate`
+   - `OperatorDecayRecord`
+   - `rail_digest`
+   - `replay_identity`
+6. Keep proof-search, patch/test, command execution, and Locus64 contact as adapters over the Boollet core.
+7. Add one Locus64 remediation-loop fixture:
+   - admission failure from admitted DNA authority
+   - Boollet challenge/remediation memory
+   - later Locus64 result
+   - Boollet improves ranking without changing Locus64 verdict logic
+8. Use Boollet to reduce migration burden only where it classifies repeated failures or suggests ordered remediation. Do not use it to skip required Locus64 gate proofs.
+
+Exit gate:
+
+- Boollet Rust core passes fixture parity against the Python reference
+- one Locus64 sidecar fixture demonstrates improved remediation ordering while Locus64 remains the only authority
+- Boollet artifacts are classified as sidecar memory, proposal, challenge, remediation, or projection; none are authority-bearing DNA
+- all Boollet-derived suggestions require Locus64 validation before affecting canonical state
+
+### Band G - Constitutional Promotion And Removal
+
+1. Promote mechanically proven candidate gates into the constitution.
+2. Keep failed or unproved gates candidate, deferred, or rejected with explicit residue.
+3. Delete legacy paths after replacement capability and negative tests pass.
+4. Reject generated caches, ambiguous JSON, reports, and projections from source releases.
+5. Resume Node 11D only against the proven constitution and native authority chain.
+
+Exit gate:
+
+- the constitution is an index of executable law rather than architectural aspiration
+- no legacy mechanism remains load-bearing merely because it existed before the native replacement
 
 ## Rail Node Template
 
@@ -802,6 +1317,45 @@ Rust target:
 - one compatibility table
 - one decode/validation failure table
 - reserved opcode ranges and version negotiation policy
+
+## 10A. Discernment And Transition Law
+
+Structural form is not yet canonical authority. It is recovered representation.
+
+Before equivalence and CNORM may collapse anything, the system must account for the distinctions that matter under the active transition regime.
+
+This layer defines:
+
+- which distinctions are authority-bearing
+- which distinctions are projection-only
+- which distinctions are format-local
+- which distinctions are collapse-eligible
+- which distinctions are collapse-forbidden
+- which transitions preserve identity
+- which transitions change identity
+- which invariants must survive a transition
+- which failures halt before equivalence
+
+Correct chain:
+
+```text
+structural form
+-> distinction extraction
+-> transition/invariant law
+-> equivalence
+-> CNORM
+```
+
+Equivalence is therefore not raw shape comparison. It is compiled sameness-discernment under declared transition law.
+
+Rust target:
+
+- `DistinctionClass`
+- `DiscernmentCarrier`
+- `TransitionLaw`
+- `InvariantSet`
+- `CollapsePolicy`
+- transition-law fixtures consumed by equivalence tests
 
 ## 11. CNORM
 
@@ -1718,11 +2272,12 @@ Downstream payoff:
 
 - canonicalization stops depending on legacy graph persistence assumptions
 
-### Node 08 - Structural Equivalence Law
+### Node 07A - Distinction And Transition Law
 
 Purpose:
 
-- define what structural equivalence means before CNORM claims to canonicalize anything
+- define the discernment/transition layer that tells equivalence which distinctions may be collapsed and which must survive
+- prevent CNORM from treating raw structural shape, token text, graph layout, or hash equality as semantic sameness
 
 Depends on:
 
@@ -1736,13 +2291,93 @@ Code targets:
 
 Step sequence:
 
+1. Inventory where current lower-chain code treats normalization, child order, grouping, source text, or hash value as identity-relevant.
+2. Define closed distinction classes:
+   - authority-bearing
+   - projection-only
+   - format-local
+   - structural
+   - semantic
+   - validation
+   - collapse-eligible
+   - collapse-forbidden
+3. Define transition-law records:
+   - consumed state
+   - produced state
+   - active regime
+   - preserved invariant set
+   - changed distinction set
+   - lawful collapse policy
+   - rejection condition
+   - receipt emitted
+4. Add first fixtures for:
+   - order-preserving transition
+   - order-erasing transition
+   - grouping-preserving transition
+   - grouping-erasing transition
+   - projection-only distinction ignored by authority
+   - authority-bearing distinction preserved
+5. Make Node 08 equivalence consume distinction/transition law instead of raw structural form.
+6. Mark any current equivalence fixture that lacks transition law as provisional.
+
+Actions:
+
+- introduce the minimal `DistinctionClass`, `DiscernmentCarrier`, `TransitionLaw`, `InvariantSet`, and `CollapsePolicy` types or equivalents
+- add receipts proving which distinction classes were preserved or collapsed
+- add negative diagnostics for attempted collapse of authority-bearing distinctions
+- avoid vocabulary-heavy generality; implement only the first structure family needed by current RNA/DNA and CKI fixtures
+
+Invariants:
+
+- raw shape equality is not equivalence
+- hash equality is not equivalence
+- source text equality is not equivalence
+- transition law decides what may collapse
+- projection-only distinctions may not become authority-bearing accidentally
+- authority-bearing distinctions may not be erased by formatting, sorting, grouping, or product rendering
+
+Tests:
+
+- distinction classification fixtures
+- transition-law positive/negative fixtures
+- projection-only distinction collapse fixture
+- authority-bearing distinction preservation fixture
+- attempted illegal collapse emits typed failure before CNORM
+
+Exit condition:
+
+- Node 08 equivalence consumes explicit distinction/transition law and no longer has to infer sameness from raw structure
+
+Downstream payoff:
+
+- CNORM becomes canonicalization of preserved discernment, not presentation-rich structure hashing
+
+### Node 08 - Structural Equivalence Law
+
+Purpose:
+
+- define what structural equivalence means before CNORM claims to canonicalize anything
+
+Depends on:
+
+- Node 07A
+
+Code targets:
+
+- `l64-core`
+- `l64-canon`
+- `l64-testkit`
+
+Step sequence:
+
 1. Inventory every place the current code assumes equivalence through sorting, grouping, text normalization, or hash equality.
-2. Define the smallest explicit equivalence-law table for the first real structure family.
-3. Mark each relation as ordered, unordered, associative, commutative, identity-preserving, or non-collapsible.
-4. Define the minimal invariant set for canonical identity.
-5. Define canonical ordering only after equivalence classes are known.
-6. Add positive and negative fixtures proving what collapses and what remains distinct.
-7. Refuse additional equivalence families until the smallest one passes conformance.
+2. Consume Node 07A distinction/transition law as the source of permitted collapse.
+3. Define the smallest explicit equivalence-law table for the first real structure family.
+4. Mark each relation as ordered, unordered, associative, commutative, identity-preserving, or non-collapsible.
+5. Define the minimal invariant set for canonical identity.
+6. Define canonical ordering only after equivalence classes are known.
+7. Add positive and negative fixtures proving what collapses and what remains distinct.
+8. Refuse additional equivalence families until the smallest one passes conformance.
 
 Actions:
 
@@ -1756,6 +2391,7 @@ Actions:
 Invariants:
 
 - equivalence is explicit, not inferred from representation shape
+- equivalence preserves Node 07A authority-bearing distinctions
 - graph/tree/arena/tape layout does not define equivalence
 - sorting is allowed only where the equivalence law permits it
 - flattening is allowed only where the equivalence law permits it
@@ -2305,6 +2941,138 @@ Downstream payoff:
 
 - bundle rerouting can target substrate mechanics instead of copying old object boundaries
 
+### Node 11D0 - Approval-Gated Constitution Promotion
+
+Purpose:
+
+- promote only mechanically demonstrated symbol/substrate/codec/campaign/product laws before Node 11D becomes behavior-bearing
+- prevent provisional codon, lexon, molecular, bundle, product, and campaign scaffolds from becoming authority by implementation momentum
+- keep unproven architectural rulings in `L64_APPROVAL_GATES.md` rather than freezing them as constitution
+
+Depends on:
+
+- Node 11C
+- `L64_APPROVAL_GATES.md`
+- current audit findings
+- pre-formulation consolidation material
+
+Document targets:
+
+- `LOCUS64_ARCHITECTURAL_CONSTITUTION_V1.md`
+- `LINEAR_EXECUTION_RAIL.md`
+- `LOCUS64_LANGUAGE_SPEC.md`
+- `HANDOFF_STATUS.md`
+
+Step sequence:
+
+1. Verify `L64_APPROVAL_GATES.md` covers the active approval rulings and marks unproven rulings as `Candidate` or `Deferred`.
+2. Create `LOCUS64_ARCHITECTURAL_CONSTITUTION_V1.md` only as a promoted-law index, not as an aspiration document.
+3. Define the authority doctrine from proven gates:
+   - source RNA
+   - canonical DNA
+   - canonical symbolic RNA
+   - products
+   - projections
+   - receipts
+   - traces
+   - failures
+   - foreign/import material
+4. Define the genesis and promotion stack:
+   - variation
+   - retention
+   - recurrence
+   - discernment
+   - canonicalization
+   - objecthood
+   - operatorization
+   - promotion
+   - law
+   - constitution
+5. Define native symbol language:
+   - authored text as one-way capture material
+   - symbolic output as durable native form
+   - source retention as non-authority lineage
+   - no obligation to reconstruct authored prose from DNA
+6. Promote codon, lexon, macro-codon, and generated-word law only where compiler/category tests prove the ruling.
+7. Promote Node 07A distinction/transition law only where fixed-point or illegal-collapse tests prove the ruling.
+8. Define substrate role law before molecular noun law:
+   - unit
+   - relation
+   - transformation
+   - witness
+   - container
+   - integration
+   - expression
+   - scope
+   - admission
+9. Classify current molecular names as provisional mappings unless a later proof promotes one:
+   - locus
+   - atom
+   - bond
+   - reaction
+   - chassis
+   - cassette
+   - plasmid
+   - genome
+10. Define codec spine law:
+   - records serialize primitives
+   - envelopes bind codon headers to records
+   - payload digests bind content
+   - no generic payload ontology
+11. Define witness/public identity:
+   - witnesses are derived
+   - hashes are machine memo bindings
+   - product identity is witness-shaped
+12. Define bundle semantic reroute as a strategic migration/proving path, not ontology source.
+13. Define campaign/certification model before expanding campaign runtime.
+14. Define projection/inspection/foreign-output quarantine.
+15. Define CKI/theory fixture law:
+   - fixture role
+   - dependency closure
+   - parent-before-child constructive order
+   - open obligations
+   - projection exports as non-authority
+16. Build a compliance matrix:
+   - current code modules -> constitution sections
+   - rail nodes -> constitution gates
+   - tests -> laws proved
+   - scaffolds -> maturity classification
+17. Build a defer/reject ledger:
+   - old K2 concepts ported as law
+   - concepts deferred
+   - concepts rejected
+   - concepts quarantined as migration-only
+
+Invariants:
+
+- no runtime gate is promoted by documentation alone
+- parity evidence is not certification
+- bundle object boundaries do not define ontology
+- products are not source
+- projections are not source
+- source capture text is not durable authority
+- current code is classified by maturity, not described as final architecture
+- old K2 surfaces are ported, deferred, or rejected explicitly
+- no `Candidate` gate may appear in the constitution as proven law
+- current molecular names are role mappings unless promoted by evidence
+
+Tests / inspections:
+
+- documentation scan proves QC0/QA0/QM0/QK0 are not recommended as public languages
+- compliance matrix covers every active crate
+- defer/reject ledger covers old surface concepts and unresolved K2 concepts
+- constitution acceptance checklist maps to rail Definition of Done
+- every promoted constitution rule links to a proven gate in `L64_APPROVAL_GATES.md`
+
+Exit condition:
+
+- `LOCUS64_ARCHITECTURAL_CONSTITUTION_V1.md` contains only proven gate law or clearly marked deferred residue
+- Node 11D can resume against explicit executable law rather than scattered chat-derived intent or provisional scaffolding
+
+Downstream payoff:
+
+- future implementation slices can be tested against a constitution instead of reinterpreting the chat history or overpromoting scaffolds
+
 ### Node 11D - Bundle Semantic Reroute
 
 Purpose:
@@ -2314,6 +3082,7 @@ Purpose:
 
 Depends on:
 
+- Node 11D0
 - Node 11C
 - completed witness-normal derivation from Node 11C
 
@@ -3454,11 +4223,18 @@ This change chain corrects the next-order substrate mistake before implementatio
 
 The rail is implemented when:
 
+- `LOCUS64_ARCHITECTURAL_CONSTITUTION_V1.md` exists and freezes authority doctrine, native symbol language, codon/lexon/macro law, molecular substrate law, codec spine law, bundle reroute law, campaign/certification law, projection quarantine, CKI fixture law, codebase compliance status, and the defer/reject ledger
+- every behavior-bearing reroute after Node 11D consumes the architectural constitution rather than carrying scaffold momentum forward as implicit authority
+- distinction/transition law exists between structural form and EQUIV/CNORM
+- EQUIV consumes explicit distinction, invariant, transition, and collapse law instead of inferring sameness from raw shape, source text, graph layout, or hash equality
+- CNORM canonicalizes preserved structure under that law and never erases authority-bearing distinctions
 - required DNA sections contain no semantic text needed for validation or execution
 - SSR cannot be serialized as authority
 - structural-form representations cannot become public identity layers
 - CNORM identity is independent of presentation strings and source formatting
 - DNA validates from structural sections alone
+- generic DNA packet integrity binds payload bytes, not schema identity alone
+- authored text capture is one-way source ingress; compiled DNA and products do not owe prose reconstruction
 - `compile-rna` accepts source RNA only and rejects projection/report/receipt/trace/failure text
 - `sequence-dna` emits canonical reconstructable RNA only
 - `inspect-dna` owns inspection/report output
@@ -3470,6 +4246,9 @@ The rail is implemented when:
 - Q-surface crates are removed and no longer shape the architecture
 - public command/crate naming does not mislead users, implementation, authority boundaries, or deletion sequencing
 - compatibility imports are removed unless backed by a concrete active requirement and deletion condition
+- persisted cross-binary cache/report/lock keys use the shared cache-hash policy rather than ad hoc local hashers
+- public documentation does not recommend QC0, QA0, QM0, or QK0 as public languages or active authority routes
+- wrapper commands do not route deleted or retired commands as live behavior
 - conformance, fuzz, torture, replay, migration, and cross-platform determinism tests pass
 - external proving slices demonstrate that authored registry-like structures can be ingested through RNA/DNA and exported as projections without making the projection authoritative
 - genome release artifacts are expressed as `.pep`, `.prot`, `.ptome`, and `.cell` products after Node 11E lands

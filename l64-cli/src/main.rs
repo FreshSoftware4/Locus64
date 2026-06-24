@@ -17,9 +17,10 @@ use l64_cert::{
 use l64_command::{BundlePolicyArg, OptimizerPolicyArg};
 use l64_core::{
     Budget, BundleConflictPolicy, Canonicalize, GenomeArtifactClass, GenomeSurface,
-    LocusCapabilityMask, LocusOpcode, LocusPacketKind, OptimizerPolicy, QaDocument, QaEntry,
-    RegistryLookup, ResearchLineageRecord, SelectRoute, decode_locus_packet,
-    document_for_registry_id, locus_packet_summary,
+    LocusCapabilityMask, LocusDecodeMode, LocusOpcode, LocusPacketKind, OptimizerPolicy,
+    QaDocument, QaEntry, RegistryLookup, ResearchLineageRecord, SelectRoute, cache_hash_v1_bytes,
+    cache_hash_v1_str, decode_locus_packet_with_mode, document_for_registry_id,
+    locus_packet_summary,
 };
 use l64_kernel::ConstitutionKernel;
 use l64_locus::{
@@ -714,7 +715,8 @@ fn real_main() -> Result<()> {
             let out_path = out.unwrap_or_else(|| format!("{id}.validation.dna"));
             fs::write(&out_path, &bytes)
                 .with_context(|| format!("failed to write `{out_path}`"))?;
-            let packet = decode_locus_packet(&bytes).map_err(anyhow::Error::msg)?;
+            let packet = decode_locus_packet_with_mode(&bytes, LocusDecodeMode::CurrentAuthority)
+                .map_err(anyhow::Error::msg)?;
             println!(
                 "{}",
                 serde_json::to_string_pretty(&serde_json::json!({
@@ -852,7 +854,9 @@ fn real_main() -> Result<()> {
             let bytes = encode_locus_packet_for_report(&report).map_err(anyhow::Error::msg)?;
             if let Some(path) = out {
                 fs::write(&path, &bytes).with_context(|| format!("failed to write `{path}`"))?;
-                let packet = decode_locus_packet(&bytes).map_err(anyhow::Error::msg)?;
+                let packet =
+                    decode_locus_packet_with_mode(&bytes, LocusDecodeMode::CurrentAuthority)
+                        .map_err(anyhow::Error::msg)?;
                 println!(
                     "{}",
                     serde_json::to_string_pretty(&serde_json::json!({
@@ -902,7 +906,8 @@ fn real_main() -> Result<()> {
             if let Some(path) = out {
                 fs::write(&path, &bytes).with_context(|| format!("failed to write `{path}`"))?;
             }
-            let packet = decode_locus_packet(&bytes).map_err(anyhow::Error::msg)?;
+            let packet = decode_locus_packet_with_mode(&bytes, LocusDecodeMode::CurrentAuthority)
+                .map_err(anyhow::Error::msg)?;
             let lineage_id = format!("LIN_{}", subject_id);
             let lineage = ResearchLineageRecord {
                 id: lineage_id.clone(),
@@ -1664,22 +1669,19 @@ fn build_cert_options(
 ) -> Result<CertificationOptions> {
     let bundle_hash = if let Some(file) = file {
         let input = fs::read(file).with_context(|| format!("failed to read `{file}`"))?;
-        format!("{:x}", fxhash_bytes(&input))
+        cache_hash_v1_bytes(&input)
     } else if let Some(bundle) = bundle {
-        format!("{:x}", fxhash(bundle))
+        cache_hash_v1_str(bundle)
     } else {
         "seed".into()
     };
     Ok(CertificationOptions {
         optimizer_policy: optimizer_policy.clone(),
         bundle_hash,
-        policy_hash: format!(
-            "{:x}",
-            fxhash(&format!(
-                "{optimizer_policy:?}|evaluator={:?}|cache={:?}|strict={strict_policy}",
-                evaluator_policy, cache_policy
-            ))
-        ),
+        policy_hash: cache_hash_v1_str(&format!(
+            "{optimizer_policy:?}|evaluator={:?}|cache={:?}|strict={strict_policy}",
+            evaluator_policy, cache_policy
+        )),
         bundle_id: bundle.map(ToString::to_string),
         evaluator_policy,
         cache_policy,
@@ -1903,20 +1905,4 @@ fn dump_canonical(kernel: &ConstitutionKernel, registry: &SeedRegistry, id: &str
     let document = document_for_id(registry, id)?;
     println!("{}", serde_json::to_string_pretty(&document.entries[0])?);
     Ok(())
-}
-
-fn fxhash(input: &str) -> u64 {
-    use std::collections::hash_map::DefaultHasher;
-    use std::hash::{Hash, Hasher};
-    let mut hasher = DefaultHasher::new();
-    input.hash(&mut hasher);
-    hasher.finish()
-}
-
-fn fxhash_bytes(input: &[u8]) -> u64 {
-    use std::collections::hash_map::DefaultHasher;
-    use std::hash::{Hash, Hasher};
-    let mut hasher = DefaultHasher::new();
-    input.hash(&mut hasher);
-    hasher.finish()
 }

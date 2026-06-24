@@ -7,8 +7,8 @@ use l64_core::{
     CoverageDecision, DeterministicExecutionEnvelope, DistressVector, EvidenceExactness,
     EvidencePreference, ExecutionClosureReceipt, FormatTransformReceipt, Frontier, FrontierLedger,
     GeneratedStatus, GenerationReceipt, GeneratorContract, GenomeArtifactClass, GenomeSurface,
-    HelpRequest, LocusCapabilityMask, LocusOpcode, LocusPacket, LocusPacketHeader, LocusPacketKind,
-    LocusSection, Obligation, ObligationCacheShard, ObligationCollisionReport,
+    HelpRequest, LocusCapabilityMask, LocusDecodeMode, LocusOpcode, LocusPacket, LocusPacketHeader,
+    LocusPacketKind, LocusSection, Obligation, ObligationCacheShard, ObligationCollisionReport,
     ObligationConcurrencyClass, ObligationDagEdge, ObligationDagNode, ObligationEvaluationMode,
     ObligationEvidenceReceipt, ObligationGroup, ObligationKind, ObligationLaneRecord,
     ObligationMergeReceipt, ObligationNamespaceReceipt, ObligationOrderingReceipt, ObligationPlan,
@@ -19,7 +19,7 @@ use l64_core::{
     ReplayStatus, RequiredProofShapeFamily, ResidualVerificationReceipt, ReuseDecisionReceipt,
     ReuseLegalityReceipt, RouteLedger, RouteScoreVector, SearchCompartment, SurfaceKind,
     TransformKind, TransformVerdict, UnsupportedHandlingMode, VerticalCompoundingBundle,
-    ensure_cache_subdir,
+    cache_hash_v1_str, decode_locus_packet_with_mode, ensure_cache_subdir,
 };
 use l64_kernel::ConstitutionKernel;
 use l64_locus::{
@@ -32,14 +32,7 @@ use l64_runtime::{
     exec_chain_rule_jet_compose, exec_chain_rule_reduction, exec_host,
 };
 use serde::{Deserialize, Serialize};
-use std::{
-    collections::hash_map::DefaultHasher,
-    fs,
-    hash::{Hash, Hasher},
-    path::PathBuf,
-    sync::mpsc,
-    thread,
-};
+use std::{fs, path::PathBuf, sync::mpsc, thread};
 use thiserror::Error;
 
 const EVALUATOR_VERSION: &str = "l64-cert-obl-v8";
@@ -4613,9 +4606,7 @@ fn report_storage_id(report: &CertificationReport) -> String {
 }
 
 fn stable_hash(input: &str) -> String {
-    let mut hasher = DefaultHasher::new();
-    input.hash(&mut hasher);
-    format!("{:x}", hasher.finish())
+    cache_hash_v1_str(input)
 }
 
 fn derive_reuse_legality_receipts(report: &CertificationReport) -> Vec<ReuseLegalityReceipt> {
@@ -5743,7 +5734,8 @@ fn encode_cached_report_packet(entry: &CachedCertificationReport) -> Result<Vec<
 }
 
 fn decode_cached_report_packet(bytes: &[u8]) -> Result<CachedCertificationReport, CertError> {
-    let packet = l64_core::decode_locus_packet(bytes).map_err(CertError::Message)?;
+    let packet = decode_locus_packet_with_mode(bytes, LocusDecodeMode::CurrentAuthority)
+        .map_err(CertError::Message)?;
     let header = packet
         .sections
         .iter()

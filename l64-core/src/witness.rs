@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::stable_hash_u64;
+use crate::{DigestRole, role_digest_str};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct SubstrateWitness {
@@ -21,11 +21,9 @@ pub fn derive_substrate_witness(
     open_frontier: Vec<String>,
     receipt_id: &str,
 ) -> SubstrateWitness {
+    let digest = role_digest_str(DigestRole::WitnessId, &format!("{subject}:{receipt_id}"));
     SubstrateWitness {
-        id: format!(
-            "WIT_{}",
-            stable_hash_u64(&format!("{subject}:{receipt_id}"))
-        ),
+        id: format!("WIT_{}", digest.value),
         subject: subject.into(),
         status_codon: "|-".into(),
         dependencies,

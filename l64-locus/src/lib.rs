@@ -1,10 +1,11 @@
 use l64_core::{
     BundleLock, CanonicalStructure, ChangeLedgerEntry, CnormReceipt, DnaHeaderReceipt,
     DnaValidationReport, ExecutionManifest, GenomeArtifactClass, GenomeSurface,
-    LocusCapabilityMask, LocusOpcode, LocusPacket, LocusPacketHeader, LocusPacketKind,
-    LocusSection, NormalizedRna, RnaNormalizationReceipt, SemanticLoweringReceipt, SsrReceipt,
-    canonical_rna_from_structure, decode_locus_packet, dna_header_receipt, encode_locus_packet,
-    ensure_cache_subdir, execute_lower_chain, locus_packet_summary, validate_dna_packet,
+    LocusCapabilityMask, LocusDecodeMode, LocusOpcode, LocusPacket, LocusPacketHeader,
+    LocusPacketKind, LocusSection, NormalizedRna, RnaNormalizationReceipt, SemanticLoweringReceipt,
+    SsrReceipt, canonical_rna_from_structure, decode_locus_packet_with_mode, dna_header_receipt,
+    encode_locus_packet, ensure_cache_subdir, execute_lower_chain, locus_packet_summary,
+    validate_dna_packet,
 };
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use std::{
@@ -117,6 +118,8 @@ pub fn encode_section_packet<T: Serialize>(
     capabilities: LocusCapabilityMask,
     authority_tier: u8,
 ) -> Result<Vec<u8>, LocusIoError> {
+    let payload_bytes =
+        bincode::serialize(payload).map_err(|err| LocusIoError::Codec(err.to_string()))?;
     let packet = LocusPacket {
         header: LocusPacketHeader {
             artifact_class: GenomeArtifactClass::Gene,
@@ -128,7 +131,7 @@ pub fn encode_section_packet<T: Serialize>(
             capabilities,
             grammar_id: "rna.v1".into(),
             schema_hash: schema_hash.into(),
-            integrity_hash: format!("{:x}", l64_core::stable_hash_u64(schema_hash)),
+            integrity_hash: l64_core::dna_digest_from_bytes(&payload_bytes).0,
             strand_manifest: vec!["core".into()],
             feature_flags: 0,
             root_subject_id: subject_id.into(),
@@ -137,8 +140,7 @@ pub fn encode_section_packet<T: Serialize>(
             opcode,
             flags: 0,
             subject_id: subject_id.into(),
-            payload: bincode::serialize(payload)
-                .map_err(|err| LocusIoError::Codec(err.to_string()))?,
+            payload: payload_bytes,
         }],
     };
     encode_locus_packet(&packet).map_err(LocusIoError::Packet)
@@ -148,7 +150,8 @@ pub fn decode_section_payload<T: DeserializeOwned>(
     bytes: &[u8],
     opcode: LocusOpcode,
 ) -> Result<T, LocusIoError> {
-    let packet = decode_locus_packet(bytes).map_err(LocusIoError::Packet)?;
+    let packet = decode_locus_packet_with_mode(bytes, LocusDecodeMode::CurrentAuthority)
+        .map_err(LocusIoError::Packet)?;
     let section = packet
         .sections
         .iter()
@@ -162,7 +165,8 @@ pub fn decode_section_payload<T: DeserializeOwned>(
 pub fn decode_summary(
     bytes: &[u8],
 ) -> Result<std::collections::BTreeMap<String, String>, LocusIoError> {
-    let packet = decode_locus_packet(bytes).map_err(LocusIoError::Packet)?;
+    let packet = decode_locus_packet_with_mode(bytes, LocusDecodeMode::CurrentAuthority)
+        .map_err(LocusIoError::Packet)?;
     Ok(locus_packet_summary(&packet))
 }
 
@@ -287,7 +291,8 @@ pub fn encode_canonical_structure_to_dna_packet(
 pub fn decode_canonical_structure_from_dna_packet(
     bytes: &[u8],
 ) -> Result<(LocusPacket, CanonicalStructure, DnaValidationReport), LocusIoError> {
-    let packet = decode_locus_packet(bytes).map_err(LocusIoError::Packet)?;
+    let packet = decode_locus_packet_with_mode(bytes, LocusDecodeMode::CurrentAuthority)
+        .map_err(LocusIoError::Packet)?;
     let dna_validation = validate_dna_packet(&packet);
     if !dna_validation.failures.is_empty() {
         return Err(LocusIoError::Packet(format!(
@@ -532,11 +537,50 @@ mod tests {
             vec!["core".into()],
         )
         .expect("compile");
-        let mut packet = decode_locus_packet(&bytes).expect("decode packet");
+        let mut packet = l64_core::decode_locus_packet(&bytes).expect("decode packet");
         packet.header.integrity_hash = "stale-digest".into();
         let corrupted = encode_locus_packet(&packet).expect("encode corrupted packet");
         let err = sequence_dna_to_rna(&corrupted).expect_err("stale digest must fail");
         assert!(err.to_string().contains("DNA validation failed"));
+    }
+
+    #[test]
+    fn generic_section_packet_integrity_is_payload_bound() {
+        let left = encode_section_packet(
+            LocusPacketKind::CertificationEnvelope,
+            LocusOpcode::CanonicalPayload,
+            "SUBJ",
+            "test-schema.v1",
+            &vec!["left"],
+            LocusCapabilityMask::default(),
+            1,
+        )
+        .expect("left packet");
+        let right = encode_section_packet(
+            LocusPacketKind::CertificationEnvelope,
+            LocusOpcode::CanonicalPayload,
+            "SUBJ",
+            "test-schema.v1",
+            &vec!["right"],
+            LocusCapabilityMask::default(),
+            1,
+        )
+        .expect("right packet");
+
+        let left_packet = l64_core::decode_locus_packet(&left).expect("left decode");
+        let right_packet = l64_core::decode_locus_packet(&right).expect("right decode");
+        assert_eq!(
+            left_packet.header.schema_hash,
+            right_packet.header.schema_hash
+        );
+        assert_ne!(
+            left_packet.header.integrity_hash,
+            right_packet.header.integrity_hash
+        );
+        assert_eq!(
+            left_packet.header.integrity_hash,
+            l64_core::dna_digest_from_bytes(&left_packet.sections[0].payload).0
+        );
     }
 
     #[test]

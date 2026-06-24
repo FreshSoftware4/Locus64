@@ -1,17 +1,20 @@
 use anyhow::{Result, anyhow};
 use l64_core::{
     AdequacyClause, AliasExpansionPolicy, ArtifactOrigin, AtlasCell, AtlasDeficiency,
-    BenchmarkReceipt, BridgeContract, BundleConflict, BundleConflictPolicy, BundleDependency,
-    BundleEntry, BundleExecutionReceipt, BundleManifest, BundleMergeReport, BurdenPack, Campaign,
-    CampaignPortfolio, CapabilityMatrix, Certificate, ChallengeReceipt, ClaimPacket, CodebookPack,
-    CodonHeader, CodonPhase, ComboPack, EquivalenceClass, EvidenceContract, ExecutionManifest,
+    AuthorityComplement, BenchmarkReceipt, BridgeBurden, BridgeContract, BundleConflict,
+    BundleConflictPolicy, BundleDependency, BundleEntry, BundleExecutionReceipt, BundleManifest,
+    BundleMergeReport, BurdenPack, Campaign, CampaignPortfolio, CanonicalWorkUnit,
+    CapabilityMatrix, Certificate, ChallengeReceipt, ClaimPacket, CodebookPack, CodonHeader,
+    CodonPhase, ComboPack, CyclePolicyResult, DeterministicAuthorityMerge, DomainClosureReport,
+    DuplexPairStatus, EquivalenceClass, EvidenceContract, ExecutionManifest,
     FormatTransformReceipt, GlyphPack, MechanizationPackage, MechanizationPolicyObject,
-    MolecularCodecEnvelope, MolecularCodecRecord, Obligation, OverlayRegistryDescriptor,
-    PolicyBinding, PolicyResolution, ProjectionPolicy, ProofShape, QaDocument, QaEntry, QcObject,
-    RegimePack, RegistryBundle, RegistryLookup, ReplayLockManifest, ReproducibilityPacket,
-    RoundTripReport, RouteClass, RouteLedger, SubstrateAtom, SubstrateBond, SubstratePrimitive,
-    SubstratePrimitiveKind, SurfaceDeficiency, SurfaceKind, SurfacePolicy, TargetProfile,
-    TheoremSpec, ensure_cache_subdir, stable_hash_u64,
+    MolecularCodecEnvelope, MolecularCodecRecord, Obligation, OpenObligation,
+    OverlayRegistryDescriptor, PairLaw, PolicyBinding, PolicyResolution, ProjectionPolicy,
+    ProofShape, QaDocument, QaEntry, QcObject, RegimePack, RegistryBundle, RegistryLookup,
+    ReplayLockManifest, ReproducibilityPacket, RoundTripReport, RouteClass, RouteLedger,
+    SemanticStrand, SubstrateAtom, SubstrateBond, SubstratePrimitive, SubstratePrimitiveKind,
+    SurfaceDeficiency, SurfaceKind, SurfacePolicy, TargetProfile, TheoremSpec, ensure_cache_subdir,
+    stable_hash_u64,
 };
 use l64_registry::SeedRegistry;
 use serde::{Deserialize, Serialize};
@@ -158,11 +161,52 @@ pub fn bundle_document_to_molecular_codec_envelopes(
         .collect()
 }
 
+fn bundle_envelope_to_duplex_pair(envelope: &MolecularCodecEnvelope) -> l64_core::DuplexPair {
+    let semantic = SemanticStrand {
+        id: format!("SEM_{}", envelope.record.subject),
+        canonical_structure_id: envelope.record.subject.clone(),
+        authority_scope: "bundle-substrate".into(),
+    };
+    let complement = AuthorityComplement {
+        id: format!("CMP_{}", envelope.record.subject),
+        authority_scope: "bundle-substrate".into(),
+        admission_law_id: "ADM_BUNDLE_SUBSTRATE_V1".into(),
+        exclusions: vec![
+            "strand-only-promotion".into(),
+            "receipt-only-complement".into(),
+        ],
+        invariants: vec![
+            "molecular-envelope-valid".into(),
+            "bundle-entry-or-dependency-preserved".into(),
+        ],
+        dependency_burdens: vec![],
+        required_witness_forms: vec!["molecular-codec-envelope-validation".into()],
+        closure_requirements: vec!["bundle-substrate-domain-closure".into()],
+        rollback_law_id: "RBK_REJECT_BUNDLE_PAIR_V1".into(),
+    };
+    let pair_law = PairLaw {
+        id: "PAIR_BUNDLE_SUBSTRATE_V1".into(),
+        required_semantic_scope: "bundle-substrate".into(),
+        required_complement_scope: "bundle-substrate".into(),
+        required_admission_law_id: "ADM_BUNDLE_SUBSTRATE_V1".into(),
+        strand_only_promotion_allowed: false,
+    };
+    l64_core::assemble_duplex_pair(semantic, complement, pair_law)
+}
+
 #[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
 pub struct BundleSubstrateParityReport {
     pub entry_count: usize,
     pub dependency_edge_count: usize,
     pub substrate_record_count: usize,
+    #[serde(default)]
+    pub duplex_pair_count: usize,
+    #[serde(default)]
+    pub locally_valid_pair_count: usize,
+    #[serde(default)]
+    pub domain_closure: Option<DomainClosureReport>,
+    #[serde(default)]
+    pub deterministic_merge: Option<DeterministicAuthorityMerge>,
     pub valid: bool,
     pub failures: Vec<String>,
 }
@@ -178,6 +222,14 @@ pub fn bundle_substrate_parity_report(
         .map(|dependency| dependency.depends_on.len())
         .sum::<usize>();
     let envelopes = bundle_document_to_molecular_codec_envelopes(document, origin_authority);
+    let duplex_pairs = envelopes
+        .iter()
+        .map(bundle_envelope_to_duplex_pair)
+        .collect::<Vec<_>>();
+    let pair_validations = duplex_pairs
+        .iter()
+        .map(|pair| l64_core::validate_duplex_pair(Some(pair)))
+        .collect::<Vec<_>>();
     let mut failures = Vec::new();
 
     if envelopes.len() != document.entries.len() + dependency_edge_count {
@@ -217,10 +269,51 @@ pub fn bundle_substrate_parity_report(
         }
     }
 
+    for validation in &pair_validations {
+        if validation.status != DuplexPairStatus::LocallyValid {
+            failures.extend(validation.failures.clone());
+        }
+    }
+    let open_frontier = if failures.is_empty() {
+        Vec::new()
+    } else {
+        vec![OpenObligation {
+            id: "OBL_BUNDLE_SUBSTRATE_PARITY".into(),
+            description: "bundle substrate parity failures block domain closure".into(),
+        }]
+    };
+    let domain_closure = l64_core::evaluate_domain_closure(
+        &pair_validations,
+        open_frontier,
+        Vec::<BridgeBurden>::new(),
+        CyclePolicyResult::Acyclic,
+    );
+    let work_units = pair_validations
+        .iter()
+        .filter_map(|validation| {
+            validation
+                .pair_commitment
+                .as_ref()
+                .map(|commitment| CanonicalWorkUnit {
+                    coordinate: commitment.clone(),
+                    payload_commitment: commitment.clone(),
+                })
+        })
+        .collect::<Vec<_>>();
+    let deterministic_merge = l64_core::deterministic_authority_merge(&work_units, 1);
+    let locally_valid_pair_count = pair_validations
+        .iter()
+        .filter(|validation| validation.status == DuplexPairStatus::LocallyValid)
+        .count();
+
     BundleSubstrateParityReport {
         entry_count: document.entries.len(),
         dependency_edge_count,
         substrate_record_count: envelopes.len(),
+        duplex_pair_count: duplex_pairs.len(),
+        locally_valid_pair_count,
+        domain_closure: Some(domain_closure),
+        deterministic_merge: Some(deterministic_merge),
         valid: failures.is_empty(),
         failures,
     }
@@ -274,6 +367,9 @@ pub fn bundle_document_from_entry_text(text: &str) -> Result<QaDocument> {
         return Err(anyhow!(
             "bundle-entry text must start with `!l64-bundle v1`"
         ));
+    }
+    if entries.is_empty() {
+        return Err(anyhow!("bundle-entry text must contain at least one entry"));
     }
     Ok(QaDocument { entries })
 }
@@ -333,6 +429,17 @@ pub fn import_bundle_document(
         return Err(anyhow!("bundle import rejected due to conflicts"));
     }
     let substrate_parity = bundle_substrate_parity_report(&document, &format!("{bundle_id}.dna"));
+    let domain_closed = substrate_parity
+        .domain_closure
+        .as_ref()
+        .map(|closure| closure.promotable)
+        .unwrap_or(false);
+    if !substrate_parity.valid || !domain_closed {
+        return Err(anyhow!(
+            "bundle import rejected because native substrate parity is not closed: {:?}",
+            substrate_parity.failures
+        ));
+    }
     let manifest = BundleManifest {
         id: bundle_id.clone(),
         entries: bundle_entries(&local),
@@ -1593,6 +1700,16 @@ mod tests {
         assert_eq!(report.entry_count, 1);
         assert_eq!(report.dependency_edge_count, 1);
         assert_eq!(report.substrate_record_count, 2);
+        assert_eq!(report.duplex_pair_count, 2);
+        assert_eq!(report.locally_valid_pair_count, 2);
+        let closure = report.domain_closure.as_ref().expect("domain closure");
+        assert!(closure.promotable, "{closure:?}");
+        let merge = report
+            .deterministic_merge
+            .as_ref()
+            .expect("deterministic merge");
+        assert_eq!(merge.ordered_coordinates.len(), 2);
+        assert_eq!(merge.ordered_payload_commitments.len(), 2);
 
         let records = bundle_document_to_molecular_codec_records(&document, "BND_SUBSTRATE_DNA");
         assert!(records.iter().any(|record| match &record.primitive {
@@ -1603,6 +1720,17 @@ mod tests {
             }
             _ => false,
         }));
+    }
+
+    #[test]
+    fn bundle_substrate_domain_closure_blocks_invalid_parity() {
+        let document = QaDocument { entries: vec![] };
+        let report = bundle_substrate_parity_report(&document, "BND_EMPTY_SUBSTRATE_DNA");
+        assert!(report.valid);
+        assert_eq!(report.duplex_pair_count, 0);
+        let closure = report.domain_closure.as_ref().expect("domain closure");
+        assert!(!closure.promotable);
+        assert!(closure.locally_valid_pairs.is_empty());
     }
 
     #[test]
@@ -1761,6 +1889,10 @@ theorem {"id":"THS_L64_HEADER","statement":"native bundle header","hosts":["R_SE
         let missing = r#"theorem {"id":"THS_NO_HEADER","statement":"missing header","hosts":["R_SET"],"bridges":[],"operators":[],"target_equivalence":"eq","obligations":[],"primary_zone":"PmzSemantic","verdict":"RouteFound","proof_shapes":[]}"#;
         let err = bundle_document_from_entry_text(missing).unwrap_err();
         assert!(err.to_string().contains("!l64-bundle v1"));
+
+        let empty = "!l64-bundle v1";
+        let err = bundle_document_from_entry_text(empty).unwrap_err();
+        assert!(err.to_string().contains("at least one entry"));
 
         let obsolete = r#"!qc0 {"surface_kind":"Qc0","version":"1"}
 theorem {"id":"THS_OLD_HEADER","statement":"old header","hosts":["R_SET"],"bridges":[],"operators":[],"target_equivalence":"eq","obligations":[],"primary_zone":"PmzSemantic","verdict":"RouteFound","proof_shapes":[]}"#;
