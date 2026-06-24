@@ -1,11 +1,11 @@
 use l64_core::{
-    BundleLock, CanonicalStructure, ChangeLedgerEntry, CnormReceipt, DnaHeaderReceipt,
+    BundleLock, CanonicalStructure, ChangeLedgerEntry, CnormReceipt, DigestRole, DnaHeaderReceipt,
     DnaValidationReport, ExecutionManifest, GenomeArtifactClass, GenomeSurface,
     LocusCapabilityMask, LocusDecodeMode, LocusOpcode, LocusPacket, LocusPacketHeader,
     LocusPacketKind, LocusSection, NormalizedRna, RnaNormalizationReceipt, SemanticLoweringReceipt,
     SsrReceipt, canonical_rna_from_structure, decode_locus_packet_with_mode, dna_header_receipt,
     encode_locus_packet, ensure_cache_subdir, execute_lower_chain, locus_packet_summary,
-    validate_dna_packet,
+    role_digest_value, validate_dna_packet,
 };
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use std::{
@@ -160,6 +160,33 @@ pub fn decode_section_payload<T: DeserializeOwned>(
             LocusIoError::Packet(format!("locus packet missing section {:?}", opcode))
         })?;
     bincode::deserialize(&section.payload).map_err(|err| LocusIoError::Codec(err.to_string()))
+}
+
+fn receipt_id(prefix: &str, parts: &[&str]) -> String {
+    format!(
+        "{prefix}_{}",
+        role_digest_value(DigestRole::ReceiptId, &(prefix, parts))
+    )
+}
+
+fn source_lowering_receipt_id(subject_id: &str) -> String {
+    receipt_id("SLR", &["rna", subject_id])
+}
+
+fn dna_lowering_receipt_id(root_subject_id: &str) -> String {
+    receipt_id("SLR", &["dna", root_subject_id])
+}
+
+fn sequenced_rna_receipt_id(canonical_hash: &str) -> String {
+    receipt_id("RNR", &["dna-sequenced", canonical_hash])
+}
+
+fn sequenced_ssr_receipt_id(root_id: &str) -> String {
+    receipt_id("SSR_RCP", &["dna-sequenced", root_id])
+}
+
+fn sequenced_cnorm_receipt_id(root_id: &str) -> String {
+    receipt_id("CNR", &["dna-sequenced", root_id])
 }
 
 pub fn decode_summary(
@@ -329,7 +356,7 @@ pub fn compile_rna_to_dna_packet(
     let cnorm_receipt = execution.cnorm_receipt;
     let phase_ledger = execution.ledger_entries;
     let lowering_receipt = SemanticLoweringReceipt {
-        id: format!("SLR_{:x}", l64_core::stable_hash_u64(subject_id)),
+        id: source_lowering_receipt_id(subject_id),
         source_surface: GenomeSurface::Rna,
         target: "canonical-structure".into(),
         canonical_hash: cnorm_receipt.canonical_hash.clone(),
@@ -373,10 +400,7 @@ pub fn sequence_dna_to_rna(bytes: &[u8]) -> Result<RnaCompilationArtifact, Locus
         splice_regions: Vec::new(),
     };
     let rn_receipt = RnaNormalizationReceipt {
-        id: format!(
-            "RNR_{:x}",
-            l64_core::stable_hash_u64(&canonical_structure.canonical_hash)
-        ),
+        id: sequenced_rna_receipt_id(&canonical_structure.canonical_hash),
         token_stream_id: String::new(),
         state: l64_core::RnaState::Stabilized,
         normalized_text: canonical_rna,
@@ -385,10 +409,7 @@ pub fn sequence_dna_to_rna(bytes: &[u8]) -> Result<RnaCompilationArtifact, Locus
         issues: Vec::new(),
     };
     let ssr_receipt = SsrReceipt {
-        id: format!(
-            "SSR_RCP_{:x}",
-            l64_core::stable_hash_u64(&canonical_structure.root_id)
-        ),
+        id: sequenced_ssr_receipt_id(&canonical_structure.root_id),
         root_id: canonical_structure.root_id.clone(),
         node_count: canonical_structure.items.len(),
         transition_count: canonical_structure.items.len().saturating_sub(1),
@@ -397,10 +418,7 @@ pub fn sequence_dna_to_rna(bytes: &[u8]) -> Result<RnaCompilationArtifact, Locus
         normalized_rna_id: rn_receipt.id.clone(),
     };
     let cnorm_receipt = CnormReceipt {
-        id: format!(
-            "CNR_{:x}",
-            l64_core::stable_hash_u64(&canonical_structure.root_id)
-        ),
+        id: sequenced_cnorm_receipt_id(&canonical_structure.root_id),
         root_id: canonical_structure.root_id.clone(),
         canonical_hash: canonical_structure.canonical_hash.clone(),
         rule_table_hash: l64_core::hash_serialized(&l64_core::structural_equivalence_law_specs()),
@@ -408,10 +426,7 @@ pub fn sequence_dna_to_rna(bytes: &[u8]) -> Result<RnaCompilationArtifact, Locus
         erased_variations: vec!["dna-sequenced".into()],
     };
     let lowering_receipt = SemanticLoweringReceipt {
-        id: format!(
-            "SLR_{:x}",
-            l64_core::stable_hash_u64(&packet.header.root_subject_id)
-        ),
+        id: dna_lowering_receipt_id(&packet.header.root_subject_id),
         source_surface: GenomeSurface::Dna,
         target: "canonical-structure".into(),
         canonical_hash: cnorm_receipt.canonical_hash.clone(),
