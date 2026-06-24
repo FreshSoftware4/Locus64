@@ -298,6 +298,7 @@ Landed:
 - Certification route selection no longer passes deprecated `SurfaceRequirement` or `SurfacePreferredTarget` target fields into atlas scoring; those fields remain migration metadata until Node 11D replaces or deletes their schema, but they no longer affect authority route choice.
 - `l64-atlas` route-selection APIs no longer accept deprecated `SurfaceRequirement` or `SurfacePreferredTarget` parameters, preventing future callers from reintroducing old surface-schema authority into certification route scoring.
 - The remaining live CLI bundle fixture no longer carries non-null Q-surface target requirements; bundle certification tests now exercise the same behavior through native route constraints instead of preserving obsolete surface syntax.
+- `TargetProfile.surface_requirement` and `TargetProfile.preferred_surface_target` are retained only as binary-compatibility tombstones for existing bincode `.dna` bundle fixtures; they no longer affect route authority, and deletion is blocked until bundle payloads migrate to a stable schema encoding or fixtures regenerate under the replacement path.
 - `l64-surfaces`, `l64-qc0`, and `l64-qa0` have been removed from workspace membership and deleted from the codebase.
 - Bundle-entry text remains only as an authoring convenience compiled by `compile-bundle` into `.dna`; it is not a public authority surface.
 
