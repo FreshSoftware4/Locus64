@@ -5,9 +5,9 @@ use l64_core::{
     CandidatePayoffTask, CandidateSemanticLeaf, Certificate, CertificationCandidate,
     CertificationReport, CertificationVerdict, CheckProofShape, CheckerReceipt, CheckerReceiptKind,
     CoverageDecision, DeterministicExecutionEnvelope, DistressVector, EvidenceExactness,
-    EvidencePreference, ExecutionClosureReceipt, FormatTransformReceipt, Frontier, FrontierLedger,
-    GeneratedStatus, GenerationReceipt, GeneratorContract, GenomeArtifactClass, GenomeSurface,
-    HelpRequest, LocusCapabilityMask, LocusDecodeMode, LocusOpcode, LocusPacket, LocusPacketHeader,
+    EvidencePreference, ExecutionClosureReceipt, Frontier, FrontierLedger, GeneratedStatus,
+    GenerationReceipt, GeneratorContract, GenomeArtifactClass, GenomeSurface, HelpRequest,
+    LocusCapabilityMask, LocusDecodeMode, LocusOpcode, LocusPacket, LocusPacketHeader,
     LocusPacketKind, LocusSection, Obligation, ObligationCacheShard, ObligationCollisionReport,
     ObligationConcurrencyClass, ObligationDagEdge, ObligationDagNode, ObligationEvaluationMode,
     ObligationEvidenceReceipt, ObligationGroup, ObligationKind, ObligationLaneRecord,
@@ -17,9 +17,9 @@ use l64_core::{
     QaEntry, RecipeDelta, RecipeRecord, RegistryLookup, ReplayBarrierReceipt,
     ReplayDivergenceRecord, ReplayLegalityCheck, ReplayLockManifest, ReplayMergeReceipt,
     ReplayStatus, RequiredProofShapeFamily, ResidualVerificationReceipt, ReuseDecisionReceipt,
-    ReuseLegalityReceipt, RouteLedger, RouteScoreVector, SearchCompartment, SurfaceKind,
-    TransformKind, TransformVerdict, UnsupportedHandlingMode, VerticalCompoundingBundle,
-    cache_hash_v1_str, decode_locus_packet_with_mode, ensure_cache_subdir,
+    ReuseLegalityReceipt, RouteLedger, RouteScoreVector, SearchCompartment,
+    UnsupportedHandlingMode, VerticalCompoundingBundle, cache_hash_v1_str,
+    decode_locus_packet_with_mode, ensure_cache_subdir,
 };
 use l64_kernel::ConstitutionKernel;
 use l64_locus::{
@@ -5492,7 +5492,7 @@ pub fn report_to_document_with_registry(
                 lock_id: lock_id.clone(),
                 manifest_id: manifest_id.clone(),
                 bundle_id: envelope.bundle_hash.clone(),
-                receipt_ids: vec![format!("XFR_{report_id}")],
+                receipt_ids: vec![format!("RLM_{report_id}")],
                 verdict: report
                     .policy_resolution
                     .as_ref()
@@ -5500,27 +5500,6 @@ pub fn report_to_document_with_registry(
                     .unwrap_or(PolicyVerdict::Applied),
             }));
         }
-        entries.push(QaEntry::TransformReceipt(FormatTransformReceipt {
-            id: format!("XFR_{report_id}"),
-            src_surface: SurfaceKind::Qc0,
-            dst_surface: SurfaceKind::Qc0,
-            object_ids: vec![ledger.id.clone(), certificate.id.clone()],
-            transform_kind: TransformKind::Export,
-            policy_id: envelope.policy_hash.clone(),
-            defaults_used: vec![format!("bundle_hash={}", envelope.bundle_hash)],
-            alias_expansions: Vec::new(),
-            loss_classes: Vec::new(),
-            hash_before: envelope.route_winner_hash.clone(),
-            hash_after: envelope.report_hash.clone(),
-            verdict: match envelope.replay_status {
-                ReplayStatus::Fresh | ReplayStatus::CacheHit | ReplayStatus::ReplayOnly => {
-                    TransformVerdict::Lossless
-                }
-                ReplayStatus::Invalidated => TransformVerdict::Invalid,
-            },
-            rollback_ref: None,
-            replay_ref: Some(format!("{:?}", envelope.replay_status)),
-        }));
     }
     entries.extend(
         report
