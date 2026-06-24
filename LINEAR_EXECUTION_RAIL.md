@@ -292,6 +292,7 @@ Landed:
 - DNA packet decoding now preallocates strand and section vectors from already-decoded counts, preserving decode semantics while reducing allocation churn on authority and explicit migration paths.
 - Certification report documents no longer synthesize `Qc0 -> Qc0` transform receipts as pseudo-lineage; lock receipts now point at replay-lock manifest evidence instead.
 - `l64-locus` synthesized RNA/DNA lowering and sequenced receipt IDs now use `DigestRole::ReceiptId` role-separated digests instead of display-style `stable_hash_u64` IDs.
+- `l64-bundle` molecular dependency bond IDs now use `DigestRole::AuthorityId` role-separated digests instead of display-style `stable_hash_u64` IDs.
 - `l64-surfaces`, `l64-qc0`, and `l64-qa0` have been removed from workspace membership and deleted from the codebase.
 - Bundle-entry text remains only as an authoring convenience compiled by `compile-bundle` into `.dna`; it is not a public authority surface.
 

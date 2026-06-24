@@ -5,8 +5,8 @@ use l64_core::{
     BundleConflictPolicy, BundleDependency, BundleEntry, BundleExecutionReceipt, BundleManifest,
     BundleMergeReport, BurdenPack, Campaign, CampaignPortfolio, CanonicalWorkUnit,
     CapabilityMatrix, Certificate, ChallengeReceipt, ClaimPacket, CodebookPack, CodonHeader,
-    CodonPhase, ComboPack, CyclePolicyResult, DeterministicAuthorityMerge, DomainClosureReport,
-    DuplexPairStatus, EquivalenceClass, EvidenceContract, ExecutionManifest,
+    CodonPhase, ComboPack, CyclePolicyResult, DeterministicAuthorityMerge, DigestRole,
+    DomainClosureReport, DuplexPairStatus, EquivalenceClass, EvidenceContract, ExecutionManifest,
     FormatTransformReceipt, GlyphPack, MechanizationPackage, MechanizationPolicyObject,
     MolecularCodecEnvelope, MolecularCodecRecord, Obligation, OpenObligation,
     OverlayRegistryDescriptor, PairLaw, PolicyBinding, PolicyResolution, ProjectionPolicy,
@@ -14,7 +14,7 @@ use l64_core::{
     ReplayLockManifest, ReproducibilityPacket, RoundTripReport, RouteClass, RouteLedger,
     SemanticStrand, SubstrateAtom, SubstrateBond, SubstratePrimitive, SubstratePrimitiveKind,
     SurfaceDeficiency, SurfaceKind, SurfacePolicy, TargetProfile, TheoremSpec, ensure_cache_subdir,
-    stable_hash_u64,
+    role_digest_value,
 };
 use l64_registry::SeedRegistry;
 use serde::{Deserialize, Serialize};
@@ -128,7 +128,7 @@ pub fn bundle_document_to_molecular_codec_records(
                 primitive: SubstratePrimitive::Bond(SubstrateBond {
                     id: format!(
                         "BOND_{}",
-                        stable_hash_u64(&format!("{}<-{}", dep.id, depends_on))
+                        role_digest_value(DigestRole::AuthorityId, &("<-", &dep.id, &depends_on))
                     ),
                     relation_codon: "<-".into(),
                     left: dep.id.clone(),
