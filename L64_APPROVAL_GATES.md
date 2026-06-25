@@ -54,7 +54,7 @@ Proof classes:
 | L64-G030 | Policy precedence emits deterministic receipts | PE,DV | policy law | Candidate | pending |
 | L64-G031 | Namespace import is a receipted bridge, not string rewriting | MG,DV | bridge law | Candidate | pending |
 | L64-G032 | RNA and DNA remain the only public authority surfaces | CR,RI | artifact roles | Proven | `cargo test -p l64-cli --test cli` (`rna_dna_primary_authority_commands_work`, `standalone_projection_leaf_commands_are_removed`, `inspect_dna_output_is_not_rna_source`) |
-| L64-G033 | Bundle-entry JSON is deletion-bound migration ingress only | MG,RI | native bundle path | Candidate | pending |
+| L64-G033 | Bundle-entry JSON is deletion-bound migration ingress only | MG,RI | native bundle path | Proven | `cargo test -p l64-bundle` (`bundle_document_import_can_cross_explicit_migration_ingress`, `bundle_entry_text_rejects_deprecated_surface_schema_entries`) |
 | L64-G034 | Remaining Qa/Qc types are migration ASTs, not core ontology | MG,CR | native bundle path | Candidate | pending |
 | L64-G035 | Codebook/glyph/combo packs are projection or legacy machinery | MG,CR | projection boundary | Candidate | pending |
 | L64-G036 | DNA reconstructs canonical RNA, not authored RNA | FP | canonical encoding | Proven | `cargo test -p l64-cli --test cli cki_registry_fixture_preserves_rna_dna_fixed_point` |

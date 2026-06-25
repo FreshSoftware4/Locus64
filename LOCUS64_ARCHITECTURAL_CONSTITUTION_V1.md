@@ -236,6 +236,20 @@ Constitutional effect:
 - Public authority workflows must pass through source/canonical RNA or DNA.
 - Projection, inspection, and removed legacy commands cannot define public authority surfaces.
 
+### L64-G033 - Bundle-Entry Migration Ingress
+
+Bundle-entry JSON is deletion-bound migration ingress only.
+
+Evidence:
+
+- `cargo test -p l64-bundle`
+- Proving tests: `bundle_document_import_can_cross_explicit_migration_ingress`, `bundle_entry_text_rejects_deprecated_surface_schema_entries`
+
+Constitutional effect:
+
+- Bundle-entry text may cross an explicit migration membrane.
+- Bundle-entry JSON cannot become a public authority syntax or native ontology source.
+
 ### L64-G036 - Canonical RNA Reconstruction
 
 DNA reconstructs canonical RNA, not authored RNA.
