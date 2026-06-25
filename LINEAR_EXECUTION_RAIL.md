@@ -361,7 +361,7 @@ Landed:
 - Deprecated surface-schema lookup methods are removed from `RegistryLookup`; bundle import drops surface-policy, transform-receipt, roundtrip-report, capability, and surface-budget entries instead of materializing them into active local registries, while generic `QaEntry::from_surface_json` and bundle text ingress reject the full deprecated family, including doc-era `format-receipt`, `capability-matrix`, and `surface-deficiency` aliases.
 - Seed registry Q-surface policy/capability records are deleted after their lookup, import, and admission paths were retired; omitted storage arrays now deserialize through defaults instead of preserving inert Q data.
 - Deprecated surface-schema `QaEntry` variants now fail closed on JSON export as well as import; old variants can remain deserialize-only schema tombstones until a deliberate storage-version break, but they cannot be rendered into active surface artifacts.
-- Generic serialized state hashes and research lineage fallback hashes now use role-separated BLAKE3 digest roles instead of `stable_hash_u64`; the remaining `stable_hash_u64` use is confined to the current `u64` structural-value fallback pending a later canonical-instruction schema revision.
+- Generic serialized state hashes and research lineage fallback hashes now use role-separated BLAKE3 digest roles; the old public `stable_hash_u64` helper is removed from the API and replaced by a private `u64` structural-value fallback pending a later canonical-instruction schema revision.
 - `l64-surfaces`, `l64-qc0`, and `l64-qa0` have been removed from workspace membership and deleted from the codebase.
 - Bundle-entry text remains only as an authoring convenience compiled by `compile-bundle` into `.dna`; it is not a public authority surface.
 

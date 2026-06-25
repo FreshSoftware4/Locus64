@@ -3342,7 +3342,7 @@ fn canonicalize_or_clean(path: PathBuf) -> Result<PathBuf, String> {
     }
 }
 
-pub fn stable_hash_u64(input: &str) -> u64 {
+fn structural_value_fallback_u64(input: &str) -> u64 {
     let mut hash: u64 = 0xcbf29ce484222325;
     for byte in input.as_bytes() {
         hash ^= u64::from(*byte);
@@ -6530,7 +6530,7 @@ pub fn canonicalize_structural_form(
         let structural_value = reconstructed
             .as_ref()
             .map(|item| item.structural_value)
-            .unwrap_or_else(|| stable_hash_u64(&node.text));
+            .unwrap_or_else(|| structural_value_fallback_u64(&node.text));
         instructions.push(CanonicalInstruction {
             tag: CanonicalInstructionTag::ItemV1,
             version: 1,
