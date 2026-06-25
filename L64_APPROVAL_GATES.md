@@ -47,7 +47,7 @@ Proof classes:
 | L64-G023 | Generated caches and ambiguous reports do not ship as source | RI | release gate | Proven | `cargo test -p l64-cli --test cli genome_release_exports_coordinate_spine_and_rejects_views_as_source` |
 | L64-G024 | Serial and parallel authoritative outputs are byte-equivalent | PE | closure scheduler | Proven | `cargo test -p l64-core deterministic_authority_merge_excludes_worker_count_and_input_order` |
 | L64-G025 | Scheduler plans and telemetry are receipts, not authority | PE,CR | G024 | Proven | `cargo test -p l64-core deterministic_authority_merge_excludes_worker_count_and_input_order` |
-| L64-G026 | Authored obligation status is intent, never evidence | CR,MG | evaluator model | Candidate | pending |
+| L64-G026 | Authored obligation status is intent, never evidence | CR,MG | evaluator model | Proven | `cargo test -p l64-cert authored_obligation_status_does_not_satisfy_evidence` |
 | L64-G027 | Evaluator authority is explicit, named, and scoped | CR,MG | evaluator interface | Candidate | pending |
 | L64-G028 | Every certification verdict carries authority scope | CR,DV | scope law | Candidate | pending |
 | L64-G029 | Report-derived research records are projections until replayed | CR,MG | artifact roles | Candidate | pending |

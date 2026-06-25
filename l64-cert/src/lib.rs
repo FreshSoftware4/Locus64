@@ -5795,6 +5795,23 @@ mod tests {
         )
     }
 
+    #[derive(Debug)]
+    struct NoopObligationEvaluator;
+
+    impl ObligationEvaluator for NoopObligationEvaluator {
+        fn supports(&self, _regime: &str, _kind: &ObligationKind) -> bool {
+            false
+        }
+
+        fn evaluate(&self, _regime: &str, _obligation: &Obligation) -> Option<ObligationStatus> {
+            None
+        }
+
+        fn version(&self) -> &'static str {
+            "test-noop"
+        }
+    }
+
     fn write_bundle(path: &PathBuf, content: &str) {
         if path.extension().and_then(|ext| ext.to_str()) == Some("dna") {
             let document = bundle_document_from_text(content);
@@ -5827,6 +5844,42 @@ mod tests {
             })
             .collect();
         QaDocument { entries }
+    }
+
+    #[test]
+    #[serial]
+    fn authored_obligation_status_does_not_satisfy_evidence() {
+        let registry = SeedRegistry::load().unwrap();
+        let obligation = Obligation {
+            id: "OBL_AUTHORED_ONLY".into(),
+            kind: ObligationKind::OblAdm,
+            description: "authored status without executable or stored evidence".into(),
+            status: CertificationVerdict::Certified,
+        };
+        let policy = l64_core::EvaluatorPolicyConfig {
+            evidence_preference: EvidencePreference::PreferStored,
+            allow_approximation: false,
+            unsupported_mode: UnsupportedHandlingMode::StrictFail,
+            require_symbolic_fidelity_route: false,
+            prefer_comp_replay: false,
+        };
+
+        let status = evaluate_obligation(
+            &registry,
+            "THS_AUTHORED_ONLY",
+            &[],
+            obligation,
+            &NoopObligationEvaluator,
+            &policy,
+        );
+
+        assert_eq!(status.verdict, CertificationVerdict::BlockedOpen);
+        assert_eq!(
+            status.evaluation_mode,
+            ObligationEvaluationMode::Unsupported
+        );
+        assert!(status.receipts.is_empty());
+        assert!(status.detail.contains("strict evaluator policy"));
     }
 
     #[test]

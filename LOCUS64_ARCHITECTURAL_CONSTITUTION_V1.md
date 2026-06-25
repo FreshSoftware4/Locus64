@@ -209,6 +209,19 @@ Constitutional effect:
 - Worker count, timing, lane assignment, and scheduling plan data are excluded from authority identity.
 - Scheduler details may be recorded as diagnostics or receipts only.
 
+### L64-G026 - Authored Obligation Status Is Intent
+
+Authored obligation status is intent, never evidence.
+
+Evidence:
+
+- `cargo test -p l64-cert authored_obligation_status_does_not_satisfy_evidence`
+
+Constitutional effect:
+
+- An authored `Certified` obligation does not satisfy evidence by itself.
+- Unsupported obligations must remain unsupported or blocked unless executable evaluation or native stored evidence exists.
+
 ### L64-G032 - RNA/DNA Public Authority Surfaces
 
 RNA and DNA remain the only public authority surfaces.

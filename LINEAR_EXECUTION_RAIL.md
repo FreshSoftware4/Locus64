@@ -366,6 +366,7 @@ Landed:
 - Node 11D0 second constitution pass promoted already-tested codon structural law, lexon scoped binding law, macro-codon reaction law, generated-word regression boundaries, canonical structural identity, canonical instruction law, and complete authority decode validation into the approval ledger and constitution.
 - Node 11D0 third constitution pass promoted already-tested duplex local authority law: paired semantic/complement structure is the smallest local authority unit, strand-only promotion is rejected, and local pair validity remains subordinate to domain closure.
 - Node 11D0 fourth constitution pass promoted already-tested public-surface and release hygiene law: RNA/DNA are the public authority surfaces, DNA reconstructs canonical RNA rather than authored RNA, and generated release views/reports cannot ship as source authority.
+- Certification evaluator law now has a focused regression proving authored obligation status is intent rather than evidence; the corresponding approval gate is promoted into the constitution.
 - `l64-surfaces`, `l64-qc0`, and `l64-qa0` have been removed from workspace membership and deleted from the codebase.
 - Bundle-entry text remains only as an authoring convenience compiled by `compile-bundle` into `.dna`; it is not a public authority surface.
 
