@@ -1413,12 +1413,13 @@ pub fn derive_lineage_record_from_report(report: &CertificationReport) -> Resear
         .as_ref()
         .map(|item| item.report_hash.clone())
         .unwrap_or_else(|| {
-            format!(
-                "{:x}",
-                l64_core::stable_hash_u64(&format!(
-                    "{}|{}|{:?}",
-                    report.theorem_id, report.target_profile_id, report.verdict
-                ))
+            l64_core::role_digest_value(
+                l64_core::DigestRole::PayloadCommitment,
+                &(
+                    &report.theorem_id,
+                    &report.target_profile_id,
+                    &report.verdict,
+                ),
             )
         });
     let lowering_receipt_id = format!("RPT_LINEAGE_{}", subject_id);
@@ -1477,7 +1478,10 @@ pub fn derive_lineage_record_from_report(report: &CertificationReport) -> Resear
         phase_ledger: vec![l64_core::ChangeLedgerEntry {
             phase_id: l64_core::PhaseId::ResearchHostReconnect,
             input_state_hash: canonical_hash.clone(),
-            output_state_hash: Some(format!("{:x}", l64_core::stable_hash_u64(&subject_id))),
+            output_state_hash: Some(l64_core::role_digest_value(
+                l64_core::DigestRole::PayloadCommitment,
+                &subject_id,
+            )),
             dependency_edges,
             invariant_checks,
             failure_records,

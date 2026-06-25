@@ -6727,8 +6727,7 @@ pub fn execute_lower_chain(rna: &str) -> Result<LowerChainExecution, SystemFailu
 }
 
 pub fn hash_serialized<T: Serialize>(value: &T) -> String {
-    let encoded = serde_json::to_string(value).unwrap_or_else(|_| "<unserializable>".into());
-    format!("{:x}", stable_hash_u64(&encoded))
+    role_digest_value(DigestRole::CacheKey, value)
 }
 
 #[cfg(test)]
