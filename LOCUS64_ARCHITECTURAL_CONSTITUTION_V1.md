@@ -261,6 +261,19 @@ Constitutional effect:
 - An authored `Certified` obligation does not satisfy evidence by itself.
 - Unsupported obligations must remain unsupported or blocked unless executable evaluation or native stored evidence exists.
 
+### L64-G027 - Scoped Evaluator Authority
+
+Evaluator authority is explicit, named, and scoped.
+
+Evidence:
+
+- `cargo test -p l64-policy evaluator_authority_is_named_and_scoped`
+
+Constitutional effect:
+
+- Evaluator behavior must be selected through a named `MechanizationPolicyObject`.
+- The resolved evaluator authority must carry a concrete policy scope; implicit ambient evaluator behavior cannot claim scoped authority.
+
 ### L64-G029 - Report-Derived Research Projection
 
 Report-derived research records are projections until replayed.

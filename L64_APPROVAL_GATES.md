@@ -48,7 +48,7 @@ Proof classes:
 | L64-G024 | Serial and parallel authoritative outputs are byte-equivalent | PE | closure scheduler | Proven | `cargo test -p l64-core deterministic_authority_merge_excludes_worker_count_and_input_order` |
 | L64-G025 | Scheduler plans and telemetry are receipts, not authority | PE,CR | G024 | Proven | `cargo test -p l64-core deterministic_authority_merge_excludes_worker_count_and_input_order` |
 | L64-G026 | Authored obligation status is intent, never evidence | CR,MG | evaluator model | Proven | `cargo test -p l64-cert authored_obligation_status_does_not_satisfy_evidence` |
-| L64-G027 | Evaluator authority is explicit, named, and scoped | CR,MG | evaluator interface | Candidate | pending |
+| L64-G027 | Evaluator authority is explicit, named, and scoped | CR,MG | evaluator interface | Proven | `cargo test -p l64-policy evaluator_authority_is_named_and_scoped` |
 | L64-G028 | Every certification verdict carries authority scope | CR,DV | scope law | Candidate | pending |
 | L64-G029 | Report-derived research records are projections until replayed | CR,MG | artifact roles | Proven | `cargo test -p l64-research report_derivation_emits_lineage_record` |
 | L64-G030 | Policy precedence emits deterministic receipts | PE,DV | policy law | Candidate | pending |

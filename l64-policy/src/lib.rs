@@ -441,7 +441,10 @@ mod tests {
     use l64_core::RegistryLookup;
 
     #[derive(Default)]
-    struct EmptyRegistry;
+    struct EmptyRegistry {
+        policies: Vec<MechanizationPolicyObject>,
+        bindings: Vec<PolicyBinding>,
+    }
     impl RegistryLookup for EmptyRegistry {
         fn get_object(&self, _: &str) -> Option<l64_core::QcObject> {
             None
@@ -519,10 +522,10 @@ mod tests {
             None
         }
         fn policy_objects(&self) -> Vec<MechanizationPolicyObject> {
-            Vec::new()
+            self.policies.clone()
         }
         fn policy_bindings(&self) -> Vec<PolicyBinding> {
-            Vec::new()
+            self.bindings.clone()
         }
         fn find_equivalence_class(&self, _: &str, _: &str) -> Option<l64_core::EquivalenceClass> {
             None
@@ -535,7 +538,7 @@ mod tests {
     #[test]
     fn resolves_builtin_policy_graph() {
         let resolved = resolve_policy_graph(
-            &EmptyRegistry,
+            &EmptyRegistry::default(),
             Some("BND_LOCAL"),
             None,
             None,
@@ -546,5 +549,57 @@ mod tests {
         .unwrap();
         assert_eq!(resolved.resolution.verdict, PolicyVerdict::Applied);
         assert!(!resolved.resolution.applied_policy_ids.is_empty());
+    }
+
+    #[test]
+    fn evaluator_authority_is_named_and_scoped() {
+        let mut evaluator = default_evaluator();
+        evaluator.allow_approximation = false;
+        evaluator.unsupported_mode = UnsupportedHandlingMode::StrictFail;
+        let registry = EmptyRegistry {
+            policies: vec![MechanizationPolicyObject {
+                id: "MOP_THS_LOCAL_EVAL".into(),
+                kind: l64_core::PolicyKind::Evaluator,
+                scope: PolicyScope::Theorem("THS_LOCAL".into()),
+                extends: None,
+                optimizer: None,
+                evaluator: Some(evaluator),
+                replay_cache: None,
+                report: None,
+                scheduler: None,
+                canonicalizer_mode: None,
+                merge_policy: None,
+                notes: vec!["theorem-scoped evaluator".into()],
+            }],
+            bindings: Vec::new(),
+        };
+
+        let resolved = resolve_policy_graph(
+            &registry,
+            Some("BND_LOCAL"),
+            Some("THS_LOCAL"),
+            None,
+            None,
+            true,
+            OptimizerPolicy::Conservative,
+        )
+        .unwrap();
+
+        assert_eq!(
+            resolved.resolution.scope,
+            PolicyScope::Theorem("THS_LOCAL".into())
+        );
+        assert!(
+            resolved
+                .resolution
+                .applied_policy_ids
+                .iter()
+                .any(|id| id == "MOP_THS_LOCAL_EVAL")
+        );
+        assert!(!resolved.resolution.evaluator.allow_approximation);
+        assert_eq!(
+            resolved.resolution.evaluator.unsupported_mode,
+            UnsupportedHandlingMode::StrictFail
+        );
     }
 }
