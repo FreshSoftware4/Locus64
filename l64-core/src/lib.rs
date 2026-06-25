@@ -3155,14 +3155,6 @@ pub fn document_for_registry_id(registry: &dyn RegistryLookup, id: &str) -> Opti
         QaEntry::ChallengeReceipt(item)
     } else if let Some(item) = registry.get_reproducibility_packet(id) {
         QaEntry::ReproducibilityPacket(item)
-    } else if let Some(item) = registry.get_surface_policy(id) {
-        QaEntry::SurfacePolicy(item)
-    } else if let Some(item) = registry.get_transform_receipt(id) {
-        QaEntry::TransformReceipt(item)
-    } else if let Some(item) = registry.get_roundtrip_report(id) {
-        QaEntry::RoundTripReport(item)
-    } else if let Some(item) = registry.get_capability_matrix(id) {
-        QaEntry::CapabilityMatrix(item)
     } else if let Some(item) = registry.get_policy_object(id) {
         QaEntry::PolicyObject(item)
     } else {
