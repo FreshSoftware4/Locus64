@@ -359,6 +359,7 @@ Landed:
 - Certification obligation evaluation no longer treats deprecated `FormatTransformReceipt` records as stored evidence; stored obligation fallback is limited to native certificate and proof-shape records.
 - Registry-id document export no longer reconstructs deprecated surface-schema records (`SurfacePolicy`, `FormatTransformReceipt`, `RoundTripReport`, `CapabilityMatrix`) into `QaDocument`; those records remain schema residue until their storage/index fields can be retired safely.
 - Deprecated surface-schema lookup methods are removed from `RegistryLookup`; bundle import drops surface-policy, transform-receipt, roundtrip-report, capability, and surface-budget entries instead of materializing them into active local registries, while generic `QaEntry::from_surface_json` and bundle text ingress reject the full deprecated family, including doc-era `format-receipt`, `capability-matrix`, and `surface-deficiency` aliases.
+- Seed registry Q-surface policy/capability records are deleted after their lookup, import, and admission paths were retired; omitted storage arrays now deserialize through defaults instead of preserving inert Q data.
 - `l64-surfaces`, `l64-qc0`, and `l64-qa0` have been removed from workspace membership and deleted from the codebase.
 - Bundle-entry text remains only as an authoring convenience compiled by `compile-bundle` into `.dna`; it is not a public authority surface.
 
