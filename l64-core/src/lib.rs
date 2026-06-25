@@ -1121,6 +1121,7 @@ pub enum AuthorityState {
     Derived,
     Benchmark,
     Evidence,
+    Projection,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]

@@ -50,7 +50,7 @@ Proof classes:
 | L64-G026 | Authored obligation status is intent, never evidence | CR,MG | evaluator model | Proven | `cargo test -p l64-cert authored_obligation_status_does_not_satisfy_evidence` |
 | L64-G027 | Evaluator authority is explicit, named, and scoped | CR,MG | evaluator interface | Candidate | pending |
 | L64-G028 | Every certification verdict carries authority scope | CR,DV | scope law | Candidate | pending |
-| L64-G029 | Report-derived research records are projections until replayed | CR,MG | artifact roles | Candidate | pending |
+| L64-G029 | Report-derived research records are projections until replayed | CR,MG | artifact roles | Proven | `cargo test -p l64-research report_derivation_emits_lineage_record` |
 | L64-G030 | Policy precedence emits deterministic receipts | PE,DV | policy law | Candidate | pending |
 | L64-G031 | Namespace import is a receipted bridge, not string rewriting | MG,DV | bridge law | Candidate | pending |
 | L64-G032 | RNA and DNA remain the only public authority surfaces | CR,RI | artifact roles | Proven | `cargo test -p l64-cli --test cli` (`rna_dna_primary_authority_commands_work`, `standalone_projection_leaf_commands_are_removed`, `inspect_dna_output_is_not_rna_source`) |

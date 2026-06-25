@@ -1505,13 +1505,7 @@ pub fn derive_math_claim_packet_from_report(report: &CertificationReport) -> Mat
     } else {
         l64_core::ResearchSector::Control
     };
-    let truth_class = if matches!(report.verdict, l64_core::CertificationVerdict::Integrated) {
-        AuthorityState::Evidence
-    } else if matches!(report.verdict, l64_core::CertificationVerdict::Certified) {
-        AuthorityState::Benchmark
-    } else {
-        AuthorityState::Derived
-    };
+    let truth_class = AuthorityState::Projection;
     let mut assumptions = Vec::new();
     assumptions.extend(
         report
@@ -1520,6 +1514,7 @@ pub fn derive_math_claim_packet_from_report(report: &CertificationReport) -> Mat
             .map(|id| format!("burden_pack:{id}")),
     );
     assumptions.extend(report.selected_path.iter().map(|id| format!("path:{id}")));
+    assumptions.push(format!("report_verdict_projection:{:?}", report.verdict));
     let blocker_leaves = report
         .deficiencies
         .iter()
@@ -2800,6 +2795,15 @@ mod tests {
         assert_eq!(
             lineage.phase_ledger[0].validation_result,
             PhaseValidationResult::Passed
+        );
+
+        let claim = derive_math_claim_packet_from_report(&report);
+        assert_eq!(claim.truth_class, l64_core::AuthorityState::Projection);
+        assert!(
+            claim
+                .assumptions
+                .iter()
+                .any(|item| item == "report_verdict_projection:Integrated")
         );
     }
 

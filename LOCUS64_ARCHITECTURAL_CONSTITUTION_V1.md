@@ -261,6 +261,19 @@ Constitutional effect:
 - An authored `Certified` obligation does not satisfy evidence by itself.
 - Unsupported obligations must remain unsupported or blocked unless executable evaluation or native stored evidence exists.
 
+### L64-G029 - Report-Derived Research Projection
+
+Report-derived research records are projections until replayed.
+
+Evidence:
+
+- `cargo test -p l64-research report_derivation_emits_lineage_record`
+
+Constitutional effect:
+
+- Claim packets derived from certification reports must be classified as projection authority, even when the report verdict is `Integrated` or `Certified`.
+- Report verdicts may be retained as projection assumptions, but they cannot upgrade report-derived research records into evidence or benchmark authority without a replay-specific promotion path.
+
 ### L64-G032 - RNA/DNA Public Authority Surfaces
 
 RNA and DNA remain the only public authority surfaces.
