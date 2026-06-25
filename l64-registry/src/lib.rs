@@ -1,11 +1,10 @@
 use l64_core::{
     AdequacyClause, AliasExpansionPolicy, ArtifactOrigin, AtlasCell, AtlasDeficiency,
-    BenchmarkReceipt, BridgeContract, BurdenPack, Campaign, CampaignPortfolio, CapabilityMatrix,
-    Certificate, ChallengeReceipt, ClaimPacket, CodebookPack, ComboPack, EquivalenceClass,
-    EvidenceContract, FormatTransformReceipt, GlyphPack, MechanizationPackage,
-    MechanizationPolicyObject, Obligation, PolicyBinding, ProjectionPolicy, ProofShape, QcObject,
-    RegimePack, RegistryBundle, RegistryLookup, ReproducibilityPacket, RoundTripReport, RouteClass,
-    RouteLedger, SurfaceDeficiency, SurfacePolicy, TargetProfile, TheoremSpec,
+    BenchmarkReceipt, BridgeContract, BurdenPack, Campaign, CampaignPortfolio, Certificate,
+    ChallengeReceipt, ClaimPacket, CodebookPack, ComboPack, EquivalenceClass, EvidenceContract,
+    GlyphPack, MechanizationPackage, MechanizationPolicyObject, Obligation, PolicyBinding,
+    ProjectionPolicy, ProofShape, QcObject, RegimePack, RegistryBundle, RegistryLookup,
+    ReproducibilityPacket, RouteClass, RouteLedger, SurfaceDeficiency, TargetProfile, TheoremSpec,
 };
 use std::collections::HashMap;
 use thiserror::Error;
@@ -48,10 +47,6 @@ pub struct SeedRegistry {
     combo_pack_index: HashMap<String, usize>,
     projection_policy_index: HashMap<String, usize>,
     alias_policy_index: HashMap<String, usize>,
-    surface_policy_index: HashMap<String, usize>,
-    capability_index: HashMap<String, usize>,
-    roundtrip_index: HashMap<String, usize>,
-    receipt_index: HashMap<String, usize>,
     surface_deficiency_index: HashMap<String, usize>,
     policy_object_index: HashMap<String, usize>,
 }
@@ -104,10 +99,6 @@ impl SeedRegistry {
             alias_policy_index: build_index(&bundle.alias_expansion_policies, |item| {
                 item.id.as_str()
             }),
-            surface_policy_index: build_index(&bundle.surface_policies, |item| item.id.as_str()),
-            capability_index: build_index(&bundle.capability_matrices, |item| item.id.as_str()),
-            roundtrip_index: build_index(&bundle.roundtrip_reports, |item| item.id.as_str()),
-            receipt_index: build_index(&bundle.transform_receipts, |item| item.id.as_str()),
             surface_deficiency_index: build_index(&bundle.surface_deficiencies, |item| {
                 item.id.as_str()
             }),
@@ -333,34 +324,6 @@ impl RegistryLookup for SeedRegistry {
         self.alias_policy_index
             .get(id)
             .and_then(|index| self.bundle.alias_expansion_policies.get(*index))
-            .cloned()
-    }
-
-    fn get_surface_policy(&self, id: &str) -> Option<SurfacePolicy> {
-        self.surface_policy_index
-            .get(id)
-            .and_then(|index| self.bundle.surface_policies.get(*index))
-            .cloned()
-    }
-
-    fn get_capability_matrix(&self, id: &str) -> Option<CapabilityMatrix> {
-        self.capability_index
-            .get(id)
-            .and_then(|index| self.bundle.capability_matrices.get(*index))
-            .cloned()
-    }
-
-    fn get_roundtrip_report(&self, id: &str) -> Option<RoundTripReport> {
-        self.roundtrip_index
-            .get(id)
-            .and_then(|index| self.bundle.roundtrip_reports.get(*index))
-            .cloned()
-    }
-
-    fn get_transform_receipt(&self, id: &str) -> Option<FormatTransformReceipt> {
-        self.receipt_index
-            .get(id)
-            .and_then(|index| self.bundle.transform_receipts.get(*index))
             .cloned()
     }
 

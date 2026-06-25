@@ -3098,10 +3098,6 @@ pub trait RegistryLookup {
     fn get_combo_pack(&self, id: &str) -> Option<ComboPack>;
     fn get_projection_policy(&self, id: &str) -> Option<ProjectionPolicy>;
     fn get_alias_expansion_policy(&self, id: &str) -> Option<AliasExpansionPolicy>;
-    fn get_surface_policy(&self, id: &str) -> Option<SurfacePolicy>;
-    fn get_capability_matrix(&self, id: &str) -> Option<CapabilityMatrix>;
-    fn get_roundtrip_report(&self, id: &str) -> Option<RoundTripReport>;
-    fn get_transform_receipt(&self, id: &str) -> Option<FormatTransformReceipt>;
     fn get_surface_deficiency(&self, id: &str) -> Option<SurfaceDeficiency>;
     fn get_policy_object(&self, id: &str) -> Option<MechanizationPolicyObject>;
     fn policy_objects(&self) -> Vec<MechanizationPolicyObject>;

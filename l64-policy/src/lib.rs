@@ -512,18 +512,6 @@ mod tests {
         fn get_alias_expansion_policy(&self, _: &str) -> Option<l64_core::AliasExpansionPolicy> {
             None
         }
-        fn get_surface_policy(&self, _: &str) -> Option<l64_core::SurfacePolicy> {
-            None
-        }
-        fn get_capability_matrix(&self, _: &str) -> Option<l64_core::CapabilityMatrix> {
-            None
-        }
-        fn get_roundtrip_report(&self, _: &str) -> Option<l64_core::RoundTripReport> {
-            None
-        }
-        fn get_transform_receipt(&self, _: &str) -> Option<l64_core::FormatTransformReceipt> {
-            None
-        }
         fn get_surface_deficiency(&self, _: &str) -> Option<l64_core::SurfaceDeficiency> {
             None
         }

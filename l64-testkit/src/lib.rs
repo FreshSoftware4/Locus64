@@ -213,20 +213,6 @@ impl RegistryLookup for BundleRegistry {
             item.id.as_str()
         })
     }
-    fn get_surface_policy(&self, id: &str) -> Option<SurfacePolicy> {
-        get_by_id(&self.bundle.surface_policies, id, |item| item.id.as_str())
-    }
-    fn get_capability_matrix(&self, id: &str) -> Option<CapabilityMatrix> {
-        get_by_id(&self.bundle.capability_matrices, id, |item| {
-            item.id.as_str()
-        })
-    }
-    fn get_roundtrip_report(&self, id: &str) -> Option<RoundTripReport> {
-        get_by_id(&self.bundle.roundtrip_reports, id, |item| item.id.as_str())
-    }
-    fn get_transform_receipt(&self, id: &str) -> Option<FormatTransformReceipt> {
-        get_by_id(&self.bundle.transform_receipts, id, |item| item.id.as_str())
-    }
     fn get_surface_deficiency(&self, id: &str) -> Option<SurfaceDeficiency> {
         get_by_id(&self.bundle.surface_deficiencies, id, |item| {
             item.id.as_str()

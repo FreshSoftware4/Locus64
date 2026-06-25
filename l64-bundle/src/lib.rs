@@ -3,18 +3,17 @@ use l64_core::{
     AdequacyClause, AliasExpansionPolicy, ArtifactOrigin, AtlasCell, AtlasDeficiency,
     AuthorityComplement, BenchmarkReceipt, BridgeBurden, BridgeContract, BundleConflict,
     BundleConflictPolicy, BundleDependency, BundleEntry, BundleExecutionReceipt, BundleManifest,
-    BundleMergeReport, BurdenPack, Campaign, CampaignPortfolio, CanonicalWorkUnit,
-    CapabilityMatrix, Certificate, ChallengeReceipt, ClaimPacket, CodebookPack, CodonHeader,
-    CodonPhase, ComboPack, CyclePolicyResult, DeterministicAuthorityMerge, DigestRole,
-    DomainClosureReport, DuplexPairStatus, EquivalenceClass, EvidenceContract, ExecutionManifest,
-    FormatTransformReceipt, GlyphPack, MechanizationPackage, MechanizationPolicyObject,
-    MolecularCodecEnvelope, MolecularCodecRecord, Obligation, OpenObligation,
-    OverlayRegistryDescriptor, PairLaw, PolicyBinding, PolicyResolution, ProjectionPolicy,
-    ProofShape, QaDocument, QaEntry, QcObject, RegimePack, RegistryBundle, RegistryLookup,
-    ReplayLockManifest, ReproducibilityPacket, RoundTripReport, RouteClass, RouteLedger,
-    SemanticStrand, SubstrateAtom, SubstrateBond, SubstratePrimitive, SubstratePrimitiveKind,
-    SurfaceDeficiency, SurfaceKind, SurfacePolicy, TargetProfile, TheoremSpec, ensure_cache_subdir,
-    role_digest_value,
+    BundleMergeReport, BurdenPack, Campaign, CampaignPortfolio, CanonicalWorkUnit, Certificate,
+    ChallengeReceipt, ClaimPacket, CodebookPack, CodonHeader, CodonPhase, ComboPack,
+    CyclePolicyResult, DeterministicAuthorityMerge, DigestRole, DomainClosureReport,
+    DuplexPairStatus, EquivalenceClass, EvidenceContract, ExecutionManifest, GlyphPack,
+    MechanizationPackage, MechanizationPolicyObject, MolecularCodecEnvelope, MolecularCodecRecord,
+    Obligation, OpenObligation, OverlayRegistryDescriptor, PairLaw, PolicyBinding,
+    PolicyResolution, ProjectionPolicy, ProofShape, QaDocument, QaEntry, QcObject, RegimePack,
+    RegistryBundle, RegistryLookup, ReplayLockManifest, ReproducibilityPacket, RouteClass,
+    RouteLedger, SemanticStrand, SubstrateAtom, SubstrateBond, SubstratePrimitive,
+    SubstratePrimitiveKind, SurfaceDeficiency, SurfaceKind, TargetProfile, TheoremSpec,
+    ensure_cache_subdir, role_digest_value,
 };
 use l64_registry::SeedRegistry;
 use serde::{Deserialize, Serialize};
@@ -399,7 +398,11 @@ fn parse_bundle_document_from_entry_text(text: &str) -> Result<QaDocument> {
             .ok_or_else(|| anyhow!("bundle entry is missing JSON payload: `{line}`"))?;
         if matches!(
             kind,
-            "transform-receipt" | "roundtrip-report" | "capability"
+            "surface-policy"
+                | "transform-receipt"
+                | "roundtrip-report"
+                | "capability"
+                | "surface-budget"
         ) {
             return Err(anyhow!(
                 "deprecated surface-schema bundle entry `{kind}` is not admitted by bundle-entry text"
@@ -765,11 +768,11 @@ fn bundle_from_document(document: &QaDocument) -> RegistryBundle {
             QaEntry::ReproducibilityPacket(item) => {
                 bundle.reproducibility_packets.push(item.clone())
             }
-            QaEntry::SurfacePolicy(item) => bundle.surface_policies.push(item.clone()),
-            QaEntry::TransformReceipt(item) => bundle.transform_receipts.push(item.clone()),
-            QaEntry::RoundTripReport(item) => bundle.roundtrip_reports.push(item.clone()),
-            QaEntry::CapabilityMatrix(item) => bundle.capability_matrices.push(item.clone()),
-            QaEntry::SurfaceBudget(_) => {}
+            QaEntry::SurfacePolicy(_)
+            | QaEntry::TransformReceipt(_)
+            | QaEntry::RoundTripReport(_)
+            | QaEntry::CapabilityMatrix(_)
+            | QaEntry::SurfaceBudget(_) => {}
             QaEntry::PolicyObject(item) => bundle.policy_objects.push(item.clone()),
             QaEntry::PolicyBinding(item) => bundle.policy_bindings.push(item.clone()),
             QaEntry::PolicyResolution(item) => bundle.policy_resolutions.push(item.clone()),
@@ -924,18 +927,11 @@ fn namespace_document(mut document: QaDocument, namespace: &str) -> QaDocument {
                 item.benchmark_refs = remap_vec(&item.benchmark_refs, &id_map);
                 item.artifact_refs = remap_vec(&item.artifact_refs, &id_map);
             }
-            QaEntry::SurfacePolicy(item) => item.id = remap(&item.id, &id_map),
-            QaEntry::TransformReceipt(item) => {
-                item.id = remap(&item.id, &id_map);
-                item.object_ids = remap_vec(&item.object_ids, &id_map);
-            }
-            QaEntry::RoundTripReport(item) => {
-                item.id = remap(&item.id, &id_map);
-                item.object_ids = remap_vec(&item.object_ids, &id_map);
-                item.receipt_ids = remap_vec(&item.receipt_ids, &id_map);
-            }
-            QaEntry::CapabilityMatrix(item) => item.id = remap(&item.id, &id_map),
-            QaEntry::SurfaceBudget(item) => item.id = remap(&item.id, &id_map),
+            QaEntry::SurfacePolicy(_)
+            | QaEntry::TransformReceipt(_)
+            | QaEntry::RoundTripReport(_)
+            | QaEntry::CapabilityMatrix(_)
+            | QaEntry::SurfaceBudget(_) => {}
             QaEntry::PolicyObject(item) => {
                 item.id = remap(&item.id, &id_map);
                 item.extends = item.extends.as_ref().map(|id| remap(id, &id_map));
@@ -1093,34 +1089,6 @@ fn registry_bundle_entries(local: &RegistryBundle) -> Vec<BundleEntry> {
             .iter()
             .cloned()
             .map(QaEntry::ReproducibilityPacket),
-    );
-    entries.extend(
-        local
-            .surface_policies
-            .iter()
-            .cloned()
-            .map(QaEntry::SurfacePolicy),
-    );
-    entries.extend(
-        local
-            .transform_receipts
-            .iter()
-            .cloned()
-            .map(QaEntry::TransformReceipt),
-    );
-    entries.extend(
-        local
-            .roundtrip_reports
-            .iter()
-            .cloned()
-            .map(QaEntry::RoundTripReport),
-    );
-    entries.extend(
-        local
-            .capability_matrices
-            .iter()
-            .cloned()
-            .map(QaEntry::CapabilityMatrix),
     );
     entries.extend(
         local
@@ -1352,18 +1320,6 @@ impl RegistryLookup for OverlayRegistry {
             get_alias_expansion_policy
         )
     }
-    fn get_surface_policy(&self, id: &str) -> Option<SurfacePolicy> {
-        lookup_local_then_parent!(self, surface_policies, id, get_surface_policy)
-    }
-    fn get_capability_matrix(&self, id: &str) -> Option<CapabilityMatrix> {
-        lookup_local_then_parent!(self, capability_matrices, id, get_capability_matrix)
-    }
-    fn get_roundtrip_report(&self, id: &str) -> Option<RoundTripReport> {
-        lookup_local_then_parent!(self, roundtrip_reports, id, get_roundtrip_report)
-    }
-    fn get_transform_receipt(&self, id: &str) -> Option<FormatTransformReceipt> {
-        lookup_local_then_parent!(self, transform_receipts, id, get_transform_receipt)
-    }
     fn get_surface_deficiency(&self, id: &str) -> Option<SurfaceDeficiency> {
         lookup_local_then_parent!(self, surface_deficiencies, id, get_surface_deficiency)
     }
@@ -1509,18 +1465,6 @@ impl RegistryLookup for LocalRegistry {
     }
     fn get_alias_expansion_policy(&self, id: &str) -> Option<AliasExpansionPolicy> {
         lookup_local_only!(self, alias_expansion_policies, id)
-    }
-    fn get_surface_policy(&self, id: &str) -> Option<SurfacePolicy> {
-        lookup_local_only!(self, surface_policies, id)
-    }
-    fn get_capability_matrix(&self, id: &str) -> Option<CapabilityMatrix> {
-        lookup_local_only!(self, capability_matrices, id)
-    }
-    fn get_roundtrip_report(&self, id: &str) -> Option<RoundTripReport> {
-        lookup_local_only!(self, roundtrip_reports, id)
-    }
-    fn get_transform_receipt(&self, id: &str) -> Option<FormatTransformReceipt> {
-        lookup_local_only!(self, transform_receipts, id)
     }
     fn get_surface_deficiency(&self, id: &str) -> Option<SurfaceDeficiency> {
         lookup_local_only!(self, surface_deficiencies, id)
@@ -1914,6 +1858,55 @@ mod tests {
     }
 
     #[test]
+    fn bundle_import_drops_deprecated_surface_schema_records() {
+        let theorem = test_theorem("THS_SURFACE_SCHEMA_DROP", "drop deprecated records", &[]);
+        let document = QaDocument {
+            entries: vec![
+                QaEntry::TheoremSpec(theorem),
+                QaEntry::SurfacePolicy(l64_core::SurfacePolicy {
+                    id: "SP_DROP".into(),
+                    codebook_pack: "CB_DROP".into(),
+                    profile: "drop".into(),
+                    projection_policy: "PP_DROP".into(),
+                    combo_pack: None,
+                    glyph_pack: None,
+                    alias_expansion_policy: "AL_DROP".into(),
+                    allowed_loss_classes: Vec::new(),
+                }),
+                QaEntry::CapabilityMatrix(l64_core::CapabilityMatrix {
+                    id: "CAP_DROP".into(),
+                    surface_kind: SurfaceKind::Qc0,
+                    supported_packs: Vec::new(),
+                    import_support: true,
+                    export_support: true,
+                    transcode_support: Vec::new(),
+                    roundtrip_support: false,
+                    known_limits: Vec::new(),
+                }),
+            ],
+        };
+
+        let world = import_bundle_document(
+            SeedRegistry::load().unwrap(),
+            "BND_SURFACE_SCHEMA_DROP".into(),
+            document,
+            BundleConflictPolicy::Reject,
+            None,
+        )
+        .expect("surface-schema entries should be quarantined, not materialized");
+
+        assert!(
+            world
+                .overlay
+                .get_theorem_spec("THS_SURFACE_SCHEMA_DROP")
+                .is_some()
+        );
+        assert!(world.overlay.local.surface_policies.is_empty());
+        assert!(world.overlay.local.capability_matrices.is_empty());
+        assert_eq!(world.manifest.entries.len(), 1);
+    }
+
+    #[test]
     fn bundle_entry_text_requires_l64_header_and_rejects_q_headers() {
         let valid = r#"!l64-bundle v1
 theorem {"id":"THS_L64_HEADER","statement":"native bundle header","hosts":["R_SET"],"bridges":[],"operators":[],"target_equivalence":"eq","obligations":[],"primary_zone":"PmzSemantic","verdict":"RouteFound","proof_shapes":[]}"#;
@@ -1943,13 +1936,36 @@ theorem {"id":"THS_OLD_HEADER","statement":"old header","hosts":["R_SET"],"bridg
 
     #[test]
     fn bundle_entry_text_rejects_deprecated_surface_schema_entries() {
-        let text = r#"!l64-bundle v1
-capability {"id":"CAP_OLD","surface_kind":"Qc0","supported_packs":[],"import_support":true,"export_support":true,"transcode_support":[],"roundtrip_support":false,"known_limits":[]}"#;
-        let err = bundle_document_from_entry_text(text).unwrap_err();
-        assert!(
-            err.to_string()
-                .contains("deprecated surface-schema bundle entry")
-        );
+        for (kind, payload) in [
+            (
+                "surface-policy",
+                r#"{"id":"SP_OLD","accepted":["Qc0"],"canonical_target":"Dna","default_projection":null}"#,
+            ),
+            (
+                "transform-receipt",
+                r#"{"id":"FTR_OLD","src_surface":"Qc0","dst_surface":"Dna","object_ids":[],"transform_kind":"Transcode","policy_id":"SP_OLD","defaults_used":[],"alias_expansions":[],"loss_classes":[],"hash_before":"a","hash_after":"b","verdict":"Lossless","rollback_ref":null,"replay_ref":null}"#,
+            ),
+            (
+                "roundtrip-report",
+                r#"{"id":"RTR_OLD","surface_kind":"Qc0","policy_id":"SP_OLD","object_ids":[],"receipt_ids":[],"verdict":"Invalid","fragility_vector":[]}"#,
+            ),
+            (
+                "capability",
+                r#"{"id":"CAP_OLD","surface_kind":"Qc0","supported_packs":[],"import_support":true,"export_support":true,"transcode_support":[],"roundtrip_support":false,"known_limits":[]}"#,
+            ),
+            (
+                "surface-budget",
+                r#"{"id":"SB_OLD","max_loss_classes":1,"forbid_silent_defaulting":true}"#,
+            ),
+        ] {
+            let text = format!("!l64-bundle v1\n{kind} {payload}");
+            let err = bundle_document_from_entry_text(&text).unwrap_err();
+            assert!(
+                err.to_string()
+                    .contains("deprecated surface-schema bundle entry"),
+                "{kind}: {err}"
+            );
+        }
     }
 
     #[test]

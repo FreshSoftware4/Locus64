@@ -188,14 +188,14 @@ Current slice classification:
 
 ```text
 Node: Band F / Node 11D surface-schema replacement
-Slice: deprecated surface-schema registry export quarantine
-Role: projection
-Authority impact: prevents deprecated surface-schema records from being reconstructed into bundle documents by registry-id export
+Slice: deprecated surface-schema lookup/materialization retirement
+Role: authority-path
+Authority impact: removes deprecated surface-schema lookup methods from the active registry trait and prevents surface-schema records from entering active bundle registries
 Promotion status: load-bearing runtime behavior, not constitutional promotion
-Expected files: l64-core/src/lib.rs, LINEAR_EXECUTION_RAIL.md
-Required verification: cargo test -p l64-core; cargo check --workspace
-Stop condition: `document_for_registry_id` no longer emits surface policy, transform receipt, roundtrip report, or capability matrix documents
-Rollback trigger: active native registry export loses theorem, claim, evidence, certificate, policy, or execution behavior
+Expected files: l64-core/src/lib.rs, l64-registry/src/lib.rs, l64-bundle/src/lib.rs, l64-testkit/src/lib.rs, l64-policy/src/lib.rs, l64-selector/src/lib.rs, LINEAR_EXECUTION_RAIL.md
+Required verification: cargo test -p l64-bundle; cargo check --workspace
+Stop condition: deprecated surface-schema records remain deserializable storage residue but cannot be looked up, materialized into active local registries, or admitted through bundle-entry text
+Rollback trigger: active native registry lookup or bundle import behavior loses valid theorem/campaign/certificate/evidence functionality
 ```
 
 ## Persistent Execution Mandate
@@ -358,6 +358,7 @@ Landed:
 - Bundle document ingress is now explicitly classified before import: text and `.dna` bundle payloads enter through a `BundleMigrationIngress` membrane, while `QaDocument` remains the transitional migration AST rather than native authority.
 - Certification obligation evaluation no longer treats deprecated `FormatTransformReceipt` records as stored evidence; stored obligation fallback is limited to native certificate and proof-shape records.
 - Registry-id document export no longer reconstructs deprecated surface-schema records (`SurfacePolicy`, `FormatTransformReceipt`, `RoundTripReport`, `CapabilityMatrix`) into `QaDocument`; those records remain schema residue until their storage/index fields can be retired safely.
+- Deprecated surface-schema lookup methods are removed from `RegistryLookup`; bundle import drops surface-policy, transform-receipt, roundtrip-report, capability, and surface-budget entries instead of materializing them into active local registries, while text ingress rejects the full deprecated family.
 - `l64-surfaces`, `l64-qc0`, and `l64-qa0` have been removed from workspace membership and deleted from the codebase.
 - Bundle-entry text remains only as an authoring convenience compiled by `compile-bundle` into `.dna`; it is not a public authority surface.
 
