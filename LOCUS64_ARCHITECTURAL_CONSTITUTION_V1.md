@@ -49,6 +49,19 @@ Constitutional effect:
 - A locally valid pair may still be non-promotable when open obligations or external burdens remain.
 - Domain closure is a separate gate above pair admission.
 
+### L64-G004 - Complement Burden Law
+
+Complement encodes admissibility burdens; receipts only discharge them.
+
+Evidence:
+
+- `cargo test -p l64-core authority_complement_must_carry_burdens_not_receipt_only_claims`
+
+Constitutional effect:
+
+- Authority complements must carry invariant and witness-form requirements.
+- Receipt-only complement claims are malformed and cannot become local authority.
+
 ### L64-G007 - Codon Structural Law
 
 Codons compile to structural instructions, not semantic codebooks.

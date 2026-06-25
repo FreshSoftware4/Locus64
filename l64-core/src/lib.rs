@@ -7065,6 +7065,46 @@ mod genome_foundation_tests {
     }
 
     #[test]
+    fn authority_complement_must_carry_burdens_not_receipt_only_claims() {
+        let semantic = SemanticStrand {
+            id: "SEM_CKI".into(),
+            canonical_structure_id: "CNS_1".into(),
+            authority_scope: "root-structure".into(),
+        };
+        let pair_law = PairLaw {
+            id: "PAIR_CANONICAL_STRUCTURE_V1".into(),
+            required_semantic_scope: "root-structure".into(),
+            required_complement_scope: "root-structure".into(),
+            required_admission_law_id: "ADM_CANONICAL_STRUCTURE_V1".into(),
+            strand_only_promotion_allowed: false,
+        };
+        let receipt_only_complement = AuthorityComplement {
+            id: "CMP_RECEIPT_ONLY".into(),
+            authority_scope: "root-structure".into(),
+            admission_law_id: "ADM_CANONICAL_STRUCTURE_V1".into(),
+            exclusions: vec!["strand-only-promotion".into()],
+            invariants: vec![],
+            dependency_burdens: vec![],
+            required_witness_forms: vec![],
+            closure_requirements: vec!["closed-domain-slice".into()],
+            rollback_law_id: "RBK_REJECT_PAIR_V1".into(),
+        };
+        let pair = assemble_duplex_pair(semantic, receipt_only_complement, pair_law);
+        let validation = validate_duplex_pair(Some(&pair));
+
+        assert_eq!(validation.status, DuplexPairStatus::Malformed);
+        assert!(
+            validation
+                .failures
+                .iter()
+                .any(|failure| { failure.contains("authority complement has no invariants") })
+        );
+        assert!(validation.failures.iter().any(|failure| {
+            failure.contains("authority complement has no required witness forms")
+        }));
+    }
+
+    #[test]
     fn domain_closure_blocks_promotion_on_open_frontier() {
         let semantic = SemanticStrand {
             id: "SEM_CKI".into(),

@@ -25,7 +25,7 @@ Proof classes:
 | L64-G001 | Duplex pair is the smallest locally authoritative unit | CR,DV | canonical encoding | Proven | `cargo test -p l64-core duplex_pair_validation_requires_semantic_and_complement_strands` |
 | L64-G002 | Neither strand is independently promotable | CR | G001 | Proven | `cargo test -p l64-core duplex_pair_validation_requires_semantic_and_complement_strands` |
 | L64-G003 | Pair-local validity does not imply domain closure | CR,DV | G001 | Proven | `cargo test -p l64-core domain_closure_blocks_promotion_on_open_frontier` |
-| L64-G004 | Complement encodes admissibility burdens; receipts only discharge them | CR | G001 | Candidate | pending |
+| L64-G004 | Complement encodes admissibility burdens; receipts only discharge them | CR | G001 | Proven | `cargo test -p l64-core authority_complement_must_carry_burdens_not_receipt_only_claims` |
 | L64-G005 | Duplex is native DNA structure, not a third public format | CR,RI | artifact roles | Candidate | pending |
 | L64-G006 | Current molecular nouns are provisional role mappings | CR,MG | role model | Candidate | pending |
 | L64-G007 | Codons compile to structural instructions, not semantic codebooks | CR,DV | symbolic law | Proven | `cargo test -p l64-core` (`codon_lexon_law_tables_are_unique_and_complete`, `codon_header_phase_controls_source_admission`) |
