@@ -302,6 +302,32 @@ Constitutional effect:
 - DNA-to-RNA reconstruction targets canonical RNA.
 - Original authored RNA remains lineage/source material, not a required inverse of DNA.
 
+### L64-G038 - Release Renderer Law
+
+Release strings are renderers over witnessed products.
+
+Evidence:
+
+- `cargo test -p l64-cli --test cli genome_release_exports_coordinate_spine_and_rejects_views_as_source`
+
+Constitutional effect:
+
+- Release strings, claim pages, maps, views, and rendered records must be derived from witnessed authority products.
+- Rendered release artifacts do not become source authority.
+
+### L64-G040 - Artifact Role Explicitness
+
+Every sample artifact has an explicit source, migration, projection, record, receipt, or view role.
+
+Evidence:
+
+- `cargo test -p l64-cli --test cli genome_release_exports_coordinate_spine_and_rejects_views_as_source`
+
+Constitutional effect:
+
+- Release and sample artifacts must advertise their role through type, filename, content marker, or command boundary.
+- Ambiguous artifacts must fail source admission or be classified before use.
+
 ### L64-G045 - Mechanical Evidence Requirement
 
 Constitutional rules require mechanical evidence.

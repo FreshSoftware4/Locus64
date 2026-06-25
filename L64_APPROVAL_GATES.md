@@ -59,9 +59,9 @@ Proof classes:
 | L64-G035 | Codebook/glyph/combo packs are projection or legacy machinery | MG,CR | projection boundary | Candidate | pending |
 | L64-G036 | DNA reconstructs canonical RNA, not authored RNA | FP | canonical encoding | Proven | `cargo test -p l64-cli --test cli cki_registry_fixture_preserves_rna_dna_fixed_point` |
 | L64-G037 | Grooves, folds, indexes, maps, and plans stay outside identity | FP,PE | G015 | Candidate | pending |
-| L64-G038 | Release strings are renderers over witnessed products | MG,PL | expression layer | Candidate | pending |
+| L64-G038 | Release strings are renderers over witnessed products | MG,PL | expression layer | Proven | `cargo test -p l64-cli --test cli genome_release_exports_coordinate_spine_and_rejects_views_as_source` |
 | L64-G039 | Seed JSON is bootstrap source and compiles to DNA | MG,RI | native seed path | Candidate | pending |
-| L64-G040 | Every sample artifact has an explicit source/migration/projection role | RI,CR | artifact roles | Candidate | pending |
+| L64-G040 | Every sample artifact has an explicit source/migration/projection role | RI,CR | artifact roles | Proven | `cargo test -p l64-cli --test cli genome_release_exports_coordinate_spine_and_rejects_views_as_source` |
 | L64-G041 | External standards are dialects and witness providers | EA,CR | adapter law | Deferred | pending |
 | L64-G042 | Every standards export carries a projection-loss receipt | PL,EA | G041 | Deferred | pending |
 | L64-G043 | Proof assistants provide scoped external witnesses | EA,DV | evaluator interface | Deferred | pending |
