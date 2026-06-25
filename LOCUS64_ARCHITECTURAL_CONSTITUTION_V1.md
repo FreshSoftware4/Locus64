@@ -170,6 +170,19 @@ Constitutional effect:
 - Current authority decode must not silently fall back to legacy packet decoding.
 - Migration and forensic decode paths are intentional subordinate modes, not ambient compatibility.
 
+### L64-G023 - Source Release Hygiene
+
+Generated caches and ambiguous reports do not ship as source.
+
+Evidence:
+
+- `cargo test -p l64-cli --test cli genome_release_exports_coordinate_spine_and_rejects_views_as_source`
+
+Constitutional effect:
+
+- Release products must distinguish source, projection, record, receipt, and view roles.
+- Generated views and reports may be shipped as products, but not as source authority.
+
 ### L64-G024 - Deterministic Parallel Equivalence
 
 Serial and parallel authoritative outputs are byte-equivalent.
@@ -195,6 +208,33 @@ Constitutional effect:
 
 - Worker count, timing, lane assignment, and scheduling plan data are excluded from authority identity.
 - Scheduler details may be recorded as diagnostics or receipts only.
+
+### L64-G032 - RNA/DNA Public Authority Surfaces
+
+RNA and DNA remain the only public authority surfaces.
+
+Evidence:
+
+- `cargo test -p l64-cli --test cli`
+- Proving tests: `rna_dna_primary_authority_commands_work`, `standalone_projection_leaf_commands_are_removed`, `inspect_dna_output_is_not_rna_source`
+
+Constitutional effect:
+
+- Public authority workflows must pass through source/canonical RNA or DNA.
+- Projection, inspection, and removed legacy commands cannot define public authority surfaces.
+
+### L64-G036 - Canonical RNA Reconstruction
+
+DNA reconstructs canonical RNA, not authored RNA.
+
+Evidence:
+
+- `cargo test -p l64-cli --test cli cki_registry_fixture_preserves_rna_dna_fixed_point`
+
+Constitutional effect:
+
+- DNA-to-RNA reconstruction targets canonical RNA.
+- Original authored RNA remains lineage/source material, not a required inverse of DNA.
 
 ### L64-G045 - Mechanical Evidence Requirement
 

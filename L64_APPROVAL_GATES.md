@@ -44,7 +44,7 @@ Proof classes:
 | L64-G020 | Authority decoding is bounded before allocation | DV | packet codec | Candidate | pending |
 | L64-G021 | Authority tiers, features, and strand roles are typed law | CR,DV | role model | Candidate | pending |
 | L64-G022 | Capability summaries require witness coordinates | CR,DV | witness model | Candidate | pending |
-| L64-G023 | Generated caches and ambiguous reports do not ship as source | RI | release gate | Candidate | pending |
+| L64-G023 | Generated caches and ambiguous reports do not ship as source | RI | release gate | Proven | `cargo test -p l64-cli --test cli genome_release_exports_coordinate_spine_and_rejects_views_as_source` |
 | L64-G024 | Serial and parallel authoritative outputs are byte-equivalent | PE | closure scheduler | Proven | `cargo test -p l64-core deterministic_authority_merge_excludes_worker_count_and_input_order` |
 | L64-G025 | Scheduler plans and telemetry are receipts, not authority | PE,CR | G024 | Proven | `cargo test -p l64-core deterministic_authority_merge_excludes_worker_count_and_input_order` |
 | L64-G026 | Authored obligation status is intent, never evidence | CR,MG | evaluator model | Candidate | pending |
@@ -53,11 +53,11 @@ Proof classes:
 | L64-G029 | Report-derived research records are projections until replayed | CR,MG | artifact roles | Candidate | pending |
 | L64-G030 | Policy precedence emits deterministic receipts | PE,DV | policy law | Candidate | pending |
 | L64-G031 | Namespace import is a receipted bridge, not string rewriting | MG,DV | bridge law | Candidate | pending |
-| L64-G032 | RNA and DNA remain the only public authority surfaces | CR,RI | artifact roles | Candidate | pending |
+| L64-G032 | RNA and DNA remain the only public authority surfaces | CR,RI | artifact roles | Proven | `cargo test -p l64-cli --test cli` (`rna_dna_primary_authority_commands_work`, `standalone_projection_leaf_commands_are_removed`, `inspect_dna_output_is_not_rna_source`) |
 | L64-G033 | Bundle-entry JSON is deletion-bound migration ingress only | MG,RI | native bundle path | Candidate | pending |
 | L64-G034 | Remaining Qa/Qc types are migration ASTs, not core ontology | MG,CR | native bundle path | Candidate | pending |
 | L64-G035 | Codebook/glyph/combo packs are projection or legacy machinery | MG,CR | projection boundary | Candidate | pending |
-| L64-G036 | DNA reconstructs canonical RNA, not authored RNA | FP | canonical encoding | Candidate | pending |
+| L64-G036 | DNA reconstructs canonical RNA, not authored RNA | FP | canonical encoding | Proven | `cargo test -p l64-cli --test cli cki_registry_fixture_preserves_rna_dna_fixed_point` |
 | L64-G037 | Grooves, folds, indexes, maps, and plans stay outside identity | FP,PE | G015 | Candidate | pending |
 | L64-G038 | Release strings are renderers over witnessed products | MG,PL | expression layer | Candidate | pending |
 | L64-G039 | Seed JSON is bootstrap source and compiles to DNA | MG,RI | native seed path | Candidate | pending |
