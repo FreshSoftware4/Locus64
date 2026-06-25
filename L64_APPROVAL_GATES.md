@@ -77,7 +77,7 @@ Proof classes:
 | L64-G053 | Boollet suggestions re-enter Locus64 only as proposals or witness coordinates | CR,MG | G051 | Candidate | pending |
 | L64-G054 | Boollet replay identity may guide remediation ordering but cannot affect canonical identity | FP,CR | G015,G051 | Candidate | pending |
 | L64-G055 | Locus64 admission/remediation sidecar fixtures prove usefulness without authority transfer | MG,DV | G051,G052,native Locus64 transition fixture | Candidate | pending |
-| L64-G056 | No naked equality: equivalence requires a scoped `EqLaw` and active transition context | CR,FP | G015,distinction law | Candidate | pending |
+| L64-G056 | No naked equality: structural equivalence requires explicit law specs and transition context | CR,FP | G015,distinction law | Proven | `cargo test -p l64-core` (`equivalence_law_makes_ordering_explicit_before_cnorm`, `distinction_law_classifies_collapse_before_equivalence`) |
 | L64-G057 | K2 bridge/path comparability is a transport obligation over DNA authority, not root identity | CR,MG | G056,G031 | Candidate | pending |
 | L64-G058 | K2 proof-shape success is a witness receipt and cannot override DNA admission or fixed-point failure | CR,DV | G018,G036,G056 | Candidate | pending |
 | L64-G059 | Route selection is lexicographic by lawfulness, obligations, equivalence transport, loss, rollback, proof shape, complexity, then reuse payoff | MG,PE | domain closure | Candidate | pending |

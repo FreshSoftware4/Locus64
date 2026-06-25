@@ -328,6 +328,20 @@ Constitutional effect:
 - Release and sample artifacts must advertise their role through type, filename, content marker, or command boundary.
 - Ambiguous artifacts must fail source admission or be classified before use.
 
+### L64-G056 - Explicit Structural Equivalence Law
+
+Structural equivalence requires explicit law specs and transition context.
+
+Evidence:
+
+- `cargo test -p l64-core`
+- Proving tests: `equivalence_law_makes_ordering_explicit_before_cnorm`, `distinction_law_classifies_collapse_before_equivalence`
+
+Constitutional effect:
+
+- CNORM cannot claim sameness from naked equality strings, graph shape, or source text alone.
+- Equivalence must reference transition law and distinction law before collapse is allowed.
+
 ### L64-G045 - Mechanical Evidence Requirement
 
 Constitutional rules require mechanical evidence.
