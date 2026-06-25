@@ -369,6 +369,7 @@ Landed:
 - Node 11D0 fourth constitution pass promoted already-tested public-surface and release hygiene law: RNA/DNA are the public authority surfaces, DNA reconstructs canonical RNA rather than authored RNA, and generated release views/reports cannot ship as source authority.
 - Certification evaluator law now has a focused regression proving authored obligation status is intent rather than evidence; the corresponding approval gate is promoted into the constitution.
 - Bundle migration law now has a proven gate: bundle-entry JSON crosses only as explicit deletion-bound migration ingress and cannot become native authority syntax.
+- DNA authority-tier law now has a typed validation slice: packet layout stays stable, but unknown authority tier byte values fail validation and cannot silently enter authority decode as meaningful tiers.
 - `l64-surfaces`, `l64-qc0`, and `l64-qa0` have been removed from workspace membership and deleted from the codebase.
 - Bundle-entry text remains only as an authoring convenience compiled by `compile-bundle` into `.dna`; it is not a public authority surface.
 

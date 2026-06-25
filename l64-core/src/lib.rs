@@ -3675,6 +3675,27 @@ pub enum CapabilityReadiness {
     FullyExercised = 5,
 }
 
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[repr(u8)]
+pub enum AuthorityTier {
+    Inspection = 0,
+    Candidate = 1,
+    Validated = 2,
+    Promoted = 3,
+}
+
+impl AuthorityTier {
+    pub fn from_u8(value: u8) -> Option<Self> {
+        match value {
+            0 => Some(Self::Inspection),
+            1 => Some(Self::Candidate),
+            2 => Some(Self::Validated),
+            3 => Some(Self::Promoted),
+            _ => None,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ArtifactContract {
     pub kind: ArtifactKind,
@@ -5478,6 +5499,9 @@ pub fn validate_dna_packet(packet: &LocusPacket) -> DnaValidationReport {
     if packet.header.surface != GenomeSurface::Dna {
         failures.push("packet surface is not DNA".into());
     }
+    if AuthorityTier::from_u8(packet.header.authority_tier).is_none() {
+        failures.push("unknown authority tier".into());
+    }
     if packet
         .sections
         .iter()
@@ -7231,6 +7255,43 @@ mod genome_foundation_tests {
         let report = validate_dna_packet(&packet);
         assert!(report.symbol_table_semantic_authority);
         assert!(!report.failures.is_empty());
+    }
+
+    #[test]
+    fn dna_packet_validation_rejects_unknown_authority_tier() {
+        let payload = b"payload".to_vec();
+        let packet = LocusPacket {
+            header: LocusPacketHeader {
+                artifact_class: GenomeArtifactClass::Gene,
+                surface: GenomeSurface::Dna,
+                kind: LocusPacketKind::CanonicalTransfer,
+                version_major: 1,
+                version_minor: 0,
+                authority_tier: 99,
+                capabilities: LocusCapabilityMask::default(),
+                grammar_id: "rna.v1".into(),
+                schema_hash: "execution_manifest.v1".into(),
+                integrity_hash: dna_digest_from_bytes(&payload).0,
+                strand_manifest: vec!["core".into()],
+                feature_flags: 0,
+                root_subject_id: "SUBJ".into(),
+            },
+            sections: vec![LocusSection {
+                opcode: LocusOpcode::CanonicalPayload,
+                flags: 0,
+                subject_id: "SUBJ".into(),
+                payload,
+            }],
+        };
+
+        let report = validate_dna_packet(&packet);
+        assert!(!report.reversible);
+        assert!(
+            report
+                .failures
+                .iter()
+                .any(|failure| { failure.contains("unknown authority tier") })
+        );
     }
 
     #[test]

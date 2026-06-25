@@ -183,6 +183,19 @@ Constitutional effect:
 - Current authority decode must not silently fall back to legacy packet decoding.
 - Migration and forensic decode paths are intentional subordinate modes, not ambient compatibility.
 
+### L64-G021 - Authority Tier Validation
+
+Authority tiers are typed law at DNA validation.
+
+Evidence:
+
+- `cargo test -p l64-core dna_packet_validation_rejects_unknown_authority_tier`
+
+Constitutional effect:
+
+- DNA validation must reject unknown authority tier values.
+- The packet byte remains layout-compatible, but valid tier meaning is closed by the typed tier table.
+
 ### L64-G023 - Source Release Hygiene
 
 Generated caches and ambiguous reports do not ship as source.
