@@ -1797,11 +1797,13 @@ impl QaEntry {
             "reproducibility-packet" => {
                 serde_json::from_str(payload).map(QaEntry::ReproducibilityPacket)
             }
-            "surface-policy" => serde_json::from_str(payload).map(QaEntry::SurfacePolicy),
-            "transform-receipt" => serde_json::from_str(payload).map(QaEntry::TransformReceipt),
-            "roundtrip-report" => serde_json::from_str(payload).map(QaEntry::RoundTripReport),
-            "capability" => serde_json::from_str(payload).map(QaEntry::CapabilityMatrix),
-            "surface-budget" => serde_json::from_str(payload).map(QaEntry::SurfaceBudget),
+            "surface-policy" | "transform-receipt" | "format-receipt" | "roundtrip-report"
+            | "capability" | "capability-matrix" | "surface-budget" | "surface-deficiency" => {
+                Err(serde_json::Error::io(std::io::Error::new(
+                    std::io::ErrorKind::InvalidData,
+                    format!("deprecated surface-schema entry `{kind}` is not admitted"),
+                )))
+            }
             "policy-object" => serde_json::from_str(payload).map(QaEntry::PolicyObject),
             "policy-binding" => serde_json::from_str(payload).map(QaEntry::PolicyBinding),
             "policy-resolution" => serde_json::from_str(payload).map(QaEntry::PolicyResolution),
@@ -6784,6 +6786,26 @@ mod genome_foundation_tests {
     fn tokenization_rejects_non_whitespace_control_characters() {
         let err = tokenize_rna("a\u{0000}b").expect_err("control character should fail");
         assert!(err.contains("invalid RNA control character"));
+    }
+
+    #[test]
+    fn qa_entry_json_rejects_deprecated_surface_schema_admission() {
+        for kind in [
+            "surface-policy",
+            "transform-receipt",
+            "format-receipt",
+            "roundtrip-report",
+            "capability",
+            "capability-matrix",
+            "surface-budget",
+            "surface-deficiency",
+        ] {
+            let err = QaEntry::from_surface_json(kind, "{}").expect_err("deprecated entry");
+            assert!(
+                err.to_string().contains("deprecated surface-schema entry"),
+                "{kind}: {err}"
+            );
+        }
     }
 
     #[test]

@@ -209,12 +209,6 @@ portfolio
 route-class
 diagnostic
 policy-object
-surface-policy
-format-receipt
-roundtrip-report
-capability-matrix
-surface-budget
-surface-deficiency
 adequacy
 burden-pack
 claim-packet
@@ -223,6 +217,20 @@ benchmark-receipt
 challenge-receipt
 reproducibility-packet
 ```
+
+Deprecated surface-schema entries are rejected by generic bundle-entry JSON admission and by `compile-bundle`:
+
+```text
+surface-policy
+transform-receipt
+roundtrip-report
+capability
+capability-matrix
+surface-budget
+surface-deficiency
+```
+
+These names remain historical schema residue only where needed for binary/storage compatibility. They do not enter active bundle registries and cannot discharge certification obligations.
 
 For most semantic/governance workflows, use:
 
