@@ -10,6 +10,87 @@ Runtime authority is earned by closed transitions, validated packet structure, s
 
 ## Proven Gates
 
+### L64-G007 - Codon Structural Law
+
+Codons compile to structural instructions, not semantic codebooks.
+
+Evidence:
+
+- `cargo test -p l64-core`
+- Proving tests: `codon_lexon_law_tables_are_unique_and_complete`, `codon_header_phase_controls_source_admission`
+
+Constitutional effect:
+
+- Codon tables define structural phase/admission law.
+- Codon names are not semantic authority and must not become lookup-mediated meaning.
+
+### L64-G008 - Lexon Scoped Binding Law
+
+Lexons are scoped receipted bindings, not global meaning.
+
+Evidence:
+
+- `cargo test -p l64-core`
+- Proving tests: `lexon_aliases_resolve_to_scoped_canonical_targets`, `representative_lexons_bind_scoped_targets_with_receipts`
+
+Constitutional effect:
+
+- Lexon aliases resolve into scoped canonical targets.
+- Bindings require receipts and cannot become global semantic aliases.
+
+### L64-G009 - Macro-Codon Reaction Law
+
+Macro-codons compile to reaction law, not workflow labels.
+
+Evidence:
+
+- `cargo test -p l64-core macro_codons_are_separate_from_lexons`
+
+Constitutional effect:
+
+- Macro-codons are separate reaction-law structures.
+- Workflow labels do not define executable law.
+
+### L64-G013 - Generated-Word Regression Boundary
+
+Generated-word bans are regression tripwires, not authority law.
+
+Evidence:
+
+- `cargo test -p l64-core generated_structural_word_ban_detects_old_label_payloads`
+
+Constitutional effect:
+
+- Generated-word bans may prevent old label payloads from leaking into structural regions.
+- The ban list is diagnostic enforcement, not a source of meaning.
+
+### L64-G015 - Canonical Structural Identity
+
+Persistent authority identity derives from canonical structural bytes.
+
+Evidence:
+
+- `cargo test -p l64-core`
+- Proving tests: `canonical_structure_erases_spacing_but_preserves_order`, `dna_packet_validation_checks_canonical_structure_digest`
+
+Constitutional effect:
+
+- Formatting variation cannot define authority identity.
+- Authority identity must bind canonical structure, not authored source text.
+
+### L64-G016 - Canonical Instruction Stream
+
+Explicit canonical instructions replace token-hash authority.
+
+Evidence:
+
+- `cargo test -p l64-core canonical_structure_erases_spacing_but_preserves_order`
+
+Constitutional effect:
+
+- Canonical structure is encoded through versioned instructions.
+- Token hash shortcuts cannot be promoted as authority identity.
+
 ### L64-G017 - Section Payload Commitment
 
 Every authority section commitment binds its payload.
@@ -22,6 +103,20 @@ Constitutional effect:
 
 - DNA validation must compare section payloads against payload commitments before authority decode can be trusted.
 - Payload commitments are authority-adjacent validation material, not display identifiers.
+
+### L64-G018 - Complete Authority Decode Validation
+
+Authority payload decode requires complete packet validation.
+
+Evidence:
+
+- `cargo test -p l64-core`
+- Proving tests: `dna_packet_validation_checks_canonical_structure_digest`, `generic_dna_packet_validates_section_payload_commitment`
+
+Constitutional effect:
+
+- Authority decode must validate payload commitment and canonical structure digest requirements.
+- Partial packet success cannot promote a payload into authority.
 
 ### L64-G019 - Explicit Legacy Decode Mode
 

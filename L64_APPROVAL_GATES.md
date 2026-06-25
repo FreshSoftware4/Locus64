@@ -28,18 +28,18 @@ Proof classes:
 | L64-G004 | Complement encodes admissibility burdens; receipts only discharge them | CR | G001 | Candidate | pending |
 | L64-G005 | Duplex is native DNA structure, not a third public format | CR,RI | artifact roles | Candidate | pending |
 | L64-G006 | Current molecular nouns are provisional role mappings | CR,MG | role model | Candidate | pending |
-| L64-G007 | Codons compile to structural instructions, not semantic codebooks | CR,DV | symbolic law | Candidate | pending |
-| L64-G008 | Lexons are scoped receipted bindings, not global meaning | CR,DV | scope law | Candidate | pending |
-| L64-G009 | Macro-codons compile to reaction law, not workflow labels | CR,DV | G007 | Candidate | pending |
+| L64-G007 | Codons compile to structural instructions, not semantic codebooks | CR,DV | symbolic law | Proven | `cargo test -p l64-core` (`codon_lexon_law_tables_are_unique_and_complete`, `codon_header_phase_controls_source_admission`) |
+| L64-G008 | Lexons are scoped receipted bindings, not global meaning | CR,DV | scope law | Proven | `cargo test -p l64-core` (`lexon_aliases_resolve_to_scoped_canonical_targets`, `representative_lexons_bind_scoped_targets_with_receipts`) |
+| L64-G009 | Macro-codons compile to reaction law, not workflow labels | CR,DV | G007 | Proven | `cargo test -p l64-core macro_codons_are_separate_from_lexons` |
 | L64-G010 | Graphs are resolver, plan, diagnostic, or projection representations only | CR | graph roles | Candidate | pending |
 | L64-G011 | Duplex pairing is logical and variable-length, not fixed-width syntax | DV,FP | canonical encoding | Candidate | pending |
 | L64-G012 | Domain theorem/claim/proof classes remain above root substrate | CR,MG | substrate roles | Candidate | pending |
-| L64-G013 | Generated-word bans are regression tripwires, not authority law | CR | typed admission | Candidate | pending |
+| L64-G013 | Generated-word bans are regression tripwires, not authority law | CR | typed admission | Proven | `cargo test -p l64-core generated_structural_word_ban_detects_old_label_payloads` |
 | L64-G014 | Bincode is cache/transport only, not canonical DNA | DV,FP | canonical encoding | Candidate | pending |
-| L64-G015 | Persistent authority identity derives from canonical structural bytes | FP,DV | distinction/equivalence | Candidate | pending |
-| L64-G016 | Explicit canonical instructions replace token-hash authority | FP,DV | G015 | Candidate | pending |
+| L64-G015 | Persistent authority identity derives from canonical structural bytes | FP,DV | distinction/equivalence | Proven | `cargo test -p l64-core` (`canonical_structure_erases_spacing_but_preserves_order`, `dna_packet_validation_checks_canonical_structure_digest`) |
+| L64-G016 | Explicit canonical instructions replace token-hash authority | FP,DV | G015 | Proven | `cargo test -p l64-core canonical_structure_erases_spacing_but_preserves_order` |
 | L64-G017 | Every authority section commitment binds its payload | DV | packet codec | Proven | `cargo test -p l64-core generic_dna_packet_validates_section_payload_commitment` |
-| L64-G018 | Authority payload decode requires complete packet validation | DV | G017 | Candidate | pending |
+| L64-G018 | Authority payload decode requires complete packet validation | DV | G017 | Proven | `cargo test -p l64-core` (`dna_packet_validation_checks_canonical_structure_digest`, `generic_dna_packet_validates_section_payload_commitment`) |
 | L64-G019 | Legacy decoding requires explicit migration or forensic mode | DV,MG | decode roles | Proven | `cargo test -p l64-core legacy_packet_decode_requires_explicit_migration_or_forensic_mode` |
 | L64-G020 | Authority decoding is bounded before allocation | DV | packet codec | Candidate | pending |
 | L64-G021 | Authority tiers, features, and strand roles are typed law | CR,DV | role model | Candidate | pending |

@@ -363,6 +363,7 @@ Landed:
 - Deprecated surface-schema `QaEntry` variants now fail closed on JSON export as well as import; old variants can remain deserialize-only schema tombstones until a deliberate storage-version break, but they cannot be rendered into active surface artifacts.
 - Generic serialized state hashes and research lineage fallback hashes now use role-separated BLAKE3 digest roles; the old public `stable_hash_u64` helper is removed from the API and replaced by a private `u64` structural-value fallback pending a later canonical-instruction schema revision.
 - Node 11D0 first constitution pass has landed: `LOCUS64_ARCHITECTURAL_CONSTITUTION_V1.md` exists as a proven-law index only, and `L64_APPROVAL_GATES.md` promotes only gates with existing executable evidence for section payload commitments, explicit legacy decode modes, deterministic parallel equivalence, scheduler non-authority, and mechanical-evidence-only constitution promotion.
+- Node 11D0 second constitution pass promoted already-tested codon structural law, lexon scoped binding law, macro-codon reaction law, generated-word regression boundaries, canonical structural identity, canonical instruction law, and complete authority decode validation into the approval ledger and constitution.
 - `l64-surfaces`, `l64-qc0`, and `l64-qa0` have been removed from workspace membership and deleted from the codebase.
 - Bundle-entry text remains only as an authoring convenience compiled by `compile-bundle` into `.dna`; it is not a public authority surface.
 
