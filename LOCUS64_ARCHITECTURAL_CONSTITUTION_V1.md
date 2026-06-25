@@ -1,0 +1,110 @@
+# Locus64 Architectural Constitution v1
+
+This file is an index of mechanically demonstrated architectural law. It is not a wishlist, roadmap, branding document, or substitute for executable evidence.
+
+Rules enter this constitution only after their corresponding approval gate is marked `Proven` in `L64_APPROVAL_GATES.md`.
+
+## Authority Rule
+
+Runtime authority is earned by closed transitions, validated packet structure, stable commitments, deterministic merge behavior, and receipted lineage. Names, projections, reports, caches, legacy formats, display IDs, scheduler choices, and migration objects do not become authority by existing in the repository.
+
+## Proven Gates
+
+### L64-G017 - Section Payload Commitment
+
+Every authority section commitment binds its payload.
+
+Evidence:
+
+- `cargo test -p l64-core generic_dna_packet_validates_section_payload_commitment`
+
+Constitutional effect:
+
+- DNA validation must compare section payloads against payload commitments before authority decode can be trusted.
+- Payload commitments are authority-adjacent validation material, not display identifiers.
+
+### L64-G019 - Explicit Legacy Decode Mode
+
+Legacy decoding requires explicit migration or forensic mode.
+
+Evidence:
+
+- `cargo test -p l64-core legacy_packet_decode_requires_explicit_migration_or_forensic_mode`
+
+Constitutional effect:
+
+- Current authority decode must not silently fall back to legacy packet decoding.
+- Migration and forensic decode paths are intentional subordinate modes, not ambient compatibility.
+
+### L64-G024 - Deterministic Parallel Equivalence
+
+Serial and parallel authoritative outputs are byte-equivalent.
+
+Evidence:
+
+- `cargo test -p l64-core deterministic_authority_merge_excludes_worker_count_and_input_order`
+
+Constitutional effect:
+
+- Worker count and input completion order must not affect authoritative merge output.
+- Canonical ordering must be derived from structural coordinates and payload commitments.
+
+### L64-G025 - Scheduler Non-Authority
+
+Scheduler plans and telemetry are receipts, not authority.
+
+Evidence:
+
+- `cargo test -p l64-core deterministic_authority_merge_excludes_worker_count_and_input_order`
+
+Constitutional effect:
+
+- Worker count, timing, lane assignment, and scheduling plan data are excluded from authority identity.
+- Scheduler details may be recorded as diagnostics or receipts only.
+
+### L64-G045 - Mechanical Evidence Requirement
+
+Constitutional rules require mechanical evidence.
+
+Evidence:
+
+- `L64_APPROVAL_GATES.md` promotion law
+
+Constitutional effect:
+
+- Candidate rulings remain outside this constitution until their executable proof is landed and recorded.
+- Documentation alone cannot promote runtime law.
+
+## Explicit Non-Promotions
+
+The following are not constitutional authority in v1:
+
+- `QaDocument` as ontology source.
+- Bundle-entry JSON as public authority syntax.
+- Bincode as canonical DNA.
+- Projection/report/view artifacts as source.
+- Legacy Q-surface syntax or Q-surface policy objects.
+- Graph, arena, map, index, fold, or scheduler representation as substrate authority.
+- Current molecular names unless promoted by a future proven gate.
+
+## Current Blockers
+
+The following gates remain candidate or deferred and must not be treated as proven law:
+
+- Duplex-pair promotion law beyond local first-slice tests.
+- Full canonical structural identity replacing every token-hash fallback.
+- Bundle semantic reroute as native authority rather than parity scaffold.
+- Seed JSON replacement by native DNA bootstrap.
+- Boollet integration as a sidecar transition-memory module.
+- External standards and proof assistants as scoped witness providers.
+
+## Maintenance Rule
+
+Every future constitution edit must include:
+
+1. The promoted gate ID.
+2. The exact evidence command, fixture, or proof artifact.
+3. The authority effect.
+4. The non-authority boundary it preserves.
+
+If any of those are missing, the ruling belongs in `L64_APPROVAL_GATES.md`, not here.

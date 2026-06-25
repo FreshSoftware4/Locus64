@@ -38,15 +38,15 @@ Proof classes:
 | L64-G014 | Bincode is cache/transport only, not canonical DNA | DV,FP | canonical encoding | Candidate | pending |
 | L64-G015 | Persistent authority identity derives from canonical structural bytes | FP,DV | distinction/equivalence | Candidate | pending |
 | L64-G016 | Explicit canonical instructions replace token-hash authority | FP,DV | G015 | Candidate | pending |
-| L64-G017 | Every authority section commitment binds its payload | DV | packet codec | Candidate | pending |
+| L64-G017 | Every authority section commitment binds its payload | DV | packet codec | Proven | `cargo test -p l64-core generic_dna_packet_validates_section_payload_commitment` |
 | L64-G018 | Authority payload decode requires complete packet validation | DV | G017 | Candidate | pending |
-| L64-G019 | Legacy decoding requires explicit migration or forensic mode | DV,MG | decode roles | Candidate | pending |
+| L64-G019 | Legacy decoding requires explicit migration or forensic mode | DV,MG | decode roles | Proven | `cargo test -p l64-core legacy_packet_decode_requires_explicit_migration_or_forensic_mode` |
 | L64-G020 | Authority decoding is bounded before allocation | DV | packet codec | Candidate | pending |
 | L64-G021 | Authority tiers, features, and strand roles are typed law | CR,DV | role model | Candidate | pending |
 | L64-G022 | Capability summaries require witness coordinates | CR,DV | witness model | Candidate | pending |
 | L64-G023 | Generated caches and ambiguous reports do not ship as source | RI | release gate | Candidate | pending |
-| L64-G024 | Serial and parallel authoritative outputs are byte-equivalent | PE | closure scheduler | Candidate | pending |
-| L64-G025 | Scheduler plans and telemetry are receipts, not authority | PE,CR | G024 | Candidate | pending |
+| L64-G024 | Serial and parallel authoritative outputs are byte-equivalent | PE | closure scheduler | Proven | `cargo test -p l64-core deterministic_authority_merge_excludes_worker_count_and_input_order` |
+| L64-G025 | Scheduler plans and telemetry are receipts, not authority | PE,CR | G024 | Proven | `cargo test -p l64-core deterministic_authority_merge_excludes_worker_count_and_input_order` |
 | L64-G026 | Authored obligation status is intent, never evidence | CR,MG | evaluator model | Candidate | pending |
 | L64-G027 | Evaluator authority is explicit, named, and scoped | CR,MG | evaluator interface | Candidate | pending |
 | L64-G028 | Every certification verdict carries authority scope | CR,DV | scope law | Candidate | pending |
