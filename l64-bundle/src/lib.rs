@@ -39,6 +39,50 @@ pub struct BundleWorld {
     pub substrate_parity: BundleSubstrateParityReport,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum BundleMigrationIngressKind {
+    BundleEntryText,
+    DnaBundlePayload,
+    InMemoryDocument,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BundleMigrationIngress {
+    pub kind: BundleMigrationIngressKind,
+    pub document: QaDocument,
+}
+
+impl BundleMigrationIngress {
+    pub fn from_entry_text(document: QaDocument) -> Self {
+        Self {
+            kind: BundleMigrationIngressKind::BundleEntryText,
+            document,
+        }
+    }
+
+    pub fn from_dna_payload(document: QaDocument) -> Self {
+        Self {
+            kind: BundleMigrationIngressKind::DnaBundlePayload,
+            document,
+        }
+    }
+
+    pub fn from_in_memory_document(document: QaDocument) -> Self {
+        Self {
+            kind: BundleMigrationIngressKind::InMemoryDocument,
+            document,
+        }
+    }
+
+    pub fn is_native_authority(&self) -> bool {
+        false
+    }
+
+    pub fn into_document(self) -> QaDocument {
+        self.document
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct CachedBundleWorld {
     manifest: BundleManifest,
@@ -333,7 +377,7 @@ pub fn overlay_registry_from_document(
     }
 }
 
-pub fn bundle_document_from_entry_text(text: &str) -> Result<QaDocument> {
+fn parse_bundle_document_from_entry_text(text: &str) -> Result<QaDocument> {
     let mut saw_header = false;
     let mut entries = Vec::new();
     for line in text.lines().map(str::trim).filter(|line| !line.is_empty()) {
@@ -377,6 +421,14 @@ pub fn bundle_document_from_entry_text(text: &str) -> Result<QaDocument> {
     Ok(QaDocument { entries })
 }
 
+pub fn bundle_migration_ingress_from_entry_text(text: &str) -> Result<BundleMigrationIngress> {
+    parse_bundle_document_from_entry_text(text).map(BundleMigrationIngress::from_entry_text)
+}
+
+pub fn bundle_document_from_entry_text(text: &str) -> Result<QaDocument> {
+    Ok(bundle_migration_ingress_from_entry_text(text)?.into_document())
+}
+
 pub fn import_bundle_file(
     path: &Path,
     forced_kind: Option<SurfaceKind>,
@@ -402,12 +454,13 @@ pub fn import_bundle_file(
         l64_core::LocusOpcode::CanonicalPayload,
     )
     .map_err(anyhow::Error::msg)?;
+    let ingress = BundleMigrationIngress::from_dna_payload(document);
     let bundle_id = path
         .file_stem()
         .and_then(|value| value.to_str())
         .map(|value| format!("BND_{}", value.to_ascii_uppercase().replace('-', "_")))
         .unwrap_or_else(|| "BND_IMPORTED".into());
-    import_bundle_document(parent, bundle_id, document, policy, namespace)
+    import_bundle_ingress(parent, bundle_id, ingress, policy, namespace)
 }
 
 pub fn import_bundle_document(
@@ -417,6 +470,23 @@ pub fn import_bundle_document(
     policy: BundleConflictPolicy,
     namespace: Option<&str>,
 ) -> Result<BundleWorld> {
+    import_bundle_ingress(
+        parent,
+        bundle_id,
+        BundleMigrationIngress::from_in_memory_document(document),
+        policy,
+        namespace,
+    )
+}
+
+pub fn import_bundle_ingress(
+    parent: SeedRegistry,
+    bundle_id: String,
+    ingress: BundleMigrationIngress,
+    policy: BundleConflictPolicy,
+    namespace: Option<&str>,
+) -> Result<BundleWorld> {
+    let document = ingress.into_document();
     let document = if policy == BundleConflictPolicy::NamespacedImport {
         namespace_document(
             document,
@@ -1596,6 +1666,30 @@ mod tests {
     }
 
     #[test]
+    fn bundle_document_import_can_cross_explicit_migration_ingress() {
+        let theorem = test_theorem("THS_DOC_INGRESS", "migration ingress import", &[]);
+        let document = QaDocument {
+            entries: vec![QaEntry::TheoremSpec(theorem)],
+        };
+        let ingress = BundleMigrationIngress::from_in_memory_document(document);
+
+        assert_eq!(ingress.kind, BundleMigrationIngressKind::InMemoryDocument);
+        assert!(!ingress.is_native_authority());
+
+        let world = import_bundle_ingress(
+            SeedRegistry::load().unwrap(),
+            "BND_DOC_INGRESS".into(),
+            ingress,
+            BundleConflictPolicy::Reject,
+            None,
+        )
+        .expect("migration ingress import");
+        assert_eq!(world.manifest.id, "BND_DOC_INGRESS");
+        assert!(world.overlay.get_theorem_spec("THS_DOC_INGRESS").is_some());
+        assert!(world.substrate_parity.valid);
+    }
+
+    #[test]
     fn bundle_document_lowers_entries_into_substrate_atoms() {
         let theorem = test_theorem("THS_SUBSTRATE", "substrate lowering", &[]);
         let document = QaDocument {
@@ -1823,6 +1917,10 @@ mod tests {
     fn bundle_entry_text_requires_l64_header_and_rejects_q_headers() {
         let valid = r#"!l64-bundle v1
 theorem {"id":"THS_L64_HEADER","statement":"native bundle header","hosts":["R_SET"],"bridges":[],"operators":[],"target_equivalence":"eq","obligations":[],"primary_zone":"PmzSemantic","verdict":"RouteFound","proof_shapes":[]}"#;
+        let ingress =
+            bundle_migration_ingress_from_entry_text(valid).expect("bundle migration ingress");
+        assert_eq!(ingress.kind, BundleMigrationIngressKind::BundleEntryText);
+        assert!(!ingress.is_native_authority());
         let document = bundle_document_from_entry_text(valid).expect("native bundle header");
         assert_eq!(document.entries.len(), 1);
 

@@ -144,6 +144,60 @@ Rationale:
 
 If a future pass finds a higher-scoring slice, it must update this selector before implementing it.
 
+## Mandatory Slice Classification
+
+Every implementation pass must classify the slice before touching behavior-bearing code. This prevents scaffold, migration evidence, projections, and runtime authority from collapsing into the same implementation category.
+
+Required slice header:
+
+```text
+Node:
+Slice:
+Role:
+Authority impact:
+Promotion status:
+Expected files:
+Required verification:
+Stop condition:
+Rollback trigger:
+```
+
+Allowed roles:
+
+- `authority-path`: changes admission, identity, validation, promotion, closure, or execution authority
+- `migration-ingress`: converts old or transitional input into native authority products without making the old object sovereign
+- `parity-evidence`: proves old-valid behavior and lawful old-invalid rejection through the new path
+- `projection`: produces inspectable output that cannot be reingested as source
+- `burden-reduction`: reduces repeated implementation cost without changing authority
+- `deletion`: removes a path already proven non-load-bearing
+- `scaffold`: explores a mechanism that cannot promote until a later gate proves it
+
+Do not cross these boundaries in one unclassified burst:
+
+- scaffold -> runtime gate
+- parity evidence -> authority path
+- migration ingress -> source surface
+- local validation -> domain closure
+- domain closure -> promotion
+- projection -> source
+- receipt -> proof
+- schema tombstone -> deletion
+- sidecar memory -> validation
+
+Current slice classification:
+
+```text
+Node: Band F / Node 11D migration membrane
+Slice: QaDocument migration-ingress membrane
+Role: migration-ingress
+Authority impact: prevents bundle documents from looking like native authority objects when they enter import/certification paths
+Promotion status: load-bearing runtime membrane, not constitutional promotion
+Expected files: l64-bundle/src/lib.rs, LINEAR_EXECUTION_RAIL.md
+Required verification: cargo test -p l64-bundle; cargo check --workspace if API fanout changes
+Stop condition: bundle file/text import routes through an explicit migration-ingress type while existing valid behavior and rejection behavior remain intact
+Rollback trigger: old-valid .dna bundle import fails without a new category-error reason, or raw QaDocument becomes harder to lower into native authority products
+```
+
 ## Persistent Execution Mandate
 
 The rail is not a suggestion list. When development resumes, execute until the highest-scoring available slice is complete, verified, recorded, and committed, unless a real blocker appears.
@@ -301,6 +355,7 @@ Landed:
 - `TargetProfile.surface_requirement` and `TargetProfile.preferred_surface_target` are retained only as binary-compatibility tombstones for existing bincode `.dna` bundle fixtures; they no longer affect route authority, and deletion is blocked until bundle payloads migrate to a stable schema encoding or fixtures regenerate under the replacement path.
 - `ConstitutionKernel::validate_target_profile` now rejects non-null deprecated surface-schema tombstone fields, preserving bincode layout while preventing old surface requirements or preferred targets from entering live authority profiles.
 - `bundle_document_from_entry_text` now rejects deprecated surface-schema entries (`transform-receipt`, `roundtrip-report`, `capability`) at text authoring ingress, while binary bundle compatibility remains isolated behind the existing `.dna` decode path.
+- Bundle document ingress is now explicitly classified before import: text and `.dna` bundle payloads enter through a `BundleMigrationIngress` membrane, while `QaDocument` remains the transitional migration AST rather than native authority.
 - `l64-surfaces`, `l64-qc0`, and `l64-qa0` have been removed from workspace membership and deleted from the codebase.
 - Bundle-entry text remains only as an authoring convenience compiled by `compile-bundle` into `.dna`; it is not a public authority surface.
 
