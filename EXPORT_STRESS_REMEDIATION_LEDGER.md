@@ -33,3 +33,13 @@ Every exported failure or friction signal should cash out into:
 ## Current machine absorption state
 
 The remediation ledger is no longer only prose. It now coexists with warm-host routing, promotion-readiness, claim packets, and producer-host specs, so export-derived seams can participate in actual route choice and readiness gating rather than remaining detached notes.
+
+## Current coherence checkpoint
+
+The newest authority-gate pass adds three constraints to how remediation and export-derived findings should be interpreted:
+
+- report-derived research records are projections until replayed through a stronger authority path
+- evaluator behavior must resolve through named scoped policy objects
+- equal-precedence policy candidates must produce deterministic resolution receipts independent of registry insertion order
+
+This matters for export stress findings because a generated report, projection, or remediation note can identify work and route follow-up, but it cannot promote itself into evidence authority without replay, scope, lineage, and receipts.

@@ -10,8 +10,9 @@ The primary binary is `l64`. It routes commands to the CLI or admin implementati
 - **RNA/DNA lower chain**: `TOKENIZE -> RNORM -> SSR -> CNORM -> DNA` is the active authority path. SSR remains ephemeral; CNORM now consumes explicit distinction/equivalence law and emits versioned canonical instructions.
 - **Locus Genome**: `.dna` is the machine authority artifact. Legacy packet decoding is explicit migration/forensic behavior, not an ambient authority fallback.
 - **Bundle substrate migration**: `.dna` bundle imports must pass native molecular-envelope parity, duplex local validation, domain closure, and deterministic merge evidence before persistence.
-- **Research Host**: governed task, signature, review, challenge, lineage, promotion, handoff, and remediation surfaces.
+- **Research Host**: governed task, signature, review, challenge, lineage, promotion, handoff, and remediation surfaces. Research objects derived from reports are projection-class until a replay-specific authority path promotes them.
 - **Tower/Coverage**: proof coverage dispatch, lawful reuse receipts, residual verification, distress/help, recipes, and promotion candidates.
+- **Policy authority**: evaluator behavior is selected through named, scoped policy objects. Policy precedence emits deterministic receipts independent of registry insertion order.
 
 ## Quick Start
 
@@ -92,8 +93,21 @@ Zip files for all five release packages are placed directly under `release`.
 ## Development References
 
 - `LINEAR_EXECUTION_RAIL.md`: authoritative linear rail; compounding change chains are trajectory-preserving changes to this file
+- `L64_APPROVAL_GATES.md`: candidate/proven architectural laws and their executable evidence
+- `LOCUS64_ARCHITECTURAL_CONSTITUTION_V1.md`: proven constitutional rules only; do not treat candidate gates as implemented law
 - `LOCUS64_LANGUAGE_SPEC.md`: RNA/DNA command and language reference
 - `USAGE_GUIDE.md`: command guide
 - `SEMANTIC_USAGE_GUIDE.md`: semantic/claim-governance guide for research frameworks and indirect ChatGPT workflows
 - `HANDOFF_STATUS.md`: developer handoff and verification notes
 - `LOCUS64_STACK.md`: stack overview
+
+## Current Coherence Checkpoint
+
+The latest verified authority gates prove that:
+
+- authored obligation status is intent, not evidence
+- evaluator authority is named and scoped through policy objects
+- report-derived research records are projections until replayed
+- policy precedence receipts are deterministic across equivalent registry orderings
+
+Use these rules when adapting Locus64 patterns to other projects: derive views freely, but promote only through explicit replay, scope, lineage, and receipt gates.

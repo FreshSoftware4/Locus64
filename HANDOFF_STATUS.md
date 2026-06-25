@@ -24,6 +24,8 @@ Implemented lower-chain substrates include:
 - execution exactness and execution closure receipts
 - proof coverage dispatch with reuse legality, reuse decisions, and residual verification receipts
 - research lineage records that carry canonical hash, lowering receipt id, phase ids, and phase ledger
+- report-derived claim packets classified as projection authority until replay-specific promotion exists
+- named, scoped evaluator policy resolution and deterministic policy-precedence receipts
 
 The current `LINEAR_EXECUTION_RAIL.md` supersedes earlier completion framing. It now routes remaining transitional bundle/product/campaign paths through native authority products before further deletion or upper-stack expansion.
 
@@ -71,6 +73,8 @@ Windows target used by this release pass: `x86_64-pc-windows-msvc`.
 - Bundle-entry authoring text must contain at least one entry.
 - Bundle import rejects non-closed native substrate parity before persisting `BundleWorld`.
 - Bundle substrate parity now carries duplex pair counts, locally valid pair counts, domain closure, and deterministic merge evidence.
+- Report-derived research artifacts are warm-host projections unless replayed through a stronger authority path. `Integrated` or `Certified` report verdicts are retained as projection assumptions, not automatically promoted into evidence/benchmark authority.
+- Evaluator behavior must resolve through named scoped `MechanizationPolicyObject` records. Equal-precedence policy candidates are ordered by stable policy identity so policy resolution IDs, applied policy order, and trace steps are deterministic.
 - Under memory pressure, use the low-memory verification wrapper:
 
 ```powershell
@@ -97,6 +101,8 @@ They are not hard-deleted.
 - `USAGE_GUIDE.md`: operator command guide
 - `SEMANTIC_USAGE_GUIDE.md`: semantic usage guide for claim governance, branch/challenge tracking, and research-framework integration
 - `LINEAR_EXECUTION_RAIL.md`: authoritative linear execution rail and phase sequence
+- `L64_APPROVAL_GATES.md`: approval-gate ledger for candidate/proven/deferred/rejected architectural law
+- `LOCUS64_ARCHITECTURAL_CONSTITUTION_V1.md`: mechanically proven architectural law only
 - `scripts/torture-test.ps1`: regression/torture harness
 - `scripts/verify-low-memory.ps1`: low-memory cargo verification wrapper for large `l64-core` rebuilds
 - `Cargo.toml`: workspace members and release profiles

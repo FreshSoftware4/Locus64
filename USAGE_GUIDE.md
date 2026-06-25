@@ -112,9 +112,21 @@ l64 research-promotion-readiness REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE
 l64 research-status
 ```
 
+`research-derive-from-report` creates warm-host projection records unless a later replay-specific path promotes them. A report verdict such as `Integrated` or `Certified` is preserved as an assumption on the derived claim packet; it is not automatically evidence authority for the research object.
+
 For exact syntax and record shapes, see `LOCUS64_LANGUAGE_SPEC.md`.
 
 For semantic claim governance, branch tracking, derivation lineage, and cosmology-style workflows, see `SEMANTIC_USAGE_GUIDE.md`.
+
+## Policy Authority
+
+Evaluator behavior comes from named, scoped policy objects rather than ambient defaults or report prose. Equivalent policy sets resolve deterministically even if registry ordering changes.
+
+Use policy objects in bundle text when you need scoped evaluator behavior:
+
+```text
+policy-object {"id":"MOP_LOCAL_EVAL","kind":"Evaluator","scope":{"Theorem":"THS_LOCAL"},"extends":null,"optimizer":null,"evaluator":{"evidence_preference":"RecomputeIfSupported","allow_approximation":false,"unsupported_mode":"StrictFail","require_symbolic_fidelity_route":false,"prefer_comp_replay":true},"replay_cache":null,"report":null,"scheduler":null,"canonicalizer_mode":null,"merge_policy":null,"notes":["strict local evaluator"]}
+```
 
 ## Coverage and Tower
 

@@ -23,6 +23,8 @@ Native structural law is moving toward codon/lexon governance:
 - Generated-word bans apply to native structural regions only. Words such as `claim_page`, `dependency_spine`, `theorem`, or `campaign` may appear in gloss/comments/views, but must not survive as generated native structural tokens.
 - Digests and hashes are machine memo bindings, not public proof identity.
 - Products, views, receipts, and projections remain rejected as source unless explicitly reconstructed into canonical RNA.
+- Report-derived research records are projection authority until replay-specific promotion exists. Authored/imported `claim-packet` records may declare `authority_state`, but report-derived claim packets must not upgrade report verdicts into evidence or benchmark authority.
+- Evaluator authority is selected by named scoped `policy-object` records. Equal-precedence policies are resolved by stable policy identity so policy receipts are deterministic.
 
 This law exists to prevent future bundle/product records from becoming JSON with different punctuation. Bundle-entry text remains transitional until representative workflows are rerouted through substrate-native records.
 
@@ -272,11 +274,13 @@ Fields:
 | --- | --- | --- |
 | `id` | string | yes |
 | `claim_class` | `Kernel` \| `Interoperability` \| `Host` | yes |
-| `authority_state` | `Derived` \| `Benchmark` \| `Evidence` | yes |
+| `authority_state` | `Derived` \| `Benchmark` \| `Evidence` \| `Projection` | yes |
 | `target_sector` | string | yes |
 | `statement` | string | yes |
 | `assumptions` | string array | no, default `[]` |
 | `open_caveats` | string array | no, default `[]` |
+
+Use `Projection` for report-derived research records unless a replay-specific promotion path has produced stronger authority. Use `Evidence` or `Benchmark` only when the authored/imported claim is backed by the corresponding evidence contracts, receipts, reproducibility packets, adequacy clauses, and certification path.
 
 ### 4.2 `evidence-contract`
 
@@ -466,6 +470,21 @@ ledger {"id":"TRL_ID","theorem":"THS_ID","paths":[["B_ID"]],"budget":{"max_loss"
 ```text
 campaign {"id":"CPG_ID","theorem":"THS_ID","target_profile":"TGT_ID","route_ledger":"TRL_ID","obligations":["OBL_ID"],"certificates":[],"dependencies":[],"campaign_class":"CBasic","verdict":"Benchmarked","payoff":["claim"]}
 ```
+
+### 4.13 `policy-object`
+
+Use to select named scoped optimizer, evaluator, replay-cache, report, or scheduler policy.
+
+```text
+policy-object {"id":"MOP_LOCAL_EVAL","kind":"Evaluator","scope":{"Theorem":"THS_ID"},"extends":null,"optimizer":null,"evaluator":{"evidence_preference":"RecomputeIfSupported","allow_approximation":false,"unsupported_mode":"StrictFail","require_symbolic_fidelity_route":false,"prefer_comp_replay":true},"replay_cache":null,"report":null,"scheduler":null,"canonicalizer_mode":null,"merge_policy":null,"notes":["strict theorem-scoped evaluator"]}
+```
+
+Rules:
+
+- `kind` must match the config it carries in strict policy resolution.
+- `scope` may be `Global`, `Bundle`, `Theorem`, `Campaign`, or `TargetProfile`.
+- Equal-precedence policy candidates resolve in stable policy-id order; registry insertion order is not authority.
+- Policy resolution receipts carry the applied policy IDs, trace, scope, and verdict.
 
 ## 5. Common Enum Values
 

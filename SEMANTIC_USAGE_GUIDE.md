@@ -29,6 +29,8 @@ The semantic split is:
 - `ReproducibilityPacket`: derivation/code/artifact refs needed to replay or audit the claim.
 - `ResearchLineageRecord`: the causal chain linking lower-chain truth, reports, and research artifacts.
 
+Important current boundary: claim packets authored/imported as part of a governed bundle can carry their declared `authority_state`, but claim packets derived from certification reports are projection-class until replay-specific promotion exists. Do not treat a report verdict as research-object evidence by itself.
+
 ## Cosmology Mapping
 
 For a cosmological framework, use this mapping:
@@ -202,6 +204,8 @@ Lineage should answer:
 - what challenges remain open?
 - what promotion state is justified?
 
+Derived research lineage is a warm-host projection over cold results. It is useful for routing, review, handoff, and readiness planning, but it must not be mistaken for a second source of authority. Replay, scoped evaluator policy, closure state, and receipt coordinates determine whether a derived object can be promoted later.
+
 ### 8. Use Coverage And Reuse Carefully
 
 Locus64 can skip repeated work only when reuse is lawful.
@@ -215,6 +219,16 @@ Reuse requires:
 - residual obligations explicitly recorded
 
 For cosmology, this matters when two branches are observationally equivalent under a projection but not ontologically identical.
+
+### 9. Use Scoped Evaluator Policy
+
+When a claim needs stricter evidence behavior, encode that as a named policy object with a concrete scope. This avoids hidden evaluator assumptions.
+
+```text
+policy-object {"id":"MOP_COSMO_EVAL","kind":"Evaluator","scope":{"Theorem":"THS_COSMO"},"extends":null,"optimizer":null,"evaluator":{"evidence_preference":"RecomputeIfSupported","allow_approximation":false,"unsupported_mode":"StrictFail","require_symbolic_fidelity_route":false,"prefer_comp_replay":true},"replay_cache":null,"report":null,"scheduler":null,"canonicalizer_mode":null,"merge_policy":null,"notes":["cosmology evaluator scope"]}
+```
+
+Policy resolution is deterministic: equal-precedence candidates are ordered by stable policy identity, not registry insertion order.
 
 ## Promotion States
 

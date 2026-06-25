@@ -40,6 +40,17 @@ The Locus Research Host now lifts cold certification outputs into warm control-s
 - **Locus Research Host**: tasks, signatures, reviews, challenges, registry, remediation, repro, claims, reductions, projections, benchmark runs, handoff packets, producer-host specs, promotion queue
 - **Locus Tower (partial)**: coverage dispatch, distress/help, recipes, promotion candidates, calibration pressure
 
+## Current authority membrane
+
+The current coherence point is stricter than the warm-host object list might imply:
+
+- Report-derived research objects are projections until a replay-specific path promotes them.
+- Evaluator authority is explicit, named, and scoped through `MechanizationPolicyObject`.
+- Policy precedence emits deterministic receipts; equivalent policy sets must resolve the same way even when registry input order differs.
+- Candidate approval gates are not constitutional law until executable evidence lands in `L64_APPROVAL_GATES.md` and the rule is promoted into `LOCUS64_ARCHITECTURAL_CONSTITUTION_V1.md`.
+
+This membrane prevents the warm host from becoming a second authority source beside RNA/DNA.
+
 
 ## Producer-host realization slice
 
