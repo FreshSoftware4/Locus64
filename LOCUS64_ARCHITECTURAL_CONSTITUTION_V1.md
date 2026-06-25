@@ -10,6 +10,45 @@ Runtime authority is earned by closed transitions, validated packet structure, s
 
 ## Proven Gates
 
+### L64-G001 - Duplex Pair Local Authority Unit
+
+Duplex pair is the smallest locally authoritative unit.
+
+Evidence:
+
+- `cargo test -p l64-core duplex_pair_validation_requires_semantic_and_complement_strands`
+
+Constitutional effect:
+
+- A semantic strand without its authority complement is not locally valid.
+- Local authority begins at the paired structure, not at either strand alone.
+
+### L64-G002 - No Strand-Only Promotion
+
+Neither strand is independently promotable.
+
+Evidence:
+
+- `cargo test -p l64-core duplex_pair_validation_requires_semantic_and_complement_strands`
+
+Constitutional effect:
+
+- Semantic-only or complement-only material must fail local admission.
+- Promotion logic must consume paired authority structure rather than single-lane meaning.
+
+### L64-G003 - Local Validity Is Not Domain Closure
+
+Pair-local validity does not imply domain closure.
+
+Evidence:
+
+- `cargo test -p l64-core domain_closure_blocks_promotion_on_open_frontier`
+
+Constitutional effect:
+
+- A locally valid pair may still be non-promotable when open obligations or external burdens remain.
+- Domain closure is a separate gate above pair admission.
+
 ### L64-G007 - Codon Structural Law
 
 Codons compile to structural instructions, not semantic codebooks.
