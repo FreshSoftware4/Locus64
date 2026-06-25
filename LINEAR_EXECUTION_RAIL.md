@@ -187,15 +187,15 @@ Do not cross these boundaries in one unclassified burst:
 Current slice classification:
 
 ```text
-Node: Band F / Node 11D migration membrane
-Slice: QaDocument migration-ingress membrane
-Role: migration-ingress
-Authority impact: prevents bundle documents from looking like native authority objects when they enter import/certification paths
-Promotion status: load-bearing runtime membrane, not constitutional promotion
-Expected files: l64-bundle/src/lib.rs, LINEAR_EXECUTION_RAIL.md
-Required verification: cargo test -p l64-bundle; cargo check --workspace if API fanout changes
-Stop condition: bundle file/text import routes through an explicit migration-ingress type while existing valid behavior and rejection behavior remain intact
-Rollback trigger: old-valid .dna bundle import fails without a new category-error reason, or raw QaDocument becomes harder to lower into native authority products
+Node: Band F / Node 11D surface-schema replacement
+Slice: stored transform-receipt obligation fallback removal
+Role: authority-path
+Authority impact: prevents deprecated surface transform receipts from discharging certification obligations as stored evidence
+Promotion status: load-bearing runtime behavior, not constitutional promotion
+Expected files: l64-cert/src/lib.rs, LINEAR_EXECUTION_RAIL.md
+Required verification: cargo test -p l64-cert; cargo check --workspace if API fanout changes
+Stop condition: stored fallback reuses native certificate/proof-shape evidence only, while transform receipts remain non-authority schema residue
+Rollback trigger: seed or imported certification loses a valid native evidence route without a replacement deficiency explaining the new rejection
 ```
 
 ## Persistent Execution Mandate
@@ -356,6 +356,7 @@ Landed:
 - `ConstitutionKernel::validate_target_profile` now rejects non-null deprecated surface-schema tombstone fields, preserving bincode layout while preventing old surface requirements or preferred targets from entering live authority profiles.
 - `bundle_document_from_entry_text` now rejects deprecated surface-schema entries (`transform-receipt`, `roundtrip-report`, `capability`) at text authoring ingress, while binary bundle compatibility remains isolated behind the existing `.dna` decode path.
 - Bundle document ingress is now explicitly classified before import: text and `.dna` bundle payloads enter through a `BundleMigrationIngress` membrane, while `QaDocument` remains the transitional migration AST rather than native authority.
+- Certification obligation evaluation no longer treats deprecated `FormatTransformReceipt` records as stored evidence; stored obligation fallback is limited to native certificate and proof-shape records.
 - `l64-surfaces`, `l64-qc0`, and `l64-qa0` have been removed from workspace membership and deleted from the codebase.
 - Bundle-entry text remains only as an authoring convenience compiled by `compile-bundle` into `.dna`; it is not a public authority surface.
 

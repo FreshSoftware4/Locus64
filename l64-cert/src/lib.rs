@@ -3440,15 +3440,43 @@ fn evaluate_obligation(
         evaluator_policy.evidence_preference,
         EvidencePreference::PreferStored | EvidencePreference::StoredOnlyWhenUnavailable
     );
-    if can_use_stored && registry.get_transform_receipt(&obligation.id).is_some() {
-        return ObligationStatus {
-            obligation_id: obligation.id,
-            kind: obligation.kind,
-            verdict: obligation.status,
-            evaluation_mode: ObligationEvaluationMode::StoredReceiptUsed,
-            detail: "stored transform receipt reused".into(),
-            receipts: Vec::new(),
-        };
+    if can_use_stored {
+        if let Some(certificate) = registry.get_certificate(&obligation.id) {
+            let verdict = certificate.verdict.clone();
+            return ObligationStatus {
+                obligation_id: obligation.id,
+                kind: obligation.kind,
+                verdict: verdict.clone(),
+                evaluation_mode: ObligationEvaluationMode::StoredReceiptUsed,
+                detail: "stored native certificate evidence reused".into(),
+                receipts: vec![ObligationEvidenceReceipt {
+                    id: certificate.id,
+                    label: "stored-certificate".into(),
+                    verdict,
+                    computed: false,
+                    detail: "native certificate record supplied stored obligation evidence".into(),
+                    subreceipts: Vec::new(),
+                }],
+            };
+        }
+        if let Some(proof_shape) = registry.get_proof_shape(&obligation.id) {
+            let verdict = obligation.status.clone();
+            return ObligationStatus {
+                obligation_id: obligation.id,
+                kind: obligation.kind,
+                verdict: verdict.clone(),
+                evaluation_mode: ObligationEvaluationMode::StoredReceiptUsed,
+                detail: "stored native proof-shape evidence reused".into(),
+                receipts: vec![ObligationEvidenceReceipt {
+                    id: proof_shape.id,
+                    label: "stored-proof-shape".into(),
+                    verdict,
+                    computed: false,
+                    detail: "native proof-shape record supplied stored obligation evidence".into(),
+                    subreceipts: Vec::new(),
+                }],
+            };
+        }
     }
     let mut unsupported = ObligationStatus {
         obligation_id: obligation.id,
