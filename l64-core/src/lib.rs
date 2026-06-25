@@ -1852,11 +1852,19 @@ impl QaEntry {
             QaEntry::ReproducibilityPacket(item) => {
                 ("reproducibility-packet", serde_json::to_string(item)?)
             }
-            QaEntry::SurfacePolicy(item) => ("surface-policy", serde_json::to_string(item)?),
-            QaEntry::TransformReceipt(item) => ("transform-receipt", serde_json::to_string(item)?),
-            QaEntry::RoundTripReport(item) => ("roundtrip-report", serde_json::to_string(item)?),
-            QaEntry::CapabilityMatrix(item) => ("capability", serde_json::to_string(item)?),
-            QaEntry::SurfaceBudget(item) => ("surface-budget", serde_json::to_string(item)?),
+            QaEntry::SurfacePolicy(_)
+            | QaEntry::TransformReceipt(_)
+            | QaEntry::RoundTripReport(_)
+            | QaEntry::CapabilityMatrix(_)
+            | QaEntry::SurfaceBudget(_) => {
+                return Err(serde_json::Error::io(std::io::Error::new(
+                    std::io::ErrorKind::InvalidData,
+                    format!(
+                        "deprecated surface-schema entry `{}` is not exported",
+                        self.kind_tag()
+                    ),
+                )));
+            }
             QaEntry::PolicyObject(item) => ("policy-object", serde_json::to_string(item)?),
             QaEntry::PolicyBinding(item) => ("policy-binding", serde_json::to_string(item)?),
             QaEntry::PolicyResolution(item) => ("policy-resolution", serde_json::to_string(item)?),
@@ -6804,6 +6812,70 @@ mod genome_foundation_tests {
             assert!(
                 err.to_string().contains("deprecated surface-schema entry"),
                 "{kind}: {err}"
+            );
+        }
+    }
+
+    #[test]
+    fn qa_entry_json_rejects_deprecated_surface_schema_export() {
+        let entries = vec![
+            QaEntry::SurfacePolicy(SurfacePolicy {
+                id: "POL_OLD".into(),
+                codebook_pack: "CB_OLD".into(),
+                profile: "old".into(),
+                projection_policy: "PROJ_OLD".into(),
+                combo_pack: None,
+                glyph_pack: None,
+                alias_expansion_policy: "ALIAS_OLD".into(),
+                allowed_loss_classes: vec![],
+            }),
+            QaEntry::TransformReceipt(FormatTransformReceipt {
+                id: "TR_OLD".into(),
+                src_surface: SurfaceKind::Qc0,
+                dst_surface: SurfaceKind::Qa0,
+                object_ids: vec!["OBJ".into()],
+                transform_kind: TransformKind::Transcode,
+                policy_id: "POL_OLD".into(),
+                defaults_used: vec![],
+                alias_expansions: vec![],
+                loss_classes: vec![],
+                hash_before: "before".into(),
+                hash_after: "after".into(),
+                verdict: TransformVerdict::Lossless,
+                rollback_ref: None,
+                replay_ref: None,
+            }),
+            QaEntry::RoundTripReport(RoundTripReport {
+                id: "RTR_OLD".into(),
+                surface_kind: SurfaceKind::Qc0,
+                policy_id: "POL_OLD".into(),
+                object_ids: vec!["OBJ".into()],
+                receipt_ids: vec!["TR_OLD".into()],
+                verdict: TransformVerdict::Lossless,
+                fragility_vector: vec![],
+            }),
+            QaEntry::CapabilityMatrix(CapabilityMatrix {
+                id: "CAP_OLD".into(),
+                surface_kind: SurfaceKind::Qa0,
+                supported_packs: vec![SupportedPack::Core],
+                import_support: true,
+                export_support: true,
+                transcode_support: vec![SurfaceKind::Qc0],
+                roundtrip_support: true,
+                known_limits: vec![],
+            }),
+            QaEntry::SurfaceBudget(SurfaceBudget {
+                id: "BUDGET_OLD".into(),
+                max_loss_classes: 0,
+                forbid_silent_defaulting: true,
+            }),
+        ];
+
+        for entry in entries {
+            let err = entry.to_surface_json().expect_err("deprecated export");
+            assert!(
+                err.to_string().contains("deprecated surface-schema entry"),
+                "{err}"
             );
         }
     }

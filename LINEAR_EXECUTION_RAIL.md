@@ -360,6 +360,7 @@ Landed:
 - Registry-id document export no longer reconstructs deprecated surface-schema records (`SurfacePolicy`, `FormatTransformReceipt`, `RoundTripReport`, `CapabilityMatrix`) into `QaDocument`; those records remain schema residue until their storage/index fields can be retired safely.
 - Deprecated surface-schema lookup methods are removed from `RegistryLookup`; bundle import drops surface-policy, transform-receipt, roundtrip-report, capability, and surface-budget entries instead of materializing them into active local registries, while generic `QaEntry::from_surface_json` and bundle text ingress reject the full deprecated family, including doc-era `format-receipt`, `capability-matrix`, and `surface-deficiency` aliases.
 - Seed registry Q-surface policy/capability records are deleted after their lookup, import, and admission paths were retired; omitted storage arrays now deserialize through defaults instead of preserving inert Q data.
+- Deprecated surface-schema `QaEntry` variants now fail closed on JSON export as well as import; old variants can remain deserialize-only schema tombstones until a deliberate storage-version break, but they cannot be rendered into active surface artifacts.
 - `l64-surfaces`, `l64-qc0`, and `l64-qa0` have been removed from workspace membership and deleted from the codebase.
 - Bundle-entry text remains only as an authoring convenience compiled by `compile-bundle` into `.dna`; it is not a public authority surface.
 
