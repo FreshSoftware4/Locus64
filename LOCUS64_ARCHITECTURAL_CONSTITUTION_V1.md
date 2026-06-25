@@ -183,6 +183,19 @@ Constitutional effect:
 - Current authority decode must not silently fall back to legacy packet decoding.
 - Migration and forensic decode paths are intentional subordinate modes, not ambient compatibility.
 
+### L64-G020 - Bounded Authority Decode
+
+Authority decoding is bounded before allocation.
+
+Evidence:
+
+- `cargo test -p l64-core locus_packet_decode_rejects_oversized_fields_before_payload_copy`
+
+Constitutional effect:
+
+- Sized packet fields must pass a hard length cap before payload copy.
+- Authority decoding cannot allocate unbounded field payloads from attacker-controlled lengths.
+
 ### L64-G021 - Authority Tier Validation
 
 Authority tiers are typed law at DNA validation.

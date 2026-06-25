@@ -370,6 +370,7 @@ Landed:
 - Certification evaluator law now has a focused regression proving authored obligation status is intent rather than evidence; the corresponding approval gate is promoted into the constitution.
 - Bundle migration law now has a proven gate: bundle-entry JSON crosses only as explicit deletion-bound migration ingress and cannot become native authority syntax.
 - DNA authority-tier law now has a typed validation slice: packet layout stays stable, but unknown authority tier byte values fail validation and cannot silently enter authority decode as meaningful tiers.
+- DNA decode bound law now has an executable cap: sized fields larger than the packet hard limit fail before payload copy, promoting the bounded-authority-decode gate.
 - `l64-surfaces`, `l64-qc0`, and `l64-qa0` have been removed from workspace membership and deleted from the codebase.
 - Bundle-entry text remains only as an authoring convenience compiled by `compile-bundle` into `.dna`; it is not a public authority surface.
 

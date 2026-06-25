@@ -41,7 +41,7 @@ Proof classes:
 | L64-G017 | Every authority section commitment binds its payload | DV | packet codec | Proven | `cargo test -p l64-core generic_dna_packet_validates_section_payload_commitment` |
 | L64-G018 | Authority payload decode requires complete packet validation | DV | G017 | Proven | `cargo test -p l64-core` (`dna_packet_validation_checks_canonical_structure_digest`, `generic_dna_packet_validates_section_payload_commitment`) |
 | L64-G019 | Legacy decoding requires explicit migration or forensic mode | DV,MG | decode roles | Proven | `cargo test -p l64-core legacy_packet_decode_requires_explicit_migration_or_forensic_mode` |
-| L64-G020 | Authority decoding is bounded before allocation | DV | packet codec | Candidate | pending |
+| L64-G020 | Authority decoding is bounded before allocation | DV | packet codec | Proven | `cargo test -p l64-core locus_packet_decode_rejects_oversized_fields_before_payload_copy` |
 | L64-G021 | Authority tiers are typed law at DNA validation | CR,DV | role model | Proven | `cargo test -p l64-core dna_packet_validation_rejects_unknown_authority_tier` |
 | L64-G022 | Capability summaries require witness coordinates | CR,DV | witness model | Candidate | pending |
 | L64-G023 | Generated caches and ambiguous reports do not ship as source | RI | release gate | Proven | `cargo test -p l64-cli --test cli genome_release_exports_coordinate_spine_and_rejects_views_as_source` |

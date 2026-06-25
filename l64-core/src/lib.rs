@@ -5365,6 +5365,7 @@ pub struct ResearchLineageRecord {
 }
 
 const LOCUS_MAGIC: &[u8; 4] = b"LCS1";
+const MAX_LOCUS_SIZED_FIELD_BYTES: usize = 64 * 1024 * 1024;
 
 pub fn encode_locus_packet(packet: &LocusPacket) -> Result<Vec<u8>, String> {
     let mut out = Vec::with_capacity(locus_packet_encoded_capacity(packet));
@@ -5796,6 +5797,11 @@ fn read_sized_bytes(bytes: &[u8], cursor: &mut usize) -> Result<Vec<u8>, String>
             .try_into()
             .map_err(|_| "bad length".to_string())?,
     ) as usize;
+    if len > MAX_LOCUS_SIZED_FIELD_BYTES {
+        return Err(format!(
+            "sized field too large: {len} > {MAX_LOCUS_SIZED_FIELD_BYTES}"
+        ));
+    }
     Ok(read_exact(bytes, cursor, len)?.to_vec())
 }
 
@@ -7292,6 +7298,24 @@ mod genome_foundation_tests {
                 .iter()
                 .any(|failure| { failure.contains("unknown authority tier") })
         );
+    }
+
+    #[test]
+    fn locus_packet_decode_rejects_oversized_fields_before_payload_copy() {
+        let mut bytes = Vec::new();
+        bytes.extend_from_slice(b"LCS1");
+        bytes.push(GenomeArtifactClass::Gene as u8);
+        bytes.push(GenomeSurface::Dna as u8);
+        bytes.push(LocusPacketKind::CanonicalTransfer as u8);
+        bytes.push(1);
+        bytes.push(0);
+        bytes.push(AuthorityTier::Candidate as u8);
+        bytes.extend_from_slice(&0u16.to_le_bytes());
+        bytes.extend_from_slice(&((MAX_LOCUS_SIZED_FIELD_BYTES as u32) + 1).to_le_bytes());
+
+        let err = decode_locus_packet_with_mode(&bytes, LocusDecodeMode::CurrentAuthority)
+            .expect_err("oversized grammar id should be rejected before payload copy");
+        assert!(err.contains("sized field too large"), "{err}");
     }
 
     #[test]
