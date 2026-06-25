@@ -51,7 +51,7 @@ Proof classes:
 | L64-G027 | Evaluator authority is explicit, named, and scoped | CR,MG | evaluator interface | Proven | `cargo test -p l64-policy evaluator_authority_is_named_and_scoped` |
 | L64-G028 | Every certification verdict carries authority scope | CR,DV | scope law | Candidate | pending |
 | L64-G029 | Report-derived research records are projections until replayed | CR,MG | artifact roles | Proven | `cargo test -p l64-research report_derivation_emits_lineage_record` |
-| L64-G030 | Policy precedence emits deterministic receipts | PE,DV | policy law | Candidate | pending |
+| L64-G030 | Policy precedence emits deterministic receipts | PE,DV | policy law | Proven | `cargo test -p l64-policy policy_precedence_receipt_is_stable_across_registry_order` |
 | L64-G031 | Namespace import is a receipted bridge, not string rewriting | MG,DV | bridge law | Candidate | pending |
 | L64-G032 | RNA and DNA remain the only public authority surfaces | CR,RI | artifact roles | Proven | `cargo test -p l64-cli --test cli` (`rna_dna_primary_authority_commands_work`, `standalone_projection_leaf_commands_are_removed`, `inspect_dna_output_is_not_rna_source`) |
 | L64-G033 | Bundle-entry JSON is deletion-bound migration ingress only | MG,RI | native bundle path | Proven | `cargo test -p l64-bundle` (`bundle_document_import_can_cross_explicit_migration_ingress`, `bundle_entry_text_rejects_deprecated_surface_schema_entries`) |

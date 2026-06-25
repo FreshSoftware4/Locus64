@@ -370,6 +370,7 @@ Landed:
 - Certification evaluator law now has a focused regression proving authored obligation status is intent rather than evidence; the corresponding approval gate is promoted into the constitution.
 - Report-derived research claim packets now classify as projection authority until a replay-specific path earns stronger authority; report verdicts are retained as projection assumptions rather than being upgraded into evidence or benchmark authority.
 - Evaluator authority now has a focused resolver regression proving evaluator behavior is selected through named scoped policy objects rather than ambient evaluator assumptions.
+- Policy precedence now emits deterministic receipt content across equivalent registry orderings by breaking equal-score resolver ties with stable policy identity.
 - Bundle migration law now has a proven gate: bundle-entry JSON crosses only as explicit deletion-bound migration ingress and cannot become native authority syntax.
 - DNA authority-tier law now has a typed validation slice: packet layout stays stable, but unknown authority tier byte values fail validation and cannot silently enter authority decode as meaningful tiers.
 - DNA decode bound law now has an executable cap: sized fields larger than the packet hard limit fail before payload copy, promoting the bounded-authority-decode gate.

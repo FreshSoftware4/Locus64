@@ -251,7 +251,11 @@ fn applicable_policies<'a>(
             direct.map(|score| (score + binding_bonus, policy))
         })
         .collect::<Vec<_>>();
-    scored.sort_by(|left, right| left.0.cmp(&right.0));
+    scored.sort_by(|left, right| {
+        left.0
+            .cmp(&right.0)
+            .then_with(|| left.1.id.cmp(&right.1.id))
+    });
     scored.into_iter().map(|(_, policy)| policy).collect()
 }
 
@@ -601,5 +605,73 @@ mod tests {
             resolved.resolution.evaluator.unsupported_mode,
             UnsupportedHandlingMode::StrictFail
         );
+    }
+
+    #[test]
+    fn policy_precedence_receipt_is_stable_across_registry_order() {
+        let evaluator_policy = MechanizationPolicyObject {
+            id: "MOP_A_EVAL".into(),
+            kind: l64_core::PolicyKind::Evaluator,
+            scope: PolicyScope::Theorem("THS_LOCAL".into()),
+            extends: None,
+            optimizer: None,
+            evaluator: Some(default_evaluator()),
+            replay_cache: None,
+            report: None,
+            scheduler: None,
+            canonicalizer_mode: None,
+            merge_policy: None,
+            notes: Vec::new(),
+        };
+        let replay_policy = MechanizationPolicyObject {
+            id: "MOP_B_REPLAY".into(),
+            kind: l64_core::PolicyKind::ReplayCache,
+            scope: PolicyScope::Theorem("THS_LOCAL".into()),
+            extends: None,
+            optimizer: None,
+            evaluator: None,
+            replay_cache: Some(default_replay_cache()),
+            report: None,
+            scheduler: None,
+            canonicalizer_mode: None,
+            merge_policy: None,
+            notes: Vec::new(),
+        };
+        let left_registry = EmptyRegistry {
+            policies: vec![replay_policy.clone(), evaluator_policy.clone()],
+            bindings: Vec::new(),
+        };
+        let right_registry = EmptyRegistry {
+            policies: vec![evaluator_policy, replay_policy],
+            bindings: Vec::new(),
+        };
+
+        let left = resolve_policy_graph(
+            &left_registry,
+            Some("BND_LOCAL"),
+            Some("THS_LOCAL"),
+            None,
+            None,
+            true,
+            OptimizerPolicy::Conservative,
+        )
+        .unwrap();
+        let right = resolve_policy_graph(
+            &right_registry,
+            Some("BND_LOCAL"),
+            Some("THS_LOCAL"),
+            None,
+            None,
+            true,
+            OptimizerPolicy::Conservative,
+        )
+        .unwrap();
+
+        assert_eq!(left.resolution.id, right.resolution.id);
+        assert_eq!(
+            left.resolution.applied_policy_ids,
+            right.resolution.applied_policy_ids
+        );
+        assert_eq!(left.resolution.trace.steps, right.resolution.trace.steps);
     }
 }

@@ -287,6 +287,19 @@ Constitutional effect:
 - Claim packets derived from certification reports must be classified as projection authority, even when the report verdict is `Integrated` or `Certified`.
 - Report verdicts may be retained as projection assumptions, but they cannot upgrade report-derived research records into evidence or benchmark authority without a replay-specific promotion path.
 
+### L64-G030 - Deterministic Policy Precedence Receipts
+
+Policy precedence emits deterministic receipts.
+
+Evidence:
+
+- `cargo test -p l64-policy policy_precedence_receipt_is_stable_across_registry_order`
+
+Constitutional effect:
+
+- Equal-precedence policy candidates must be ordered by stable policy identity rather than registry insertion order.
+- Policy resolution IDs, applied policy ID order, and trace steps must remain stable for equivalent policy sets.
+
 ### L64-G032 - RNA/DNA Public Authority Surfaces
 
 RNA and DNA remain the only public authority surfaces.
