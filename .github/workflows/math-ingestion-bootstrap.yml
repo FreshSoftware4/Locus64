@@ -1,0 +1,50 @@
+name: Math ingestion bootstrap
+
+on:
+  push:
+    branches:
+      - codex/math-ingestion-bootstrap
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install stable Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Test workspace
+        run: cargo test -q
+
+      - name: Build Linux release binaries
+        run: cargo build --release -p l64 -p l64-cli -p l64-admin
+
+      - name: Package binaries and source metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          cp target/release/l64 dist/
+          cp target/release/l64-cli dist/
+          cp target/release/l64-admin dist/
+          cp README.md Cargo.toml Cargo.lock dist/
+          git rev-parse HEAD > dist/SOURCE_COMMIT.txt
+          sha256sum dist/l64 dist/l64-cli dist/l64-admin > dist/SHA256SUMS.txt
+          tar -C dist -czf locus64-linux-x86_64.tar.gz .
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: locus64-linux-x86_64
+          path: locus64-linux-x86_64.tar.gz
+          if-no-files-found: error
+          retention-days: 7
