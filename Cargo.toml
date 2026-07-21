@@ -10,6 +10,7 @@ members = [
     "l64-runtime",
     "l64-canon",
     "l64-atlas",
+    "l64-atlas-export",
     "l64-cert",
     "l64-bundle",
     "l64-policy",
