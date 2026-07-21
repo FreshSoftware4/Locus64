@@ -2,7 +2,7 @@ use anyhow::{Context, Result, anyhow};
 use clap::Parser;
 use l64_atlas::{CompiledAtlas, CompiledEdge};
 use l64_bundle::{import_bundle_file, load_bundle_world};
-use l64_core::{AtlasCell, BundleConflictPolicy, RegistryLookup};
+use l64_core::{AtlasCell, BundleConflictPolicy, ClaimPacket, RegistryLookup};
 use serde::Serialize;
 use std::{collections::BTreeMap, fs, path::Path};
 
@@ -10,18 +10,35 @@ use std::{collections::BTreeMap, fs, path::Path};
 #[command(name = "l64-atlas-export")]
 #[command(about = "Compile and export a Locus64 atlas from seed or bundle overlay authority")]
 struct Cli {
+    /// Import a .dna bundle before compiling the atlas.
     #[arg(long, conflicts_with = "bundle")]
     file: Option<String>,
+
+    /// Load a previously imported bundle by ID.
     #[arg(long, conflicts_with = "file")]
     bundle: Option<String>,
+
+    /// Compile only the bundle-local overlay instead of seed + overlay.
     #[arg(long, default_value_t = false)]
     overlay_only: bool,
+
+    /// Include complete compiled edge records in JSON output.
     #[arg(long, default_value_t = false)]
     dump_edges: bool,
+
+    /// Include source atlas-cell records in JSON output.
     #[arg(long, default_value_t = false)]
     dump_cells: bool,
+
+    /// Include engine-resolved governed claim packets in JSON output.
+    #[arg(long, default_value_t = false)]
+    dump_claims: bool,
+
+    /// Write JSON output to a file instead of stdout.
     #[arg(long)]
     out: Option<String>,
+
+    /// Write a Graphviz DOT projection of compiled atlas edges.
     #[arg(long)]
     dot_out: Option<String>,
 }
@@ -52,6 +69,8 @@ struct AtlasExport {
     edges: Option<Vec<CompiledEdge>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     cells: Option<Vec<AtlasCell>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    claims: Option<Vec<ClaimPacket>>,
 }
 
 fn build_export<R: RegistryLookup + ?Sized>(
@@ -61,6 +80,7 @@ fn build_export<R: RegistryLookup + ?Sized>(
     overlay_only: bool,
     dump_edges: bool,
     dump_cells: bool,
+    dump_claims: bool,
 ) -> Result<AtlasExport> {
     let atlas = CompiledAtlas::compile(registry).map_err(anyhow::Error::msg)?;
     let cells = registry.atlas_cells();
@@ -115,6 +135,7 @@ fn build_export<R: RegistryLookup + ?Sized>(
         route_buckets,
         edges: dump_edges.then_some(atlas.edges),
         cells: dump_cells.then_some(cells),
+        claims: dump_claims.then_some(claims),
     })
 }
 
@@ -164,6 +185,7 @@ fn main() -> Result<()> {
                 true,
                 cli.dump_edges,
                 cli.dump_cells,
+                cli.dump_claims,
             )?
         } else {
             build_export(
@@ -173,6 +195,7 @@ fn main() -> Result<()> {
                 false,
                 cli.dump_edges,
                 cli.dump_cells,
+                cli.dump_claims,
             )?
         }
     } else if let Some(bundle_id) = cli.bundle.as_deref() {
@@ -186,6 +209,7 @@ fn main() -> Result<()> {
                 true,
                 cli.dump_edges,
                 cli.dump_cells,
+                cli.dump_claims,
             )?
         } else {
             build_export(
@@ -195,6 +219,7 @@ fn main() -> Result<()> {
                 false,
                 cli.dump_edges,
                 cli.dump_cells,
+                cli.dump_claims,
             )?
         }
     } else {
@@ -206,6 +231,7 @@ fn main() -> Result<()> {
             false,
             cli.dump_edges,
             cli.dump_cells,
+            cli.dump_claims,
         )?
     };
 
