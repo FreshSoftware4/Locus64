@@ -1,0 +1,15 @@
+[package]
+name = "l64-atlas-export"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+clap = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+l64-atlas = { path = "../l64-atlas" }
+l64-bundle = { path = "../l64-bundle" }
+l64-core = { path = "../l64-core" }
+l64-registry = { path = "../l64-registry" }
