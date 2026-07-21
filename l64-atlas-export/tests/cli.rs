@@ -3,7 +3,7 @@ use std::process::Command;
 #[test]
 fn exports_seed_atlas_through_binary_surface() {
     let output = Command::new(env!("CARGO_BIN_EXE_l64-atlas-export"))
-        .args(["--dump-edges", "--dump-cells"])
+        .args(["--dump-edges", "--dump-cells", "--dump-claims"])
         .output()
         .expect("run l64-atlas-export");
     assert!(
@@ -22,6 +22,12 @@ fn exports_seed_atlas_through_binary_surface() {
     assert_eq!(
         value["cells"].as_array().map(Vec::len),
         value["atlas_cell_count"]
+            .as_u64()
+            .map(|count| count as usize)
+    );
+    assert_eq!(
+        value["claims"].as_array().map(Vec::len),
+        value["claim_packet_count"]
             .as_u64()
             .map(|count| count as usize)
     );
