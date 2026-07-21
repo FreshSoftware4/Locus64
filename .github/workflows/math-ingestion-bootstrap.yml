@@ -29,7 +29,7 @@ jobs:
         run: cargo test -q
 
       - name: Build Linux release binaries
-        run: cargo build --release -p l64 -p l64-cli -p l64-admin
+        run: cargo build --release -p l64 -p l64-cli -p l64-admin -p l64-atlas-export
 
       - name: Package binaries and source metadata
         shell: bash
@@ -39,9 +39,10 @@ jobs:
           cp target/release/l64 dist/
           cp target/release/l64-cli dist/
           cp target/release/l64-admin dist/
+          cp target/release/l64-atlas-export dist/
           cp README.md Cargo.toml Cargo.lock dist/
           git rev-parse HEAD > dist/SOURCE_COMMIT.txt
-          sha256sum dist/l64 dist/l64-cli dist/l64-admin > dist/SHA256SUMS.txt
+          sha256sum dist/l64 dist/l64-cli dist/l64-admin dist/l64-atlas-export > dist/SHA256SUMS.txt
           tar -C dist -czf locus64-linux-x86_64.tar.gz .
 
       - name: Upload Linux artifact
