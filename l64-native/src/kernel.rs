@@ -29,6 +29,10 @@ impl OpCode {
     pub(crate) fn is_type(self) -> bool {
         matches!(self, Self::TypeAtom | Self::TypeMatrix | Self::TypeFunction)
     }
+
+    pub(crate) fn is_persisted_node(self) -> bool {
+        self != Self::ExtendContext
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -49,12 +53,33 @@ pub struct Port {
     ordinal: u16,
 }
 
+impl PortRole {
+    pub(crate) fn from_raw(value: u8) -> Option<Self> {
+        match value {
+            1 => Some(Self::Parameter),
+            2 => Some(Self::Domain),
+            3 => Some(Self::Codomain),
+            4 => Some(Self::Argument),
+            _ => None,
+        }
+    }
+}
+
 impl Port {
     pub(crate) fn new(target: NodeId, role: PortRole, ordinal: u16) -> Self {
         Self {
             target,
             role: role as u8,
             flags: 0,
+            ordinal,
+        }
+    }
+
+    pub(crate) fn from_raw(target: NodeId, role: PortRole, flags: u8, ordinal: u16) -> Self {
+        Self {
+            target,
+            role: role as u8,
+            flags,
             ordinal,
         }
     }
@@ -75,6 +100,10 @@ impl Port {
 
     pub fn ordinal(&self) -> u16 {
         self.ordinal
+    }
+
+    pub(crate) fn flags(&self) -> u8 {
+        self.flags
     }
 }
 
