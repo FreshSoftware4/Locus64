@@ -37,6 +37,8 @@ The sixth boundary adds the first native constraint core without creating a para
 
 The larger implementation files are factored only at existing item boundaries into construction, typing, transaction, validation, codec, and RNA concerns. This changes review locality without introducing another authority layer or altering canonical bytes.
 
+
+
 The seventh boundary adds proof-producing congruence without promoting a union-find table into authority:
 
 - equality is a native type judgment with a deterministically attached equality witness;
@@ -56,3 +58,15 @@ State identity is the domain-separated BLAKE3 commitment of canonical native byt
 The existing `l64-cli` command names now route `L64R1` and `L64D` directly through this native path. Legacy RNA/DNA behavior is classified as compatibility/forensic ingress and is available explicitly through `l64-cli legacy ...`; ambient fallback remains temporarily available with a mandatory deprecation warning.
 
 This remains additive. It does not yet implement incremental dependency closure, native upper-stack projections, or replacement of the legacy runtime, registry, certification, and old packet implementation internally.
+
+The eighth boundary adds incremental closure without turning invalidation into a second authority database:
+
+- reverse dependencies and context-local node lists are derived from canonical type/port incidence and rebuilt after decode;
+- assumption change is represented by an immutable direct child-context refinement, preserving prior authority in its original scope;
+- guarded operations, their judgments, evidence, downstream operations, and equality proofs receive context-relative `Closed`, `Open`, or `Invalid` closure states;
+- closure transitions identify the exact reverse-reachable subgraph whose state changed and carry the constraint binding that caused the transition;
+- independent structure remains outside the affected set;
+- local and global closure are distinguishable;
+- closure queries do not alter canonical bytes, commitments, routes, contexts, or journal history.
+
+The derived reverse index is an in-memory accelerator only. It is excluded from RNA, DNA, state commitments, and authority identity.

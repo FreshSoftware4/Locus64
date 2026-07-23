@@ -1,7 +1,7 @@
 use core::mem::size_of;
 use std::{fs, path::Path};
 
-use l64_native::{Dimension, Node, Port};
+use l64_native::{ClosureTransition, Dimension, Node, Port};
 
 #[test]
 fn compact_layout_budgets_hold() {
@@ -14,6 +14,11 @@ fn compact_layout_budgets_hold() {
         size_of::<Port>() <= 8,
         "Port grew to {} bytes",
         size_of::<Port>()
+    );
+    assert!(
+        size_of::<ClosureTransition>() <= 24,
+        "ClosureTransition grew to {} bytes",
+        size_of::<ClosureTransition>()
     );
     assert!(
         size_of::<Dimension>() <= 8,

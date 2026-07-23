@@ -2,8 +2,8 @@ use std::collections::BTreeMap;
 
 use crate::kernel::{ConstraintState, EqualityRule, EvidencePlan};
 use crate::{
-    ConstraintKind, ContextDelta, Dimension, JournalEvent, LocusWord, Obstruction, OpCode, Port,
-    PortRole, Route,
+    ClosureState, ClosureTransition, ConstraintKind, ContextDelta, Dimension, JournalEvent,
+    LocusWord, Obstruction, OpCode, Port, PortRole, Route,
 };
 
 pub type NodeId = u32;
@@ -67,6 +67,12 @@ impl Node {
     }
 }
 
+#[derive(Debug, Clone, Default)]
+struct DerivedIndex {
+    reverse: Vec<Vec<NodeId>>,
+    by_context: Vec<Vec<NodeId>>,
+}
+
 #[derive(Debug, Clone)]
 pub struct Graph {
     nodes: Vec<Node>,
@@ -75,6 +81,7 @@ pub struct Graph {
     routes: BTreeMap<Route, NodeId>,
     journal: Vec<JournalEvent>,
     commitment: [u8; 32],
+    derived: DerivedIndex,
 }
 
 impl Default for Graph {
@@ -87,3 +94,5 @@ include!("graph/construction.rs");
 include!("graph/typing.rs");
 include!("graph/storage.rs");
 include!("graph/context.rs");
+include!("graph/derived.rs");
+include!("graph/closure.rs");

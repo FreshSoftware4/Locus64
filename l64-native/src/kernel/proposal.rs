@@ -216,4 +216,13 @@ pub enum Obstruction {
         left: NodeId,
         right: NodeId,
     },
+    ContextNotDirectRefinement {
+        parent: ContextId,
+        child: ContextId,
+    },
+    RefinementBindingNotConstraint {
+        context: ContextId,
+        binding: NodeId,
+    },
 }
+

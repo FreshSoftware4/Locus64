@@ -81,6 +81,7 @@ impl Graph {
             port_count: ports.len() as u16,
         });
         self.routes.insert(route, node);
+        self.register_derived_node(node);
         let after = crate::codec::state_commitment(self);
         self.push_event(opcode, node, before, after);
         self.commitment = after;

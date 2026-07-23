@@ -6,14 +6,17 @@ impl Graph {
         routes: BTreeMap<Route, NodeId>,
         commitment: [u8; 32],
     ) -> Self {
-        Self {
+        let mut graph = Self {
             nodes,
             ports,
             contexts,
             routes,
             journal: Vec::new(),
             commitment,
-        }
+            derived: DerivedIndex::default(),
+        };
+        graph.rebuild_derived_index();
+        graph
     }
 
     pub fn new() -> Self {
@@ -24,6 +27,7 @@ impl Graph {
             routes: BTreeMap::new(),
             journal: Vec::new(),
             commitment: [0; 32],
+            derived: DerivedIndex::empty(1),
         };
         graph.commitment = crate::codec::state_commitment(&graph);
         graph
@@ -77,6 +81,7 @@ impl Graph {
         let before = self.commitment;
         let id = self.contexts.len() as ContextId;
         self.contexts.push(ContextDelta { parent, binding });
+        self.derived.by_context.push(Vec::new());
         let after = crate::codec::state_commitment(self);
         self.push_event(OpCode::ExtendContext, binding, before, after);
         self.commitment = after;
@@ -263,6 +268,9 @@ impl Graph {
         self.routes.insert(route, operation);
         self.routes.insert(judgment_route, judgment);
         self.routes.insert(evidence_route, evidence);
+        self.register_derived_node(operation);
+        self.register_derived_node(judgment);
+        self.register_derived_node(evidence);
 
         let after = crate::codec::state_commitment(self);
         self.push_event(opcode, operation, before, after);
@@ -319,6 +327,8 @@ impl Graph {
 
         self.routes.insert(route, judgment);
         self.routes.insert(evidence_route, evidence);
+        self.register_derived_node(judgment);
+        self.register_derived_node(evidence);
         let after = crate::codec::state_commitment(self);
         self.push_event(OpCode::EqualityWitness, judgment, before, after);
         self.commitment = after;
@@ -329,4 +339,5 @@ impl Graph {
             commitment: after,
         }
     }
+
 }

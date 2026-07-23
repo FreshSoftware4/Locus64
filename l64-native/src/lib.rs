@@ -1,5 +1,6 @@
 #![forbid(unsafe_code)]
 
+mod closure;
 mod codec;
 mod context;
 mod dimension;
@@ -10,6 +11,7 @@ mod kernel;
 mod rna;
 mod route;
 
+pub use closure::{ClosureState, ClosureTransition};
 pub use codec::{DecodeError, canonical_bytes, decode_canonical};
 pub use context::ContextDelta;
 pub use dimension::Dimension;
