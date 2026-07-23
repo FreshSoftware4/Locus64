@@ -23,6 +23,24 @@ pub struct Node {
 }
 
 impl Node {
+    pub(crate) fn from_raw(
+        payload: u64,
+        context: ContextId,
+        ty: NodeId,
+        first_port: u32,
+        opcode: OpCode,
+        port_count: u16,
+    ) -> Self {
+        Self {
+            payload,
+            context,
+            ty,
+            first_port,
+            opcode: opcode as u16,
+            port_count,
+        }
+    }
+
     pub fn opcode(&self) -> OpCode {
         OpCode::from_raw(self.opcode).expect("stored opcode is validated at insertion")
     }
@@ -62,6 +80,23 @@ impl Default for Graph {
 }
 
 impl Graph {
+    pub(crate) fn from_decoded_parts(
+        nodes: Vec<Node>,
+        ports: Vec<Port>,
+        contexts: Vec<ContextDelta>,
+        routes: BTreeMap<Route, NodeId>,
+        commitment: [u8; 32],
+    ) -> Self {
+        Self {
+            nodes,
+            ports,
+            contexts,
+            routes,
+            journal: Vec::new(),
+            commitment,
+        }
+    }
+
     pub fn new() -> Self {
         let mut graph = Self {
             nodes: Vec::new(),
