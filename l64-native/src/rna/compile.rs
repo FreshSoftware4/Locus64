@@ -116,7 +116,28 @@ pub fn compile_rna(source: &[u8]) -> Result<Graph, RnaError> {
                     .transact(Proposal::square_root(route, context, input, output))?
                     .node
             }
-            b"a" | b"m" | b"f" | b"q" | b"v" | b"k" | b"c" | b"x" | b"+" | b"*" | b"/" | b"r" => {
+            b"e" if parts.len() >= 6 => {
+                let rule_raw = parse_u8_part(&parts, 2, line)?;
+                let rule = EqualityRule::from_raw(rule_raw)
+                    .ok_or(RnaError::InvalidNumber { line })?;
+                let left = resolve_part(&slots, &parts, 3, line)?;
+                let right = resolve_part(&slots, &parts, 4, line)?;
+                let context = parse_u32_part(&parts, 5, line)?;
+                let premises = parts[6..]
+                    .iter()
+                    .map(|part| {
+                        let slot = parse_u64(part).ok_or(RnaError::InvalidNumber { line })?;
+                        slots
+                            .get(&slot)
+                            .copied()
+                            .ok_or(RnaError::UnknownSlot { line, slot })
+                    })
+                    .collect::<Result<Vec<_>, _>>()?;
+                graph
+                    .prove_equality(route, context, left, right, rule, &premises)?
+                    .node
+            }
+            b"a" | b"m" | b"f" | b"q" | b"v" | b"k" | b"c" | b"x" | b"+" | b"*" | b"/" | b"r" | b"e" => {
                 return Err(RnaError::InvalidArity { line });
             }
             _ => return Err(RnaError::UnknownInstruction { line }),

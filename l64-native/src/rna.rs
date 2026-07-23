@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
 
+use crate::kernel::EqualityRule;
 use crate::{
     ConstraintKind, ContextId, Dimension, DnaError, Graph, LocusWord, NodeId, Obstruction, OpCode,
     Proposal, ROOT_CONTEXT, Route, decode_dna, dna_bytes,

@@ -194,4 +194,26 @@ pub enum Obstruction {
     MalformedEvidence {
         node: NodeId,
     },
+    EqualitySortMismatch {
+        left: NodeId,
+        right: NodeId,
+    },
+    InvalidEqualityRule,
+    MalformedEquality {
+        node: NodeId,
+    },
+    EqualityPremiseMismatch {
+        premise: NodeId,
+    },
+    EqualityContextEscape {
+        premise: NodeId,
+        context: ContextId,
+    },
+    UncanonicalizableNode {
+        node: NodeId,
+    },
+    NoEqualityPath {
+        left: NodeId,
+        right: NodeId,
+    },
 }

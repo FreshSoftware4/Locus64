@@ -187,7 +187,7 @@ impl Graph {
     ) -> Result<NodeId, Obstruction> {
         self.ensure_context(context)?;
         let type_node = self.ensure_type(ty)?;
-        if type_node.opcode() == OpCode::TypeJudgment {
+        if matches!(type_node.opcode(), OpCode::TypeJudgment | OpCode::TypeEquality) {
             return Err(Obstruction::EvidenceOnlyType { node: ty });
         }
         self.insert_committed_node(route, context, ty, OpCode::Value, 0, &[])
@@ -269,6 +269,61 @@ impl Graph {
         self.commitment = after;
         crate::CommitResult {
             node: operation,
+            evidence,
+            event: self.journal.len().saturating_sub(1) as EventId,
+            commitment: after,
+        }
+    }
+
+    pub(crate) fn insert_admitted_equality(
+        &mut self,
+        routes: [Route; 2],
+        context: ContextId,
+        left: NodeId,
+        right: NodeId,
+        rule: EqualityRule,
+        premises: &[NodeId],
+    ) -> crate::CommitResult {
+        let [route, evidence_route] = routes;
+        let before = self.commitment;
+
+        let judgment = self.nodes.len() as NodeId;
+        let judgment_first_port = self.ports.len() as u32;
+        self.ports.push(Port::new(left, PortRole::Left, 0));
+        self.ports.push(Port::new(right, PortRole::Right, 1));
+        self.nodes.push(Node {
+            payload: 0,
+            context,
+            ty: META_TYPE,
+            first_port: judgment_first_port,
+            opcode: OpCode::TypeEquality as u16,
+            port_count: 2,
+        });
+
+        let evidence = self.nodes.len() as NodeId;
+        let evidence_first_port = self.ports.len() as u32;
+        self.ports.extend(
+            premises
+                .iter()
+                .enumerate()
+                .map(|(ordinal, target)| Port::new(*target, PortRole::Premise, ordinal as u16)),
+        );
+        self.nodes.push(Node {
+            payload: rule as u64,
+            context,
+            ty: judgment,
+            first_port: evidence_first_port,
+            opcode: OpCode::EqualityWitness as u16,
+            port_count: premises.len() as u16,
+        });
+
+        self.routes.insert(route, judgment);
+        self.routes.insert(evidence_route, evidence);
+        let after = crate::codec::state_commitment(self);
+        self.push_event(OpCode::EqualityWitness, judgment, before, after);
+        self.commitment = after;
+        crate::CommitResult {
+            node: judgment,
             evidence,
             event: self.journal.len().saturating_sub(1) as EventId,
             commitment: after,

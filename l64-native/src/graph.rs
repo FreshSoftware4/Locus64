@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use crate::kernel::{ConstraintState, EvidencePlan};
+use crate::kernel::{ConstraintState, EqualityRule, EvidencePlan};
 use crate::{
     ConstraintKind, ContextDelta, Dimension, JournalEvent, LocusWord, Obstruction, OpCode, Port,
     PortRole, Route,

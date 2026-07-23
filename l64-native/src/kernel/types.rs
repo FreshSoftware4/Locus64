@@ -20,6 +20,8 @@ pub enum OpCode {
     Constraint = 14,
     Sqrt = 15,
     Obligation = 16,
+    TypeEquality = 17,
+    EqualityWitness = 18,
 }
 
 impl OpCode {
@@ -41,6 +43,8 @@ impl OpCode {
             14 => Some(Self::Constraint),
             15 => Some(Self::Sqrt),
             16 => Some(Self::Obligation),
+            17 => Some(Self::TypeEquality),
+            18 => Some(Self::EqualityWitness),
             _ => None,
         }
     }
@@ -53,6 +57,7 @@ impl OpCode {
                 | Self::TypeFunction
                 | Self::TypeJudgment
                 | Self::TypeQuantity
+                | Self::TypeEquality
         )
     }
 
@@ -126,6 +131,29 @@ pub(crate) enum EvidencePlan {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
+pub(crate) enum EqualityRule {
+    Reflexive = 1,
+    Structural = 2,
+    Symmetry = 3,
+    Transitive = 4,
+    Congruence = 5,
+}
+
+impl EqualityRule {
+    pub(crate) fn from_raw(value: u8) -> Option<Self> {
+        match value {
+            1 => Some(Self::Reflexive),
+            2 => Some(Self::Structural),
+            3 => Some(Self::Symmetry),
+            4 => Some(Self::Transitive),
+            5 => Some(Self::Congruence),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u8)]
 pub enum PortRole {
     Parameter = 1,
     Domain = 2,
@@ -134,6 +162,8 @@ pub enum PortRole {
     Subject = 5,
     Premise = 6,
     Conclusion = 7,
+    Left = 8,
+    Right = 9,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -155,6 +185,8 @@ impl PortRole {
             5 => Some(Self::Subject),
             6 => Some(Self::Premise),
             7 => Some(Self::Conclusion),
+            8 => Some(Self::Left),
+            9 => Some(Self::Right),
             _ => None,
         }
     }

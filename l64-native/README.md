@@ -37,8 +37,20 @@ The sixth boundary adds the first native constraint core without creating a para
 
 The larger implementation files are factored only at existing item boundaries into construction, typing, transaction, validation, codec, and RNA concerns. This changes review locality without introducing another authority layer or altering canonical bytes.
 
+The seventh boundary adds proof-producing congruence without promoting a union-find table into authority:
+
+- equality is a native type judgment with a deterministically attached equality witness;
+- primitive rules cover reflexivity, exact structural identity, symmetry, and transitivity;
+- congruence lifts checked equalities through type constructors and executable operations;
+- every premise points to an earlier equality judgment with its own checked witness;
+- proof paths are returned deterministically and remain context-scoped;
+- canonical representatives are selected by minimum composed route over the validated equality component;
+- no equivalence class, representative cache, or merge table is persisted;
+- decoder-side rule re-execution rejects forged rules, missing provenance, scope escape, and mismatched congruence premises;
+- equality-bearing `L64R1` reaches the exact `L64D → L64R1 → L64D` fixed point.
+
 State identity is the domain-separated BLAKE3 commitment of canonical native bytes. No native name, claim identifier, theorem identifier, campaign identifier, JSON field name, or generic serialization schema participates.
 
 The existing `l64-cli` command names now route `L64R1` and `L64D` directly through this native path. Legacy RNA/DNA behavior is classified as compatibility/forensic ingress and is available explicitly through `l64-cli legacy ...`; ambient fallback remains temporarily available with a mandatory deprecation warning.
 
-This remains additive. It does not yet implement proof-producing congruence, incremental dependency closure, native upper-stack projections, or replacement of the legacy runtime, registry, certification, and old packet implementation internally.
+This remains additive. It does not yet implement incremental dependency closure, native upper-stack projections, or replacement of the legacy runtime, registry, certification, and old packet implementation internally.

@@ -79,7 +79,10 @@ fn validate_node_semantics(
     match node.opcode() {
         OpCode::Value => {
             let ty = node.ty().ok_or(DecodeError::InvalidNode)?;
-            if nodes[ty as usize].opcode() == OpCode::TypeJudgment {
+            if matches!(
+                nodes[ty as usize].opcode(),
+                OpCode::TypeJudgment | OpCode::TypeEquality
+            ) {
                 return Err(DecodeError::InvalidNode);
             }
         }
@@ -90,6 +93,20 @@ fn validate_node_semantics(
             }
             if node.opcode() == OpCode::Obligation
                 && crate::ConstraintKind::from_payload(node.payload()).is_none()
+            {
+                return Err(DecodeError::InvalidNode);
+            }
+        }
+        OpCode::TypeEquality => {
+            if node.payload() != 0 {
+                return Err(DecodeError::InvalidNode);
+            }
+        }
+        OpCode::EqualityWitness => {
+            let ty = node.ty().ok_or(DecodeError::InvalidNode)?;
+            if nodes[ty as usize].opcode() != OpCode::TypeEquality
+                || node.payload() > u8::MAX as u64
+                || EqualityRule::from_raw(node.payload() as u8).is_none()
             {
                 return Err(DecodeError::InvalidNode);
             }
@@ -165,10 +182,29 @@ fn validate_evidence_routes(
         attached[judgment as usize] = true;
         attached[witness as usize] = true;
     }
+    for (route, judgment) in routes {
+        if nodes[*judgment as usize].opcode() != OpCode::TypeEquality {
+            continue;
+        }
+        let witness = *routes
+            .get(&route.composed(EVIDENCE_LOCUS))
+            .ok_or(DecodeError::InvalidRoute)?;
+        if nodes[witness as usize].opcode() != OpCode::EqualityWitness
+            || nodes[witness as usize].ty() != Some(*judgment)
+        {
+            return Err(DecodeError::InvalidRoute);
+        }
+        attached[*judgment as usize] = true;
+        attached[witness as usize] = true;
+    }
     for (index, node) in nodes.iter().enumerate() {
         if matches!(
             node.opcode(),
-            OpCode::TypeJudgment | OpCode::KernelWitness | OpCode::Obligation
+            OpCode::TypeJudgment
+                | OpCode::KernelWitness
+                | OpCode::Obligation
+                | OpCode::TypeEquality
+                | OpCode::EqualityWitness
         ) && !attached[index]
         {
             return Err(DecodeError::InvalidRoute);
@@ -213,6 +249,15 @@ fn validate_port_law(opcode: OpCode, ports: &[Port], has_type: bool) -> Result<(
         }
         OpCode::KernelWitness => ports.is_empty() && has_type,
         OpCode::Obligation => ports.len() == 1 && ports[0].role() == PortRole::Premise && has_type,
+        OpCode::TypeEquality => {
+            ports.len() == 2
+                && ports[0].role() == PortRole::Left
+                && ports[1].role() == PortRole::Right
+                && !has_type
+        }
+        OpCode::EqualityWitness => {
+            ports.iter().all(|port| port.role() == PortRole::Premise) && has_type
+        }
         OpCode::ExtendContext => false,
     };
     valid.then_some(()).ok_or(DecodeError::InvalidPortLaw)

@@ -79,6 +79,7 @@ impl Graph {
                 });
             }
         }
+        self.validate_equality_authority()?;
         Ok(())
     }
 }

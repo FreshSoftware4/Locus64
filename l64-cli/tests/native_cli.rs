@@ -6,6 +6,8 @@ use std::{
 };
 
 const SOURCE: &[u8] = b"L64R1 0x4c36344e41544956\na 1 0x41\na 2 0x42\na 3 0x43\nf 4 1 2\nf 5 2 3\nf 6 1 3\nv 7 4\nv 8 5\nc 9 7 8 6\n";
+const EQUALITY_SOURCE: &[u8] =
+    b"L64R1 0x4551\na 1 0x41\na 2 0x41\ne 3 2 1 2 0\ne 4 3 2 1 0 3\ne 5 4 1 1 0 3 4\n";
 
 fn fixture(name: &str, bytes: &[u8]) -> PathBuf {
     let dir = std::env::temp_dir().join(format!(
@@ -45,6 +47,31 @@ fn native_compile_and_sequence_use_existing_commands() {
         .unwrap();
     assert!(output.status.success());
     assert_eq!(output.stdout, SOURCE);
+}
+
+#[test]
+fn native_cli_preserves_equality_proof_fixed_point() {
+    let rna = fixture("equality.rna", EQUALITY_SOURCE);
+    let dna = rna.with_extension("dna");
+
+    Command::cargo_bin("l64-cli")
+        .unwrap()
+        .args([
+            "compile-rna",
+            rna.to_str().unwrap(),
+            "--out",
+            dna.to_str().unwrap(),
+        ])
+        .assert()
+        .success();
+
+    let output = Command::cargo_bin("l64-cli")
+        .unwrap()
+        .args(["sequence-dna", dna.to_str().unwrap()])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    assert_eq!(output.stdout, EQUALITY_SOURCE);
 }
 
 #[test]

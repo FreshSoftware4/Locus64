@@ -36,7 +36,10 @@ pub fn rna_bytes(graph: &Graph) -> Result<Vec<u8>, RnaError> {
         .filter(|node| {
             !matches!(
                 node.opcode(),
-                OpCode::TypeJudgment | OpCode::KernelWitness | OpCode::Obligation
+                OpCode::TypeJudgment
+                    | OpCode::KernelWitness
+                    | OpCode::Obligation
+                    | OpCode::EqualityWitness
             )
         })
         .count();
@@ -179,6 +182,17 @@ fn emit_node(
                 slot_for(slots, node.ty().ok_or(RnaError::UnrepresentableGraph)?)?,
             );
             push_context(out, node.context());
+        }
+        OpCode::TypeEquality if ports.len() == 2 => {
+            push_prefix(out, b'e', slot);
+            let (rule, premises) = graph.equality_evidence_parts(node_id)?;
+            push_space_decimal(out, rule as u64);
+            push_space_decimal(out, slot_for(slots, ports[0].target())?);
+            push_space_decimal(out, slot_for(slots, ports[1].target())?);
+            push_space_decimal(out, u64::from(node.context()));
+            for premise in premises {
+                push_space_decimal(out, slot_for(slots, premise)?);
+            }
         }
         _ => return Err(RnaError::UnrepresentableGraph),
     }

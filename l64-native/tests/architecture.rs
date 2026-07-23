@@ -24,14 +24,20 @@ fn compact_layout_budgets_hold() {
 
 #[test]
 fn native_source_rejects_coordination_heavy_dependencies() {
-    let source_root = Path::new(env!("CARGO_MANIFEST_DIR")).join("src");
-    let mut source = std::string::String::new();
-    for entry in fs::read_dir(source_root).unwrap() {
-        let path = entry.unwrap().path();
-        if path.extension().and_then(|part| part.to_str()) == Some("rs") {
-            source.push_str(&fs::read_to_string(path).unwrap());
+    fn collect_rust(path: &Path, source: &mut std::string::String) {
+        for entry in fs::read_dir(path).unwrap() {
+            let path = entry.unwrap().path();
+            if path.is_dir() {
+                collect_rust(&path, source);
+            } else if path.extension().and_then(|part| part.to_str()) == Some("rs") {
+                source.push_str(&fs::read_to_string(path).unwrap());
+            }
         }
     }
+
+    let source_root = Path::new(env!("CARGO_MANIFEST_DIR")).join("src");
+    let mut source = std::string::String::new();
+    collect_rust(&source_root, &mut source);
 
     let forbidden = [
         ["Str", "ing"].concat(),
