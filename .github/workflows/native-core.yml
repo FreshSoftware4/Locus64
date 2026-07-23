@@ -1,23 +1,15 @@
 name: Native core gate
 
 on:
-  push:
+  pull_request:
     branches:
+      - main
       - 'chatgpt/**'
     paths:
       - Cargo.toml
       - Cargo.lock
       - l64-native/**
-      - LOCUS64_*_RAIL.athens
-      - LOCUS64_*_CHANGE_CHAIN.athens
-      - .github/workflows/native-core.yml
-  pull_request:
-    branches:
-      - main
-    paths:
-      - Cargo.toml
-      - Cargo.lock
-      - l64-native/**
+      - l64-cli/**
       - LOCUS64_*_RAIL.athens
       - LOCUS64_*_CHANGE_CHAIN.athens
       - .github/workflows/native-core.yml
@@ -28,7 +20,6 @@ permissions:
 
 jobs:
   verify:
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
