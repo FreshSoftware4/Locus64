@@ -3,7 +3,60 @@ use std::{
     fs,
     io::Write,
     path::{Path, PathBuf},
+    process::Command,
 };
+
+const LEGACY_INGRESS_ENV: &str = "L64_EXPLICIT_LEGACY_INGRESS";
+
+pub(super) fn is_legacy_child() -> bool {
+    std::env::var_os(LEGACY_INGRESS_ENV).is_some()
+}
+
+pub(super) fn announce_explicit_legacy() {
+    eprintln!(
+        "legacy migration ingress: compatibility/forensic path; not current native authority"
+    );
+}
+
+pub(super) fn run_explicit_legacy() -> Result<Option<i32>, String> {
+    let args = std::env::args_os().collect::<Vec<_>>();
+    if args.get(1).and_then(|item| item.to_str()) != Some("legacy") {
+        return Ok(None);
+    }
+    if args.len() == 2 || args.get(2).and_then(|item| item.to_str()) == Some("--help") {
+        println!(
+            "usage: l64-cli legacy <normalize-rna|compile-rna|sequence-dna|inspect-dna|verify-roundtrip> ..."
+        );
+        return Ok(Some(0));
+    }
+    let command = args
+        .get(2)
+        .and_then(|item| item.to_str())
+        .ok_or_else(|| "legacy ingress command must be UTF-8".to_string())?;
+    if !is_legacy_authority_command(command) {
+        return Err(format!(
+            "`{command}` is not a legacy RNA/DNA ingress command"
+        ));
+    }
+    let executable = std::env::current_exe().map_err(io_error)?;
+    Command::new(executable)
+        .env(LEGACY_INGRESS_ENV, "1")
+        .args(&args[2..])
+        .status()
+        .map(|status| Some(status.code().unwrap_or(1)))
+        .map_err(io_error)
+}
+
+pub(super) fn warn_ambient_legacy_contact() {
+    if let Some(command) = std::env::args()
+        .nth(1)
+        .filter(|command| is_legacy_authority_command(command))
+    {
+        eprintln!(
+            "legacy migration ingress: ambient compatibility is deprecated; use `l64-cli legacy {command} ...`"
+        );
+    }
+}
 
 pub(super) fn run_env() -> Result<bool, String> {
     let args = std::env::args_os().collect::<Vec<_>>();
@@ -195,4 +248,11 @@ fn native_error(error: impl core::fmt::Debug) -> String {
 
 fn io_error(error: std::io::Error) -> String {
     error.to_string()
+}
+
+fn is_legacy_authority_command(command: &str) -> bool {
+    matches!(
+        command,
+        "normalize-rna" | "compile-rna" | "sequence-dna" | "inspect-dna" | "verify-roundtrip"
+    )
 }
