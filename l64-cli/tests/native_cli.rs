@@ -94,3 +94,61 @@ fn non_native_commands_still_reach_legacy_dispatch() {
         .assert()
         .success();
 }
+
+#[test]
+fn ambient_legacy_contact_is_visibly_demoted() {
+    let legacy = fixture("legacy.rna", "ι ≔ σ ‖ κ\n".as_bytes());
+    let dna = legacy.with_extension("dna");
+    let output = Command::cargo_bin("l64-cli")
+        .unwrap()
+        .args([
+            "compile-rna",
+            legacy.to_str().unwrap(),
+            "--out",
+            dna.to_str().unwrap(),
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    assert!(
+        String::from_utf8_lossy(&output.stderr).contains("ambient compatibility is deprecated")
+    );
+}
+
+#[test]
+fn explicit_legacy_ingress_reaches_unchanged_dispatcher() {
+    let legacy = fixture("legacy.rna", "ι ≔ σ ‖ κ\n".as_bytes());
+    let dna = legacy.with_extension("dna");
+    let output = Command::cargo_bin("l64-cli")
+        .unwrap()
+        .args([
+            "legacy",
+            "compile-rna",
+            legacy.to_str().unwrap(),
+            "--out",
+            dna.to_str().unwrap(),
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    assert!(dna.exists());
+    assert!(String::from_utf8_lossy(&output.stderr).contains("compatibility/forensic path"));
+}
+
+#[test]
+fn native_contact_does_not_emit_legacy_warning() {
+    let rna = fixture("native.rna", SOURCE);
+    let dna = rna.with_extension("dna");
+    let output = Command::cargo_bin("l64-cli")
+        .unwrap()
+        .args([
+            "compile-rna",
+            rna.to_str().unwrap(),
+            "--out",
+            dna.to_str().unwrap(),
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    assert!(!String::from_utf8_lossy(&output.stderr).contains("legacy migration ingress"));
+}
