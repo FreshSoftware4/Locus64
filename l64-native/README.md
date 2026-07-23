@@ -21,3 +21,5 @@ The third boundary makes primitive execution proof-carrying without adding a rec
 State identity is the domain-separated BLAKE3 commitment of canonical native bytes. No native name, claim identifier, theorem identifier, campaign identifier, JSON field name, or generic serialization schema participates.
 
 This remains additive. It does not yet replace the legacy runtime or DNA packet path.
+
+The fourth boundary adds a native DNA frame with a fixed 44-byte binary header, bounded canonical payload, embedded domain-separated BLAKE3 commitment, and exact DNA decode/re-encode fixed point. The frame contains no string metadata or legacy record payload.
