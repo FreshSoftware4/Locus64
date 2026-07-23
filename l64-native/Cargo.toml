@@ -1,0 +1,7 @@
+[package]
+name = "l64-native"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+[dependencies]
