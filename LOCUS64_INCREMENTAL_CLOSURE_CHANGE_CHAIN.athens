@@ -1,7 +1,6 @@
 ATHENS_DEVELOPMENT_RAIL v1
-field=key=current_stage;value=incremental-closure-closure
 field=key=projection_authority;value=non_authoritative
-field=key=rail_version;value=6
+field=key=rail_version;value=7
 field=key=schema_version;value=1
 gate=id=closure-state-evaluator-green
 gate=id=context-refinement-impact-green
@@ -31,7 +30,7 @@ stage_field=stage=local-global-closure;key=status;value=complete
 stage=id=incremental-closure-closure
 stage_field=stage=incremental-closure-closure;key=depends_on;value=local-global-closure
 stage_field=stage=incremental-closure-closure;key=required_gates;value=incremental-closure-green
-stage_field=stage=incremental-closure-closure;key=status;value=current
+stage_field=stage=incremental-closure-closure;key=status;value=complete
 history=from_status=current;gates=reverse-incidence-green;mode=linear_advance;stage_id=reverse-incidence;to_status=complete
 history=evidence=local%3A43-tests%2Breverse-index%2Bdecode-rebuild%2Bexact-independent-exclusion;kind=dogfood_promotion_receipt;stage_id=reverse-incidence
 history=from_status=current;gates=closure-state-evaluator-green;mode=linear_advance;stage_id=closure-state-evaluator;to_status=complete
@@ -42,4 +41,6 @@ history=from_status=current;gates=exact-affected-recompute-green;mode=linear_adv
 history=evidence=local%3Areverse-reachable-only%2Bdownstream-equality%2Bindependent-stability;kind=dogfood_promotion_receipt;stage_id=exact-affected-recompute
 history=from_status=current;gates=local-global-closure-green;mode=linear_advance;stage_id=local-global-closure;to_status=complete
 history=evidence=local%3Aroot-open%2Bchild-closed-or-invalid%2Bglobal-aggregate;kind=dogfood_promotion_receipt;stage_id=local-global-closure
+history=from_status=current;gates=incremental-closure-green;mode=linear_advance;stage_id=incremental-closure-closure;to_status=complete
+history=evidence=github-fd90966af2191e6d9ca5e14e17f0bcaca431c260-run-30009891592;kind=dogfood_promotion_receipt;stage_id=incremental-closure-closure
 END
