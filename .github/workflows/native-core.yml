@@ -1,6 +1,16 @@
 name: Native core gate
 
 on:
+  push:
+    branches:
+      - 'chatgpt/**'
+    paths:
+      - Cargo.toml
+      - Cargo.lock
+      - l64-native/**
+      - LOCUS64_*_RAIL.athens
+      - LOCUS64_*_CHANGE_CHAIN.athens
+      - .github/workflows/native-core.yml
   pull_request:
     branches:
       - main
@@ -8,6 +18,8 @@ on:
       - Cargo.toml
       - Cargo.lock
       - l64-native/**
+      - LOCUS64_*_RAIL.athens
+      - LOCUS64_*_CHANGE_CHAIN.athens
       - .github/workflows/native-core.yml
   workflow_dispatch:
 
