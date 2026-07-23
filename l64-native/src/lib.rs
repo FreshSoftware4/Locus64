@@ -7,7 +7,7 @@ mod journal;
 mod kernel;
 mod route;
 
-pub use codec::canonical_bytes;
+pub use codec::{DecodeError, canonical_bytes, decode_canonical};
 pub use context::ContextDelta;
 pub use graph::{ContextId, EventId, Graph, Node, NodeId, ROOT_CONTEXT};
 pub use journal::JournalEvent;
