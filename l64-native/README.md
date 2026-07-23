@@ -33,6 +33,8 @@ The sixth boundary adds the first native constraint core without creating a para
 - decoder-side re-execution of operation and evidence law, preventing structurally plausible forged authority;
 - canonical `L64R1 → L64D → L64R1 → L64D` fixed points for both discharged and unresolved guards.
 
+The larger implementation files are factored only at existing item boundaries into construction, typing, transaction, validation, codec, and RNA concerns. This changes review locality without introducing another authority layer or altering canonical bytes.
+
 State identity is the domain-separated BLAKE3 commitment of canonical native bytes. No native name, claim identifier, theorem identifier, campaign identifier, JSON field name, or generic serialization schema participates.
 
 The existing `l64-cli` command names now route `L64R1` and `L64D` directly through this native path. Legacy RNA/DNA behavior is classified as compatibility/forensic ingress and is available explicitly through `l64-cli legacy ...`; ambient fallback remains temporarily available with a mandatory deprecation warning.
