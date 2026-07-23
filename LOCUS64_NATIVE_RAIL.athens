@@ -1,0 +1,21 @@
+ATHENS_DEVELOPMENT_RAIL v1
+field=key=schema_version;value=1
+field=key=rail_version;value=5
+field=key=current_stage;value=native-rna-pilot
+field=key=next_stage;value=native-cli-membrane
+field=key=projection_authority;value=non_authoritative
+stage=id=native-rna-pilot
+stage_field=stage=native-rna-pilot;key=status;value=current
+stage_field=stage=native-rna-pilot;key=required_gates;value=native-rna-pilot-green
+stage=id=native-cli-membrane
+stage_field=stage=native-cli-membrane;key=status;value=next
+stage_field=stage=native-cli-membrane;key=depends_on;value=native-rna-pilot
+stage_field=stage=native-cli-membrane;key=required_gates;value=native-cli-membrane-green
+stage=id=legacy-demotion
+stage_field=stage=legacy-demotion;key=status;value=planned
+stage_field=stage=legacy-demotion;key=depends_on;value=native-cli-membrane
+stage_field=stage=legacy-demotion;key=required_gates;value=legacy-demotion-green
+gate=id=native-rna-pilot-green
+gate=id=native-cli-membrane-green
+gate=id=legacy-demotion-green
+END
