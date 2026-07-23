@@ -2,6 +2,11 @@
 name = "l64-cli"
 version = "0.1.0"
 edition = "2024"
+autobins = false
+
+[[bin]]
+name = "l64-cli"
+path = "src/native_main.rs"
 
 [dependencies]
 anyhow = { workspace = true }
@@ -19,6 +24,7 @@ l64-atlas = { path = "../l64-atlas" }
 l64-cert = { path = "../l64-cert" }
 l64-bundle = { path = "../l64-bundle" }
 l64-policy = { path = "../l64-policy" }
+l64-native = { path = "../l64-native" }
 serde_json = { workspace = true }
 bincode = { workspace = true }
 hex = { workspace = true }
