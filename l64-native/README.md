@@ -5,9 +5,9 @@ A deliberately small, additive execution spine for Locus64.
 This crate is not a projection of the legacy `QaEntry` / `RegistryBundle` ontology. It carries:
 
 - composed numeric routes;
-- one node algebra for types, values, operations, judgments, and witnesses;
+- one node algebra for types, values, constraints, operations, judgments, witnesses, and obligations;
 - ordered compact ports;
-- persistent context deltas;
+- persistent context deltas with contradiction checks;
 - one transition journal;
 - one canonical structural codec;
 - one transactional admission path.
@@ -20,10 +20,21 @@ The third boundary makes primitive execution proof-carrying without adding a rec
 
 The fourth boundary adds a native DNA frame with a fixed 44-byte binary header, bounded canonical payload, embedded domain-separated BLAKE3 commitment, and exact DNA decode/re-encode fixed point. The frame contains no string metadata or legacy record payload.
 
-The fifth boundary adds a compact authored RNA ingress. `L64R1` uses one declared domain and strictly increasing numeric local slots; routes are composed as `(domain, slot)`. Six one-byte instructions lower directly through the existing graph and transaction APIs: atom, matrix, function, value, composition, and matrix multiplication. Sequencing omits intrinsic evidence nodes because their routes and structure are deterministically derived.
+The fifth boundary adds a compact authored RNA ingress. `L64R1` uses one declared domain and strictly increasing numeric local slots; routes are composed as `(domain, slot)`. Its byte-oriented instructions lower directly through the existing graph and transaction APIs. Sequencing omits intrinsic evidence nodes because their routes and structure are deterministically derived.
+
+The sixth boundary adds the first native constraint core without creating a parallel schema system:
+
+- seven-axis signed dimensions packed into one 64-bit value;
+- quantity types over existing carrier types;
+- dimension-checked addition, multiplication, division, and square root;
+- compact constraint nodes and persistent context deltas;
+- contradiction rejection before context or journal mutation;
+- a guarded square-root operation that yields a kernel witness when proven, rejects when refuted, and yields a native obligation when unresolved;
+- decoder-side re-execution of operation and evidence law, preventing structurally plausible forged authority;
+- canonical `L64R1 → L64D → L64R1 → L64D` fixed points for both discharged and unresolved guards.
 
 State identity is the domain-separated BLAKE3 commitment of canonical native bytes. No native name, claim identifier, theorem identifier, campaign identifier, JSON field name, or generic serialization schema participates.
 
 The existing `l64-cli` command names now route `L64R1` and `L64D` directly through this native path. Legacy RNA/DNA behavior is classified as compatibility/forensic ingress and is available explicitly through `l64-cli legacy ...`; ambient fallback remains temporarily available with a mandatory deprecation warning.
 
-This remains additive. It does not yet replace the legacy runtime, registry, certification, or old packet implementation internally.
+This remains additive. It does not yet implement proof-producing congruence, incremental dependency closure, native upper-stack projections, or replacement of the legacy runtime, registry, certification, and old packet implementation internally.
