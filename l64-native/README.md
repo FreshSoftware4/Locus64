@@ -24,4 +24,6 @@ The fifth boundary adds a compact authored RNA ingress. `L64R1` uses one declare
 
 State identity is the domain-separated BLAKE3 commitment of canonical native bytes. No native name, claim identifier, theorem identifier, campaign identifier, JSON field name, or generic serialization schema participates.
 
-This remains additive. It does not yet replace the legacy runtime or old DNA packet path. The Commander-held rail names the next cutover stage.
+The existing `l64-cli` command names now route `L64R1` and `L64D` directly through this native path. Legacy RNA/DNA behavior is classified as compatibility/forensic ingress and is available explicitly through `l64-cli legacy ...`; ambient fallback remains temporarily available with a mandatory deprecation warning.
+
+This remains additive. It does not yet replace the legacy runtime, registry, certification, or old packet implementation internally.
