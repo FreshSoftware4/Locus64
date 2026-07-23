@@ -227,30 +227,81 @@ impl Graph {
         ty: NodeId,
     ) -> Result<NodeId, Obstruction> {
         self.ensure_context(context)?;
-        self.ensure_type(ty)?;
+        let type_node = self.ensure_type(ty)?;
+        if type_node.opcode() == OpCode::TypeJudgment {
+            return Err(Obstruction::EvidenceOnlyType { node: ty });
+        }
         self.insert_committed_node(route, context, ty, OpCode::Value, 0, &[])
     }
 
-    pub(crate) fn insert_operation(
+    pub(crate) fn insert_proven_operation(
         &mut self,
-        route: Route,
+        routes: [Route; 3],
         context: ContextId,
         ty: NodeId,
         opcode: OpCode,
         inputs: &[NodeId],
-    ) -> Result<crate::CommitResult, Obstruction> {
-        let ports = inputs
-            .iter()
-            .enumerate()
-            .map(|(ordinal, target)| Port::new(*target, PortRole::Argument, ordinal as u16))
-            .collect::<Vec<_>>();
-        let node = self.insert_committed_node(route, context, ty, opcode, 0, &ports)?;
-        let event = self.journal.len().saturating_sub(1) as EventId;
-        Ok(crate::CommitResult {
-            node,
-            event,
-            commitment: self.commitment,
-        })
+    ) -> crate::CommitResult {
+        let [route, judgment_route, witness_route] = routes;
+        let before = self.commitment;
+
+        let operation = self.nodes.len() as NodeId;
+        let operation_first_port = self.ports.len() as u32;
+        self.ports.extend(
+            inputs
+                .iter()
+                .enumerate()
+                .map(|(ordinal, target)| Port::new(*target, PortRole::Argument, ordinal as u16)),
+        );
+        self.nodes.push(Node {
+            payload: 0,
+            context,
+            ty,
+            first_port: operation_first_port,
+            opcode: opcode as u16,
+            port_count: inputs.len() as u16,
+        });
+
+        let judgment = self.nodes.len() as NodeId;
+        let judgment_first_port = self.ports.len() as u32;
+        self.ports.extend([
+            Port::new(operation, PortRole::Subject, 0),
+            Port::new(inputs[0], PortRole::Premise, 1),
+            Port::new(inputs[1], PortRole::Premise, 2),
+            Port::new(ty, PortRole::Conclusion, 3),
+        ]);
+        self.nodes.push(Node {
+            payload: opcode as u64,
+            context,
+            ty: META_TYPE,
+            first_port: judgment_first_port,
+            opcode: OpCode::TypeJudgment as u16,
+            port_count: 4,
+        });
+
+        let evidence = self.nodes.len() as NodeId;
+        self.nodes.push(Node {
+            payload: 0,
+            context,
+            ty: judgment,
+            first_port: self.ports.len() as u32,
+            opcode: OpCode::KernelWitness as u16,
+            port_count: 0,
+        });
+
+        self.routes.insert(route, operation);
+        self.routes.insert(judgment_route, judgment);
+        self.routes.insert(witness_route, evidence);
+
+        let after = crate::codec::state_commitment(self);
+        self.push_event(opcode, operation, before, after);
+        self.commitment = after;
+        crate::CommitResult {
+            node: operation,
+            evidence,
+            event: self.journal.len().saturating_sub(1) as EventId,
+            commitment: after,
+        }
     }
 
     pub(crate) fn function_parts(&self, ty: NodeId) -> Result<(NodeId, NodeId), Obstruction> {
