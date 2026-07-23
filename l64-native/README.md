@@ -49,7 +49,7 @@ The seventh boundary adds proof-producing congruence without promoting a union-f
 - decoder-side rule re-execution rejects forged rules, missing provenance, scope escape, and mismatched congruence premises;
 - equality-bearing `L64R1` reaches the exact `L64D → L64R1 → L64D` fixed point.
 
-`LOCUS64_PROOF_CONGRUENCE_CHANGE_CHAIN.athens` is the promotion boundary for equality authority; forged-merge closure requires repository evidence before the parent rail can advance.
+`LOCUS64_PROOF_CONGRUENCE_CHANGE_CHAIN.athens` is complete on repository evidence. The parent execution rail has advanced to incremental dependency closure.
 
 State identity is the domain-separated BLAKE3 commitment of canonical native bytes. No native name, claim identifier, theorem identifier, campaign identifier, JSON field name, or generic serialization schema participates.
 
