@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "l64-native",
     "l64-core",
     "l64-locus",
     "l64-research",
