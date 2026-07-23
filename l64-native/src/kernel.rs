@@ -1,4 +1,7 @@
-use crate::{ContextId, Graph, NodeId, Route};
+use crate::{ContextId, Graph, LocusWord, NodeId, Route};
+
+pub(crate) const JUDGMENT_LOCUS: LocusWord = LocusWord(u64::MAX - 1);
+pub(crate) const WITNESS_LOCUS: LocusWord = LocusWord(u64::MAX);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u16)]
@@ -10,6 +13,8 @@ pub enum OpCode {
     Compose = 5,
     MatMul = 6,
     ExtendContext = 7,
+    TypeJudgment = 8,
+    KernelWitness = 9,
 }
 
 impl OpCode {
@@ -22,16 +27,25 @@ impl OpCode {
             5 => Some(Self::Compose),
             6 => Some(Self::MatMul),
             7 => Some(Self::ExtendContext),
+            8 => Some(Self::TypeJudgment),
+            9 => Some(Self::KernelWitness),
             _ => None,
         }
     }
 
     pub(crate) fn is_type(self) -> bool {
-        matches!(self, Self::TypeAtom | Self::TypeMatrix | Self::TypeFunction)
+        matches!(
+            self,
+            Self::TypeAtom | Self::TypeMatrix | Self::TypeFunction | Self::TypeJudgment
+        )
     }
 
     pub(crate) fn is_persisted_node(self) -> bool {
         self != Self::ExtendContext
+    }
+
+    pub(crate) fn is_executable(self) -> bool {
+        matches!(self, Self::Compose | Self::MatMul)
     }
 }
 
@@ -42,6 +56,9 @@ pub enum PortRole {
     Domain = 2,
     Codomain = 3,
     Argument = 4,
+    Subject = 5,
+    Premise = 6,
+    Conclusion = 7,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -60,6 +77,9 @@ impl PortRole {
             2 => Some(Self::Domain),
             3 => Some(Self::Codomain),
             4 => Some(Self::Argument),
+            5 => Some(Self::Subject),
+            6 => Some(Self::Premise),
+            7 => Some(Self::Conclusion),
             _ => None,
         }
     }
@@ -89,13 +109,7 @@ impl Port {
     }
 
     pub fn role(&self) -> PortRole {
-        match self.role {
-            1 => PortRole::Parameter,
-            2 => PortRole::Domain,
-            3 => PortRole::Codomain,
-            4 => PortRole::Argument,
-            _ => unreachable!("stored port role is constructed internally"),
-        }
+        PortRole::from_raw(self.role).expect("stored port role is validated at insertion")
     }
 
     pub fn ordinal(&self) -> u16 {
@@ -153,6 +167,7 @@ impl Proposal {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CommitResult {
     pub node: NodeId,
+    pub evidence: NodeId,
     pub event: u32,
     pub commitment: [u8; 32],
 }
@@ -176,6 +191,9 @@ pub enum Obstruction {
         node: NodeId,
     },
     MalformedType {
+        node: NodeId,
+    },
+    EvidenceOnlyType {
         node: NodeId,
     },
     Arity {
@@ -217,6 +235,16 @@ impl Graph {
                 actual: proposal.inputs.len() as u16,
             });
         }
+
+        let judgment_route = proposal.route.composed(JUDGMENT_LOCUS);
+        let witness_route = proposal.route.composed(WITNESS_LOCUS);
+        if self.resolve(&proposal.route).is_some()
+            || self.resolve(&judgment_route).is_some()
+            || self.resolve(&witness_route).is_some()
+        {
+            return Err(Obstruction::RouteOccupied);
+        }
+
         let left = proposal.inputs[0];
         let right = proposal.inputs[1];
         let left_node = self.ensure_node(left)?;
@@ -279,12 +307,12 @@ impl Graph {
             _ => unreachable!("public proposal constructors expose executable operations only"),
         }
 
-        self.insert_operation(
-            proposal.route,
+        Ok(self.insert_proven_operation(
+            [proposal.route, judgment_route, witness_route],
             proposal.context,
             proposal.output_type,
             proposal.opcode,
             &proposal.inputs,
-        )
+        ))
     }
 }
