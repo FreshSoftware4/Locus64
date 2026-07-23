@@ -1,7 +1,6 @@
 ATHENS_DEVELOPMENT_RAIL v1
-field=key=current_stage;value=forged-merge-closure
 field=key=projection_authority;value=non_authoritative
-field=key=rail_version;value=6
+field=key=rail_version;value=7
 field=key=schema_version;value=1
 gate=id=canonical-representative-green
 gate=id=congruence-lifting-green
@@ -31,7 +30,7 @@ stage_field=stage=canonical-representative;key=status;value=complete
 stage=id=forged-merge-closure
 stage_field=stage=forged-merge-closure;key=depends_on;value=canonical-representative
 stage_field=stage=forged-merge-closure;key=required_gates;value=forged-merge-closure-green
-stage_field=stage=forged-merge-closure;key=status;value=current
+stage_field=stage=forged-merge-closure;key=status;value=complete
 history=from_status=current;gates=equality-judgment-green;mode=linear_advance;stage_id=equality-judgment;to_status=complete
 history=evidence=local%3A41-tests%3Btyped-equality-judgment%2Battached-witness;kind=dogfood_promotion_receipt;stage_id=equality-judgment
 history=from_status=current;gates=primitive-equality-witness-green;mode=linear_advance;stage_id=primitive-equality-witness;to_status=complete
@@ -42,4 +41,6 @@ history=from_status=current;gates=evidence-path-validation-green;mode=linear_adv
 history=evidence=local%3A41-tests%3Bdeterministic-path%2Bcontext-scope%2Bdecode-recheck;kind=dogfood_promotion_receipt;stage_id=evidence-path-validation
 history=from_status=current;gates=canonical-representative-green;mode=linear_advance;stage_id=canonical-representative;to_status=complete
 history=evidence=local%3A41-tests%3Broute-minimal-representative-no-persisted-index;kind=dogfood_promotion_receipt;stage_id=canonical-representative
+history=from_status=current;gates=forged-merge-closure-green;mode=linear_advance;stage_id=forged-merge-closure;to_status=complete
+history=evidence=github-0a84bdd3dc232a0db1b79009c3bf99cfd4fb40cd-run-29997066639;kind=dogfood_promotion_receipt;stage_id=forged-merge-closure
 END
