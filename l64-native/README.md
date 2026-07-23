@@ -1,22 +1,21 @@
 # l64-native
 
-The first additive native execution slice for Locus64.
+A deliberately small, additive execution spine for Locus64.
 
-This crate deliberately does less:
+This crate is not a projection of the legacy `QaEntry` / `RegistryBundle` ontology. It carries:
 
-- one node algebra represents types, values, and operations;
-- composed numeric routes replace native names;
-- ordered ports carry incidence;
-- persistent context deltas carry scope;
-- one transition journal records committed changes;
-- one canonical byte encoder determines a provisional dependency-free state stamp;
-- one transaction path validates before mutation.
+- composed numeric routes;
+- one node algebra for types, values, and operations;
+- ordered compact ports;
+- persistent context deltas;
+- one transition journal;
+- one canonical structural codec;
+- one transactional admission path.
 
-The first workloads are intentionally narrow:
+The first workload boundary proves that lawful typed function composition commits while incompatible matrix multiplication is rejected without state mutation.
 
-1. typed function composition must commit;
-2. incompatible matrix multiplication must return a structured obstruction and leave state unchanged.
+The second boundary adds a bounded native decoder. Canonical bytes must decode, satisfy structural laws, and re-encode byte-for-byte. The decoder rejects malformed node order, invalid port laws, bad contexts, invalid route coverage, unknown opcodes, structural overrun, trailing bytes, and non-canonical ordering.
 
-The crate has no dependency on the legacy registry, bundle, report, or certification object families. It is additive and cannot yet replace those systems.
+State identity is the domain-separated BLAKE3 commitment of canonical native bytes. No native name, claim identifier, theorem identifier, campaign identifier, JSON field name, or generic serialization schema participates.
 
-The first-pass stamp is deterministic but not cryptographic. DNA v2 must bind the same canonical bytes to the repository's domain-separated cryptographic commitment implementation.
+This remains additive. It does not yet replace the legacy runtime or DNA packet path.
