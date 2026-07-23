@@ -57,7 +57,7 @@ State identity is the domain-separated BLAKE3 commitment of canonical native byt
 
 The existing `l64-cli` command names now route `L64R1` and `L64D` directly through this native path. Legacy RNA/DNA behavior is classified as compatibility/forensic ingress and is available explicitly through `l64-cli legacy ...`; ambient fallback remains temporarily available with a mandatory deprecation warning.
 
-This remains additive. It does not yet implement incremental dependency closure, native upper-stack projections, or replacement of the legacy runtime, registry, certification, and old packet implementation internally.
+This remains additive. It does not yet implement native upper-stack projections or replacement of the legacy runtime, registry, certification, and old packet implementation internally.
 
 The eighth boundary adds incremental closure without turning invalidation into a second authority database:
 
