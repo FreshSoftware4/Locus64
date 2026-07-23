@@ -1,9 +1,10 @@
 use std::collections::BTreeMap;
 
+use crate::kernel::{JUDGMENT_LOCUS, WITNESS_LOCUS};
 use crate::{ContextDelta, Graph, LocusWord, Node, NodeId, OpCode, Port, PortRole, Route};
 
-const CODEC_VERSION: u16 = 1;
-const COMMITMENT_DOMAIN: &[u8] = b"l64-native-state-v1\0";
+const CODEC_VERSION: u16 = 2;
+const COMMITMENT_DOMAIN: &[u8] = b"l64-native-state-v2\0";
 const MAX_NODES: usize = 1 << 20;
 const MAX_PORTS: usize = 1 << 22;
 const MAX_CONTEXTS: usize = 1 << 20;
@@ -218,6 +219,7 @@ fn validate_structure(
             }
         }
         validate_port_law(node.opcode(), node_ports, node.ty().is_some())?;
+        validate_node_semantics(index, node, node_ports, nodes, ports)?;
         port_cursor = range.end;
     }
     if port_cursor != ports.len() {
@@ -236,6 +238,88 @@ fn validate_structure(
     }
     if covered.iter().any(|covered| !covered) {
         return Err(DecodeError::InvalidRoute);
+    }
+    validate_evidence_routes(nodes, routes)?;
+    Ok(())
+}
+
+fn validate_node_semantics(
+    index: usize,
+    node: &Node,
+    node_ports: &[Port],
+    nodes: &[Node],
+    ports: &[Port],
+) -> Result<(), DecodeError> {
+    match node.opcode() {
+        OpCode::Value => {
+            let ty = node.ty().ok_or(DecodeError::InvalidNode)?;
+            if nodes[ty as usize].opcode() == OpCode::TypeJudgment {
+                return Err(DecodeError::InvalidNode);
+            }
+        }
+        OpCode::KernelWitness => {
+            let ty = node.ty().ok_or(DecodeError::InvalidNode)?;
+            if nodes[ty as usize].opcode() != OpCode::TypeJudgment {
+                return Err(DecodeError::InvalidNode);
+            }
+        }
+        OpCode::TypeJudgment => {
+            let rule = OpCode::from_raw(node.payload() as u16)
+                .filter(|opcode| opcode.is_executable())
+                .ok_or(DecodeError::InvalidNode)?;
+            let subject = node_ports[0].target() as usize;
+            if subject >= index || nodes[subject].opcode() != rule {
+                return Err(DecodeError::InvalidNode);
+            }
+            let subject_node = &nodes[subject];
+            if subject_node.ty() != Some(node_ports[3].target()) {
+                return Err(DecodeError::InvalidNode);
+            }
+            let subject_ports = ports
+                .get(subject_node.port_range())
+                .ok_or(DecodeError::InvalidPortRange)?;
+            if subject_ports.len() != 2
+                || subject_ports[0].target() != node_ports[1].target()
+                || subject_ports[1].target() != node_ports[2].target()
+            {
+                return Err(DecodeError::InvalidNode);
+            }
+        }
+        _ => {}
+    }
+    Ok(())
+}
+
+fn validate_evidence_routes(
+    nodes: &[Node],
+    routes: &BTreeMap<Route, NodeId>,
+) -> Result<(), DecodeError> {
+    let mut attached = vec![false; nodes.len()];
+    for (route, node_id) in routes {
+        let node = &nodes[*node_id as usize];
+        if !node.opcode().is_executable() {
+            continue;
+        }
+        let judgment = *routes
+            .get(&route.composed(JUDGMENT_LOCUS))
+            .ok_or(DecodeError::InvalidRoute)?;
+        let witness = *routes
+            .get(&route.composed(WITNESS_LOCUS))
+            .ok_or(DecodeError::InvalidRoute)?;
+        if nodes[judgment as usize].opcode() != OpCode::TypeJudgment
+            || nodes[witness as usize].opcode() != OpCode::KernelWitness
+            || nodes[witness as usize].ty() != Some(judgment)
+        {
+            return Err(DecodeError::InvalidRoute);
+        }
+        attached[judgment as usize] = true;
+        attached[witness as usize] = true;
+    }
+    for (index, node) in nodes.iter().enumerate() {
+        if matches!(node.opcode(), OpCode::TypeJudgment | OpCode::KernelWitness) && !attached[index]
+        {
+            return Err(DecodeError::InvalidRoute);
+        }
     }
     Ok(())
 }
@@ -258,6 +342,15 @@ fn validate_port_law(opcode: OpCode, ports: &[Port], has_type: bool) -> Result<(
                 && ports.iter().all(|port| port.role() == PortRole::Argument)
                 && has_type
         }
+        OpCode::TypeJudgment => {
+            ports.len() == 4
+                && ports[0].role() == PortRole::Subject
+                && ports[1].role() == PortRole::Premise
+                && ports[2].role() == PortRole::Premise
+                && ports[3].role() == PortRole::Conclusion
+                && !has_type
+        }
+        OpCode::KernelWitness => ports.is_empty() && has_type,
         OpCode::ExtendContext => false,
     };
     valid.then_some(()).ok_or(DecodeError::InvalidPortLaw)
