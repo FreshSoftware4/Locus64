@@ -252,5 +252,8 @@ fn replay_projection_is_bound_to_the_actual_runtime_journal() {
     let decoded = decode_canonical(&canonical_bytes(&fixture.graph)).unwrap();
     assert_eq!(decoded.state_commitment(), fixture.graph.state_commitment());
     assert_eq!(decoded.journal_len(), 0);
-    assert_eq!(projection.verify(&decoded), Err(ProjectionError::SourceMismatch));
+    assert_eq!(
+        projection.verify(&decoded),
+        Err(ProjectionError::SourceMismatch)
+    );
 }
