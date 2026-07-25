@@ -9,6 +9,7 @@ on:
       - Cargo.toml
       - Cargo.lock
       - l64-native/**
+      - l64-projection/**
       - l64-cli/**
       - LOCUS64_*_RAIL.athens
       - LOCUS64_*_CHANGE_CHAIN.athens
@@ -39,5 +40,5 @@ jobs:
       - name: Test workspace
         run: cargo test -q
 
-      - name: Lint native core
-        run: cargo clippy -p l64-native --all-targets -- -D warnings
+      - name: Lint native projection spine
+        run: cargo clippy -p l64-native -p l64-projection --all-targets -- -D warnings

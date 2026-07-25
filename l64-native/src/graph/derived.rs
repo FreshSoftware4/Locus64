@@ -57,7 +57,7 @@ impl Graph {
         Ok(affected.into_iter().collect())
     }
 
-    fn visible_nodes(&self, context: ContextId) -> Result<Vec<NodeId>, Obstruction> {
+    pub fn visible_nodes(&self, context: ContextId) -> Result<Vec<NodeId>, Obstruction> {
         self.ensure_context(context)?;
         let mut contexts = Vec::new();
         let mut cursor = context;

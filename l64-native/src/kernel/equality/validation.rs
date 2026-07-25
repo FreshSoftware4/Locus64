@@ -47,7 +47,6 @@ impl Graph {
         Ok(())
     }
 
-
     pub(crate) fn validate_equality_rule(
         &self,
         context: ContextId,
@@ -184,12 +183,12 @@ impl Graph {
         self.equality_parts(premise)
     }
 
-    pub(crate) fn equality_witness_for(&self, judgment: NodeId) -> Option<NodeId> {
+    pub fn equality_witness_for(&self, judgment: NodeId) -> Option<NodeId> {
         let route = self.route_for_node(judgment)?;
         self.resolve(&route.composed(EVIDENCE_LOCUS))
     }
 
-    fn route_for_node(&self, node: NodeId) -> Option<&Route> {
+    pub fn route_for_node(&self, node: NodeId) -> Option<&Route> {
         self.routes_raw()
             .iter()
             .find_map(|(route, candidate)| (*candidate == node).then_some(route))
@@ -213,7 +212,9 @@ impl Graph {
     fn same_equality_sort(&self, left: &crate::Node, right: &crate::Node) -> bool {
         match (left.ty(), right.ty()) {
             (Some(left_ty), Some(right_ty)) => left_ty == right_ty,
-            (None, None) => self.equality_endpoint_allowed(left) && self.equality_endpoint_allowed(right),
+            (None, None) => {
+                self.equality_endpoint_allowed(left) && self.equality_endpoint_allowed(right)
+            }
             _ => false,
         }
     }

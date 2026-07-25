@@ -58,6 +58,10 @@ impl Graph {
         self.contexts.len()
     }
 
+    pub fn context(&self, id: ContextId) -> Option<&ContextDelta> {
+        self.contexts.get(id as usize)
+    }
+
     pub fn journal_len(&self) -> usize {
         self.journal.len()
     }
@@ -339,5 +343,4 @@ impl Graph {
             commitment: after,
         }
     }
-
 }
