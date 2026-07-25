@@ -38,19 +38,13 @@ fn valid_typed_function_composition_commits() {
 fn invalid_matrix_shape_rejects_without_mutation() {
     let mut graph = Graph::new();
     let scalar = graph.declare_atom_type(route(11), LocusWord(0x52)).unwrap();
-    let graph
-        .declare_matrix_type(route(12), scalar, 2, 3)
-        .unwrap();
-    let graph
-        .declare_matrix_type(route(13), scalar, 4, 2)
-        .unwrap();
-    let graph
-        .declare_matrix_type(route(14), scalar, 2, 2)
-        .unwrap();
-    let graph
+    let left_ty = graph.declare_matrix_type(route(12), scalar, 2, 3).unwrap();
+    let right_ty = graph.declare_matrix_type(route(13), scalar, 4, 2).unwrap();
+    let output_ty = graph.declare_matrix_type(route(14), scalar, 2, 2).unwrap();
+    let left = graph
         .insert_value(route(15), ROOT_CONTEXT, left_ty)
         .unwrap();
-    let graph
+    let right = graph
         .insert_value(route(16), ROOT_CONTEXT, right_ty)
         .unwrap();
 
