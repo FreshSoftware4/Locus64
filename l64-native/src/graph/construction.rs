@@ -4,7 +4,6 @@ impl Graph {
         ports: Vec<Port>,
         contexts: Vec<ContextDelta>,
         routes: BTreeMap<Route, NodeId>,
-        commitment: [u8; 32],
     ) -> Self {
         let mut graph = Self {
             nodes,
@@ -12,10 +11,11 @@ impl Graph {
             contexts,
             routes,
             journal: Vec::new(),
-            commitment,
+            symbol: StateSymbol::ZERO,
             derived: DerivedIndex::default(),
         };
         graph.rebuild_derived_index();
+        graph.symbol = crate::symbol::state_symbol(&graph);
         graph
     }
 
@@ -26,10 +26,10 @@ impl Graph {
             contexts: vec![ContextDelta::root()],
             routes: BTreeMap::new(),
             journal: Vec::new(),
-            commitment: [0; 32],
+            symbol: StateSymbol::ZERO,
             derived: DerivedIndex::empty(1),
         };
-        graph.commitment = crate::codec::state_commitment(&graph);
+        graph.symbol = crate::symbol::state_symbol(&graph);
         graph
     }
 
@@ -66,8 +66,12 @@ impl Graph {
         self.journal.len()
     }
 
-    pub fn state_commitment(&self) -> [u8; 32] {
-        self.commitment
+    pub fn state_symbol(&self) -> StateSymbol {
+        self.symbol
+    }
+
+    pub fn exact_state_identity(&self) -> crate::SymbolicIdentity {
+        crate::state_identity(self)
     }
 
     pub fn journal(&self) -> &[JournalEvent] {
@@ -82,13 +86,13 @@ impl Graph {
         self.ensure_context(parent)?;
         self.ensure_node(binding)?;
         self.validate_context_binding(parent, binding)?;
-        let before = self.commitment;
+        let before = self.symbol.root;
         let id = self.contexts.len() as ContextId;
         self.contexts.push(ContextDelta { parent, binding });
         self.derived.by_context.push(Vec::new());
-        let after = crate::codec::state_commitment(self);
+        let after = crate::symbol::state_symbol(self).root;
         self.push_event(OpCode::ExtendContext, binding, before, after);
-        self.commitment = after;
+        self.symbol = crate::symbol::state_symbol(self);
         Ok(id)
     }
 
@@ -212,7 +216,7 @@ impl Graph {
         evidence_plan: EvidencePlan,
     ) -> crate::CommitResult {
         let [route, judgment_route, evidence_route] = routes;
-        let before = self.commitment;
+        let before = self.symbol.root;
 
         let operation = self.nodes.len() as NodeId;
         let operation_first_port = self.ports.len() as u32;
@@ -276,14 +280,14 @@ impl Graph {
         self.register_derived_node(judgment);
         self.register_derived_node(evidence);
 
-        let after = crate::codec::state_commitment(self);
+        let after = crate::symbol::state_symbol(self).root;
         self.push_event(opcode, operation, before, after);
-        self.commitment = after;
+        self.symbol = crate::symbol::state_symbol(self);
         crate::CommitResult {
             node: operation,
             evidence,
             event: self.journal.len().saturating_sub(1) as EventId,
-            commitment: after,
+            symbol: after,
         }
     }
 
@@ -297,7 +301,7 @@ impl Graph {
         premises: &[NodeId],
     ) -> crate::CommitResult {
         let [route, evidence_route] = routes;
-        let before = self.commitment;
+        let before = self.symbol.root;
 
         let judgment = self.nodes.len() as NodeId;
         let judgment_first_port = self.ports.len() as u32;
@@ -333,14 +337,14 @@ impl Graph {
         self.routes.insert(evidence_route, evidence);
         self.register_derived_node(judgment);
         self.register_derived_node(evidence);
-        let after = crate::codec::state_commitment(self);
+        let after = crate::symbol::state_symbol(self).root;
         self.push_event(OpCode::EqualityWitness, judgment, before, after);
-        self.commitment = after;
+        self.symbol = crate::symbol::state_symbol(self);
         crate::CommitResult {
             node: judgment,
             evidence,
             event: self.journal.len().saturating_sub(1) as EventId,
-            commitment: after,
+            symbol: after,
         }
     }
 }

@@ -49,6 +49,7 @@ fn native_source_rejects_coordination_heavy_dependencies() {
         ["HashMap", "<", "Str", "ing"].concat(),
         ["serde", "_json"].concat(),
         ["bin", "code"].concat(),
+        ["blake", "3"].concat(),
         ["Ser", "ialize"].concat(),
         ["Deser", "ialize"].concat(),
         ["claim", "_packet"].concat(),

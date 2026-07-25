@@ -1,11 +1,11 @@
-use crate::{EventId, NodeId, OpCode};
+use crate::{EventId, NodeId, OpCode, SymbolicSeal};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct JournalEvent {
     pub(crate) operation: OpCode,
     pub(crate) subject: NodeId,
-    pub(crate) before: [u8; 32],
-    pub(crate) after: [u8; 32],
+    pub(crate) before: SymbolicSeal,
+    pub(crate) after: SymbolicSeal,
     pub(crate) parent: EventId,
 }
 
@@ -18,11 +18,11 @@ impl JournalEvent {
         self.subject
     }
 
-    pub fn before(&self) -> [u8; 32] {
+    pub fn before(&self) -> SymbolicSeal {
         self.before
     }
 
-    pub fn after(&self) -> [u8; 32] {
+    pub fn after(&self) -> SymbolicSeal {
         self.after
     }
 

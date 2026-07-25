@@ -1,9 +1,10 @@
-use crate::{DecodeError, Graph, canonical_bytes, decode_canonical};
+use crate::{DecodeError, Graph, SymbolicSeal, canonical_bytes, decode_canonical};
+use l64_symbolic::Composer;
 
 const DNA_MAGIC: &[u8; 4] = b"L64D";
-const DNA_VERSION: u16 = 1;
+const DNA_VERSION: u16 = 2;
 const DNA_FLAGS: u16 = 0;
-const DNA_COMMITMENT_DOMAIN: &[u8] = b"l64-native-dna-v1\0";
+const DNA_SYMBOL_DOMAIN: &str = "l64.native.dna.v2";
 const DNA_HEADER_BYTES: usize = 44;
 pub const MAX_NATIVE_DNA_PAYLOAD_BYTES: usize = 1 << 28;
 
@@ -15,7 +16,7 @@ pub enum DnaError {
     UnsupportedVersion { version: u16 },
     UnsupportedFlags { flags: u16 },
     TrailingBytes,
-    CommitmentMismatch,
+    SealMismatch,
     Canonical(DecodeError),
 }
 
@@ -36,7 +37,7 @@ pub fn dna_bytes(graph: &Graph) -> Result<Vec<u8>, DnaError> {
     out.extend_from_slice(&DNA_VERSION.to_le_bytes());
     out.extend_from_slice(&DNA_FLAGS.to_le_bytes());
     out.extend_from_slice(&(payload.len() as u32).to_le_bytes());
-    out.extend_from_slice(&dna_commitment(&payload));
+    out.extend_from_slice(&dna_seal(graph, payload.len()).to_bytes());
     out.extend_from_slice(&payload);
     Ok(out)
 }
@@ -73,21 +74,24 @@ pub fn decode_dna(bytes: &[u8]) -> Result<Graph, DnaError> {
         return Err(DnaError::TrailingBytes);
     }
 
-    let stored_commitment: [u8; 32] = bytes[12..44]
-        .try_into()
-        .expect("fixed DNA commitment field");
+    let stored_seal = SymbolicSeal::from_bytes(
+        bytes[12..44]
+            .try_into()
+            .expect("fixed DNA symbolic seal field"),
+    );
     let payload = &bytes[DNA_HEADER_BYTES..];
-    let computed_commitment = dna_commitment(payload);
-    if stored_commitment != computed_commitment {
-        return Err(DnaError::CommitmentMismatch);
+    let graph = decode_canonical(payload)?;
+    if stored_seal != dna_seal(&graph, payload.len()) {
+        return Err(DnaError::SealMismatch);
     }
-
-    Ok(decode_canonical(payload)?)
+    Ok(graph)
 }
 
-fn dna_commitment(payload: &[u8]) -> [u8; 32] {
-    let mut hasher = blake3::Hasher::new();
-    hasher.update(DNA_COMMITMENT_DOMAIN);
-    hasher.update(payload);
-    *hasher.finalize().as_bytes()
+fn dna_seal(graph: &Graph, payload_len: usize) -> SymbolicSeal {
+    let mut composer = Composer::new(DNA_SYMBOL_DOMAIN);
+    composer
+        .u16("version", DNA_VERSION)
+        .u64("payload-length", payload_len as u64)
+        .ordered("state", &[graph.state_symbol().root]);
+    composer.finish()
 }

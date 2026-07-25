@@ -39,7 +39,7 @@ fn canonical_decode_reencode_is_exact_fixed_point() {
     let decoded = decode_canonical(&bytes).unwrap();
 
     assert_eq!(canonical_bytes(&decoded), bytes);
-    assert_eq!(decoded.state_commitment(), graph.state_commitment());
+    assert_eq!(decoded.state_symbol(), graph.state_symbol());
     assert_eq!(decoded.node_count(), graph.node_count());
     assert_eq!(decoded.port_count(), graph.port_count());
     assert_eq!(decoded.context_count(), graph.context_count());

@@ -1,5 +1,7 @@
 use crate::PROJECTION_VERSION;
-use l64_native::{ClosureState, ContextId, Graph, NodeId, Obstruction, OpCode, PortRole, Route};
+use l64_native::{
+    ClosureState, ContextId, Graph, NodeId, Obstruction, OpCode, PortRole, Route, StateSymbol,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ProjectionError {
@@ -20,7 +22,7 @@ impl From<Obstruction> for ProjectionError {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ProjectionSource {
-    pub commitment: [u8; 32],
+    pub symbol: StateSymbol,
     pub context: ContextId,
     pub node_count: usize,
     pub context_count: usize,
@@ -34,7 +36,7 @@ impl ProjectionSource {
             .context(context)
             .ok_or(ProjectionError::UnknownContext(context))?;
         Ok(Self {
-            commitment: graph.state_commitment(),
+            symbol: graph.state_symbol(),
             context,
             node_count: graph.node_count(),
             context_count: graph.context_count(),
@@ -53,7 +55,7 @@ impl ProjectionSource {
         graph
             .context(self.context)
             .ok_or(ProjectionError::UnknownContext(self.context))?;
-        if self.commitment != graph.state_commitment()
+        if self.symbol != graph.state_symbol()
             || self.node_count != graph.node_count()
             || self.context_count != graph.context_count()
             || self.journal_len != graph.journal_len()

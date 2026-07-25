@@ -2,8 +2,11 @@ ATHENS_DEVELOPMENT_RAIL v1
 field=key=current_stage;value=legacy-authority-quarantine
 field=key=next_stage;value=complete
 field=key=projection_authority;value=non_authoritative
-field=key=rail_version;value=5
+field=key=rail_version;value=6
 field=key=schema_version;value=1
+field=key=native_identity;value=exact_symbolic
+field=key=native_compact_seal;value=non_authoritative
+field=key=legacy_digest_boundary;value=blake3_l64_core_only
 gate=id=incremental-closure-green
 gate=id=legacy-authority-quarantine-green
 gate=id=native-constraint-core-green

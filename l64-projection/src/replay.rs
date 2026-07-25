@@ -1,5 +1,5 @@
 use crate::{ProjectionError, ProjectionSource, SourceRef, source_ref};
-use l64_native::{ContextId, Graph, OpCode};
+use l64_native::{ContextId, Graph, OpCode, SymbolicSeal};
 use std::collections::BTreeSet;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -7,8 +7,8 @@ pub struct ReplayStep {
     pub event: u32,
     pub operation: OpCode,
     pub subject: SourceRef,
-    pub before: [u8; 32],
-    pub after: [u8; 32],
+    pub before: SymbolicSeal,
+    pub after: SymbolicSeal,
     pub parent: Option<u32>,
 }
 

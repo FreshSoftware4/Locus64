@@ -1,8 +1,5 @@
 [package]
-name = "l64-native"
+name = "l64-symbolic"
 edition.workspace = true
 version.workspace = true
 license.workspace = true
-
-[dependencies]
-l64-symbolic = { path = "../l64-symbolic" }

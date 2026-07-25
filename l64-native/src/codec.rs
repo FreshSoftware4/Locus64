@@ -3,8 +3,7 @@ use std::collections::BTreeMap;
 use crate::kernel::{EVIDENCE_LOCUS, EqualityRule, JUDGMENT_LOCUS};
 use crate::{ContextDelta, Graph, LocusWord, Node, NodeId, OpCode, Port, PortRole, Route};
 
-const CODEC_VERSION: u16 = 4;
-const COMMITMENT_DOMAIN: &[u8] = b"l64-native-state-v4\0";
+pub(crate) const CODEC_VERSION: u16 = 4;
 const MAX_NODES: usize = 1 << 20;
 const MAX_PORTS: usize = 1 << 22;
 const MAX_CONTEXTS: usize = 1 << 20;

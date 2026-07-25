@@ -312,7 +312,7 @@ fn closure_queries_do_not_mutate_authority_or_canonical_bytes() {
         .unwrap();
     let child = fixture.graph.extend_context(ROOT_CONTEXT, cause).unwrap();
     let before = canonical_bytes(&fixture.graph);
-    let commitment = fixture.graph.state_commitment();
+    let commitment = fixture.graph.state_symbol();
     let journal = fixture.graph.journal_len();
 
     let _ = fixture.graph.direct_dependents(fixture.subject).unwrap();
@@ -325,6 +325,6 @@ fn closure_queries_do_not_mutate_authority_or_canonical_bytes() {
     let _ = fixture.graph.global_closure().unwrap();
 
     assert_eq!(canonical_bytes(&fixture.graph), before);
-    assert_eq!(fixture.graph.state_commitment(), commitment);
+    assert_eq!(fixture.graph.state_symbol(), commitment);
     assert_eq!(fixture.graph.journal_len(), journal);
 }

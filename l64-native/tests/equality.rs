@@ -203,7 +203,7 @@ fn invalid_merges_are_rejected_before_state_mutation() {
         graph.node_count(),
         graph.port_count(),
         graph.journal_len(),
-        graph.state_commitment(),
+        graph.state_symbol(),
     );
 
     assert!(matches!(
@@ -215,7 +215,7 @@ fn invalid_merges_are_rejected_before_state_mutation() {
             graph.node_count(),
             graph.port_count(),
             graph.journal_len(),
-            graph.state_commitment(),
+            graph.state_symbol(),
         ),
         before
     );

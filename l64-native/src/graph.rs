@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use crate::kernel::{ConstraintState, EqualityRule, EvidencePlan};
 use crate::{
     ClosureState, ClosureTransition, ConstraintKind, ContextDelta, Dimension, JournalEvent,
-    LocusWord, Obstruction, OpCode, Port, PortRole, Route,
+    LocusWord, Obstruction, OpCode, Port, PortRole, Route, StateSymbol, SymbolicSeal,
 };
 
 pub type NodeId = u32;
@@ -80,7 +80,7 @@ pub struct Graph {
     contexts: Vec<ContextDelta>,
     routes: BTreeMap<Route, NodeId>,
     journal: Vec<JournalEvent>,
-    commitment: [u8; 32],
+    symbol: StateSymbol,
     derived: DerivedIndex,
 }
 

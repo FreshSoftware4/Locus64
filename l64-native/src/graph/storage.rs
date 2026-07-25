@@ -68,7 +68,7 @@ impl Graph {
             self.ensure_type(ty)?;
         }
 
-        let before = self.commitment;
+        let before = self.symbol.root;
         let node = self.nodes.len() as NodeId;
         let first_port = self.ports.len() as u32;
         self.ports.extend_from_slice(ports);
@@ -82,9 +82,9 @@ impl Graph {
         });
         self.routes.insert(route, node);
         self.register_derived_node(node);
-        let after = crate::codec::state_commitment(self);
+        let after = crate::symbol::state_symbol(self).root;
         self.push_event(opcode, node, before, after);
-        self.commitment = after;
+        self.symbol = crate::symbol::state_symbol(self);
         Ok(node)
     }
 
@@ -92,8 +92,8 @@ impl Graph {
         &mut self,
         operation: OpCode,
         subject: NodeId,
-        before: [u8; 32],
-        after: [u8; 32],
+        before: SymbolicSeal,
+        after: SymbolicSeal,
     ) {
         let parent = self
             .journal

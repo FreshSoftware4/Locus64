@@ -119,8 +119,7 @@ pub fn decode_canonical(bytes: &[u8]) -> Result<Graph, DecodeError> {
     }
 
     validate_structure(&nodes, &ports, &contexts, &routes)?;
-    let commitment = commitment_bytes(bytes);
-    let graph = Graph::from_decoded_parts(nodes, ports, contexts, routes, commitment);
+    let graph = Graph::from_decoded_parts(nodes, ports, contexts, routes);
     graph
         .validate_decoded_authority()
         .map_err(|_| DecodeError::InvalidAuthority)?;
@@ -128,15 +127,4 @@ pub fn decode_canonical(bytes: &[u8]) -> Result<Graph, DecodeError> {
         return Err(DecodeError::NonCanonical);
     }
     Ok(graph)
-}
-
-pub(crate) fn state_commitment(graph: &Graph) -> [u8; 32] {
-    commitment_bytes(&canonical_bytes(graph))
-}
-
-fn commitment_bytes(bytes: &[u8]) -> [u8; 32] {
-    let mut hasher = blake3::Hasher::new();
-    hasher.update(COMMITMENT_DOMAIN);
-    hasher.update(bytes);
-    *hasher.finalize().as_bytes()
 }

@@ -10,6 +10,6 @@ It provides five coordinated views over one native state and context:
 - deterministic aggregate reporting;
 - ranked research candidates from open and invalid reverse-reachable structure.
 
-Every projection carries its native state commitment, context, structural counts, journal length, and projection version. Verification rebuilds the complete view from the graph and requires exact equality. The crate has no storage, registry, cache, import, promotion, serialization, hashing, or alternate graph dependency.
+Every projection carries its native composed state symbol, context, structural counts, journal length, and projection version. Verification rebuilds the complete view from the graph and requires exact equality. The crate has no storage, registry, cache, import, promotion, serialization, independent hashing, or alternate graph dependency. It reuses the symbolic identity carried by native authority.
 
 Projection records are expendable. Native authority remains canonical.

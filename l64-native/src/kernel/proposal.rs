@@ -106,7 +106,7 @@ pub struct CommitResult {
     pub node: NodeId,
     pub evidence: NodeId,
     pub event: u32,
-    pub commitment: [u8; 32],
+    pub symbol: crate::SymbolicSeal,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -225,4 +225,3 @@ pub enum Obstruction {
         binding: NodeId,
     },
 }
-

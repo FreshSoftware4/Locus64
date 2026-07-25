@@ -15,7 +15,7 @@ fn valid_typed_function_composition_commits() {
     let ac = graph.declare_function_type(route(6), a, c).unwrap();
     let first = graph.insert_value(route(7), ROOT_CONTEXT, ab).unwrap();
     let second = graph.insert_value(route(8), ROOT_CONTEXT, bc).unwrap();
-    let before = graph.state_commitment();
+    let before = graph.state_symbol();
     let before_nodes = graph.node_count();
 
     let committed = graph
@@ -23,7 +23,7 @@ fn valid_typed_function_composition_commits() {
         .unwrap();
 
     assert_eq!(graph.node_count(), before_nodes + 3);
-    assert_ne!(graph.state_commitment(), before);
+    assert_ne!(graph.state_symbol(), before);
     assert_eq!(graph.node(committed.node).unwrap().ty(), Some(ac));
     assert_eq!(graph.ports(committed.node).unwrap().len(), 2);
     let evidence = graph.node(committed.evidence).unwrap();
@@ -31,27 +31,30 @@ fn valid_typed_function_composition_commits() {
     let judgment = evidence.ty().unwrap();
     assert_eq!(graph.node(judgment).unwrap().opcode(), OpCode::TypeJudgment);
     assert_eq!(graph.ports(judgment).unwrap().len(), 4);
-    assert_eq!(
-        graph.journal().last().unwrap().after(),
-        committed.commitment
-    );
+    assert_eq!(graph.journal().last().unwrap().after(), committed.symbol);
 }
 
 #[test]
 fn invalid_matrix_shape_rejects_without_mutation() {
     let mut graph = Graph::new();
     let scalar = graph.declare_atom_type(route(11), LocusWord(0x52)).unwrap();
-    let left_ty = graph.declare_matrix_type(route(12), scalar, 2, 3).unwrap();
-    let right_ty = graph.declare_matrix_type(route(13), scalar, 4, 2).unwrap();
-    let output_ty = graph.declare_matrix_type(route(14), scalar, 2, 2).unwrap();
-    let left = graph
+    let graph
+        .declare_matrix_type(route(12), scalar, 2, 3)
+        .unwrap();
+    let graph
+        .declare_matrix_type(route(13), scalar, 4, 2)
+        .unwrap();
+    let graph
+        .declare_matrix_type(route(14), scalar, 2, 2)
+        .unwrap();
+    let graph
         .insert_value(route(15), ROOT_CONTEXT, left_ty)
         .unwrap();
-    let right = graph
+    let graph
         .insert_value(route(16), ROOT_CONTEXT, right_ty)
         .unwrap();
 
-    let before_commitment = graph.state_commitment();
+    let before_commitment = graph.state_symbol();
     let before_nodes = graph.node_count();
     let before_ports = graph.port_count();
     let before_contexts = graph.context_count();
@@ -72,7 +75,7 @@ fn invalid_matrix_shape_rejects_without_mutation() {
             right_rows: 4,
         })
     );
-    assert_eq!(graph.state_commitment(), before_commitment);
+    assert_eq!(graph.state_symbol(), before_commitment);
     assert_eq!(graph.node_count(), before_nodes);
     assert_eq!(graph.port_count(), before_ports);
     assert_eq!(graph.context_count(), before_contexts);
@@ -101,14 +104,14 @@ fn kernel_judgment_cannot_be_forged_through_value_insertion() {
         ))
         .unwrap();
     let judgment = graph.node(committed.evidence).unwrap().ty().unwrap();
-    let before = graph.state_commitment();
+    let before = graph.state_symbol();
     let before_nodes = graph.node_count();
 
     assert_eq!(
         graph.insert_value(route(40), ROOT_CONTEXT, judgment),
         Err(Obstruction::EvidenceOnlyType { node: judgment })
     );
-    assert_eq!(graph.state_commitment(), before);
+    assert_eq!(graph.state_symbol(), before);
     assert_eq!(graph.node_count(), before_nodes);
     assert!(graph.resolve(&route(40)).is_none());
 }

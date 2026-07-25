@@ -8,6 +8,7 @@ on:
     paths:
       - Cargo.toml
       - Cargo.lock
+      - l64-symbolic/**
       - l64-native/**
       - l64-projection/**
       - l64-cli/**
@@ -40,5 +41,5 @@ jobs:
       - name: Test workspace
         run: cargo test -q
 
-      - name: Lint native projection spine
-        run: cargo clippy -p l64-native -p l64-projection --all-targets -- -D warnings
+      - name: Lint native symbolic spine
+        run: cargo clippy -p l64-symbolic -p l64-native -p l64-projection --all-targets -- -D warnings

@@ -46,7 +46,7 @@ impl ProjectionSet {
         let mut out = String::new();
         let _ = writeln!(out, "L64 NATIVE PROJECTION v{}", self.source.version);
         let _ = writeln!(out, "context={}", self.source.context);
-        let _ = writeln!(out, "commitment={}", hex(&self.source.commitment));
+        let _ = writeln!(out, "symbol={}", self.source.symbol);
         let _ = writeln!(out, "nodes={}", self.source.node_count);
         let _ = writeln!(out, "contexts={}", self.source.context_count);
         let _ = writeln!(out, "journal={}", self.source.journal_len);
@@ -84,14 +84,6 @@ fn format_route(route: &Route) -> String {
     let mut out = format!("{:016x}", route.domain().0);
     for word in route.tail() {
         let _ = write!(out, "/{:016x}", word.0);
-    }
-    out
-}
-
-fn hex(bytes: &[u8]) -> String {
-    let mut out = String::with_capacity(bytes.len() * 2);
-    for byte in bytes {
-        let _ = write!(out, "{byte:02x}");
     }
     out
 }

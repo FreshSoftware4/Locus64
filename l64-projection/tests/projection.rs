@@ -73,7 +73,7 @@ fn fixture() -> Fixture {
 fn all_upper_views_are_derived_without_mutating_native_authority() {
     let fixture = fixture();
     let before = canonical_bytes(&fixture.graph);
-    let commitment = fixture.graph.state_commitment();
+    let commitment = fixture.graph.state_symbol();
     let counts = (
         fixture.graph.node_count(),
         fixture.graph.port_count(),
@@ -85,7 +85,7 @@ fn all_upper_views_are_derived_without_mutating_native_authority() {
     projection.verify(&fixture.graph).unwrap();
 
     assert_eq!(canonical_bytes(&fixture.graph), before);
-    assert_eq!(fixture.graph.state_commitment(), commitment);
+    assert_eq!(fixture.graph.state_symbol(), commitment);
     assert_eq!(
         (
             fixture.graph.node_count(),
@@ -250,7 +250,7 @@ fn replay_projection_is_bound_to_the_actual_runtime_journal() {
     let fixture = fixture();
     let projection = ProjectionSet::derive(&fixture.graph, ROOT_CONTEXT, 8).unwrap();
     let decoded = decode_canonical(&canonical_bytes(&fixture.graph)).unwrap();
-    assert_eq!(decoded.state_commitment(), fixture.graph.state_commitment());
+    assert_eq!(decoded.state_symbol(), fixture.graph.state_symbol());
     assert_eq!(decoded.journal_len(), 0);
     assert_eq!(
         projection.verify(&decoded),
