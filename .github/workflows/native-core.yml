@@ -11,6 +11,7 @@ on:
       - l64-symbolic/**
       - l64-native/**
       - l64-projection/**
+      - l64-core/**
       - l64-cli/**
       - LOCUS64_*_RAIL.athens
       - LOCUS64_*_CHANGE_CHAIN.athens
@@ -26,6 +27,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Export governed source
+        run: tar --exclude=.git --exclude=target -czf /tmp/locus64-governed-source.tgz .
+
+      - name: Upload governed source
+        uses: actions/upload-artifact@v4
+        with:
+          name: locus64-governed-source-pass12-bootstrap
+          path: /tmp/locus64-governed-source.tgz
+          if-no-files-found: error
+          retention-days: 1
 
       - name: Install stable Rust
         uses: dtolnay/rust-toolchain@stable
