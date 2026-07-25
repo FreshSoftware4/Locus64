@@ -2,7 +2,7 @@ ATHENS_DEVELOPMENT_RAIL v1
 field=key=compact_seal_authority;value=non_authoritative
 field=key=exact_identity_authority;value=domain_plus_canonical_bytes
 field=key=legacy_blake3_boundary;value=l64-core-only
-field=key=rail_version;value=1
+field=key=rail_version;value=2
 field=key=schema_version;value=1
 gate=id=exact-identity-envelope-green
 gate=id=seal-coordinate-algebra-green
@@ -42,7 +42,7 @@ stage_field=stage=developer-surface;key=status;value=complete
 stage=id=symbolic-commitment-closure
 stage_field=stage=symbolic-commitment-closure;key=depends_on;value=developer-surface
 stage_field=stage=symbolic-commitment-closure;key=required_gates;value=symbolic-commitment-green
-stage_field=stage=symbolic-commitment-closure;key=status;value=current
+stage_field=stage=symbolic-commitment-closure;key=status;value=complete
 history=from_status=current;gates=exact-identity-envelope-green;mode=linear_advance;stage_id=exact-identity-envelope;to_status=complete
 history=evidence=local%3Al64s1-self-delimiting-domain-plus-canonical-bytes%2Bexact-roundtrip;kind=dogfood_promotion_receipt;stage_id=exact-identity-envelope
 history=from_status=current;gates=seal-coordinate-algebra-green;mode=linear_advance;stage_id=seal-coordinate-algebra;to_status=complete
@@ -57,4 +57,6 @@ history=from_status=current;gates=projection-symbol-binding-green;mode=linear_ad
 history=evidence=local%3Aprojection-source-and-replay-bind-native-state-symbol%2Bstale-rejection;kind=dogfood_promotion_receipt;stage_id=projection-symbol-binding
 history=from_status=current;gates=developer-surface-green;mode=linear_advance;stage_id=developer-surface;to_status=complete
 history=evidence=local%3Aone-line-helpers%2Bparser-safe-ascii%2Breadable-unicode%2Baxis-change-explanations;kind=dogfood_promotion_receipt;stage_id=developer-surface
+history=from_status=current;gates=symbolic-commitment-green;mode=linear_advance;stage_id=symbolic-commitment-closure;to_status=complete
+history=evidence=github-66e09837ff96e2d10bee30232346e57f9bf7cec9-run-30146463330;kind=dogfood_promotion_receipt;stage_id=symbolic-commitment-closure
 END
