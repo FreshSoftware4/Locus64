@@ -57,7 +57,7 @@ State identity is the domain-separated BLAKE3 commitment of canonical native byt
 
 The existing `l64-cli` command names now route `L64R1` and `L64D` directly through this native path. Legacy RNA/DNA behavior is classified as compatibility/forensic ingress and is available explicitly through `l64-cli legacy ...`; ambient fallback remains temporarily available with a mandatory deprecation warning.
 
-This remains additive. It does not yet implement native upper-stack projections or replacement of the legacy runtime, registry, certification, and old packet implementation internally.
+This remains additive. Native upper projections now exist as read-only derivations in `l64-projection`; replacement and quarantine of the legacy runtime, registry, certification, and old packet implementation remain incomplete.
 
 The eighth boundary adds incremental closure without turning invalidation into a second authority database:
 
@@ -70,3 +70,17 @@ The eighth boundary adds incremental closure without turning invalidation into a
 - closure queries do not alter canonical bytes, commitments, routes, contexts, or journal history.
 
 The derived reverse index is an in-memory accelerator only. It is excluded from RNA, DNA, state commitments, and authority identity.
+
+The ninth boundary derives the first native upper views without turning any view into authority:
+
+- `l64-projection` depends only on `l64-native`;
+- atlas candidates are reconstructed from executable operations, equalities, ports, routes, closure, and native evidence;
+- certification burdens distinguish discharged, open, invalid, and missing-evidence states without rewriting obligation nodes;
+- replay is a deterministic view of the native journal and rejects a canonical decode that lacks that runtime history;
+- reporting counts visible native structure and exposes obligation and invalid routes;
+- research ranking follows open, invalid, and high-impact reverse-reachable structure;
+- every view binds to the native commitment, context, structural counts, journal length, and projection version;
+- verification rebuilds the complete view and requires exact equality;
+- the projection crate contains no storage, registry, cache, alternate graph, import, promotion, serialization, or hash authority.
+
+`LOCUS64_NATIVE_UPPER_PROJECTION_CHANGE_CHAIN.athens` is complete on repository evidence. The parent execution rail has advanced to legacy authority quarantine.

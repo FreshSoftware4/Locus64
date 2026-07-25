@@ -1,6 +1,6 @@
 ATHENS_DEVELOPMENT_RAIL v1
 field=key=projection_authority;value=non_authoritative
-field=key=rail_version;value=1
+field=key=rail_version;value=2
 field=key=schema_version;value=1
 gate=id=projection-contract-green
 gate=id=read-only-query-green
@@ -40,7 +40,7 @@ stage_field=stage=deterministic-regeneration;key=status;value=complete
 stage=id=native-upper-projection-closure
 stage_field=stage=native-upper-projection-closure;key=depends_on;value=deterministic-regeneration
 stage_field=stage=native-upper-projection-closure;key=required_gates;value=native-upper-projection-green
-stage_field=stage=native-upper-projection-closure;key=status;value=current
+stage_field=stage=native-upper-projection-closure;key=status;value=complete
 history=from_status=current;gates=projection-contract-green;mode=linear_advance;stage_id=projection-contract;to_status=complete
 history=evidence=local%3Aprojection-source-binding%2Bnonmutation%2Bno-storage%2Bsingle-native-dependency;kind=dogfood_promotion_receipt;stage_id=projection-contract
 history=from_status=current;gates=read-only-query-green;mode=linear_advance;stage_id=read-only-native-query;to_status=complete
@@ -55,4 +55,6 @@ history=from_status=current;gates=report-research-view-green;mode=linear_advance
 history=evidence=local%3Adeterministic-counts%2Bobligation-and-invalid-routes%2Baffected-set-ranking;kind=dogfood_promotion_receipt;stage_id=report-research-view
 history=from_status=current;gates=deterministic-regeneration-green;mode=linear_advance;stage_id=deterministic-regeneration;to_status=complete
 history=evidence=local%3A56-tests%2Bstrict-clippy%2Bformat%2Blive-projection-execution%2Bforged-and-stale-rejection;kind=dogfood_promotion_receipt;stage_id=deterministic-regeneration
+history=from_status=current;gates=native-upper-projection-green;mode=linear_advance;stage_id=native-upper-projection-closure;to_status=complete
+history=evidence=github-0ad8acc52f35362262c383efd02cc455e6778489-run-30139859138;kind=dogfood_promotion_receipt;stage_id=native-upper-projection-closure
 END

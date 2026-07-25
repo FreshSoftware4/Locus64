@@ -1,8 +1,8 @@
 ATHENS_DEVELOPMENT_RAIL v1
-field=key=current_stage;value=native-upper-projection
-field=key=next_stage;value=legacy-authority-quarantine
+field=key=current_stage;value=legacy-authority-quarantine
+field=key=next_stage;value=complete
 field=key=projection_authority;value=non_authoritative
-field=key=rail_version;value=4
+field=key=rail_version;value=5
 field=key=schema_version;value=1
 gate=id=incremental-closure-green
 gate=id=legacy-authority-quarantine-green
@@ -23,15 +23,17 @@ stage_field=stage=incremental-closure;key=status;value=complete
 stage=id=native-upper-projection
 stage_field=stage=native-upper-projection;key=depends_on;value=incremental-closure
 stage_field=stage=native-upper-projection;key=required_gates;value=native-upper-projection-green
-stage_field=stage=native-upper-projection;key=status;value=current
+stage_field=stage=native-upper-projection;key=status;value=complete
 stage=id=legacy-authority-quarantine
 stage_field=stage=legacy-authority-quarantine;key=depends_on;value=native-upper-projection
 stage_field=stage=legacy-authority-quarantine;key=required_gates;value=legacy-authority-quarantine-green
-stage_field=stage=legacy-authority-quarantine;key=status;value=next
+stage_field=stage=legacy-authority-quarantine;key=status;value=current
 history=from_status=current;gates=native-constraint-core-green;mode=linear_advance;stage_id=native-constraint-core;to_status=complete
 history=evidence=github-cbcbfe5d9c4f34baf0ca54306c77a85ac970bd26-run-29990484222;kind=dogfood_promotion_receipt;stage_id=native-constraint-core
 history=from_status=current;gates=proof-producing-congruence-green;mode=linear_advance;stage_id=proof-producing-congruence;to_status=complete
 history=evidence=github-0a84bdd3dc232a0db1b79009c3bf99cfd4fb40cd-run-29997066639;kind=dogfood_promotion_receipt;stage_id=proof-producing-congruence
 history=from_status=current;gates=incremental-closure-green;mode=linear_advance;stage_id=incremental-closure;to_status=complete
 history=evidence=github-fd90966af2191e6d9ca5e14e17f0bcaca431c260-run-30009891592;kind=dogfood_promotion_receipt;stage_id=incremental-closure
+history=from_status=current;gates=native-upper-projection-green;mode=linear_advance;stage_id=native-upper-projection;to_status=complete
+history=evidence=github-0ad8acc52f35362262c383efd02cc455e6778489-run-30139859138;kind=dogfood_promotion_receipt;stage_id=native-upper-projection
 END
