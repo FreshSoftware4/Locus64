@@ -1,9 +1,8 @@
 ---
 document_status: historical
 superseded_by:
-  - LOCUS64_NATIVE_CONSTITUTION.md
-  - L64_APPROVAL_GATES.md
-scope: consolidated implementation history through Pass 30
+  - LOCUS64.md
+scope: consolidated implementation and documentation history through Pass 30
 authority: none
 preservation_reason: retain development causality without keeping completed rails as live coordination surfaces
 ---
@@ -15,10 +14,9 @@ that formerly occupied twenty separate `.athens` files. It records how the
 current native system was reached, but it does not define current architecture,
 authority, wire formats, commands, or promotion state.
 
-Current law lives in `LOCUS64_NATIVE_CONSTITUTION.md`. Current executable gates
-live in `L64_APPROVAL_GATES.md`. Current operational status lives in
-`HANDOFF_STATUS.md`. The repository's Git history and archival tags retain the
-exact former files.
+Current law, executable gates, operational status, usage, package contracts,
+portability law, and release information live in `LOCUS64.md`. The repository's
+Git history and archival tags retain the exact former files.
 
 ## Historical trajectory
 
@@ -333,6 +331,37 @@ At the end of the consolidated rails:
 These statements describe the completed historical boundary. Current code,
 constitution, gates, tests, and CI remain the only valid way to establish the
 present state.
+
+### 17. Markdown authority consolidation
+
+The documentation surface was reduced from twenty-seven Markdown files to one:
+`LOCUS64.md`.
+
+The consolidation:
+
+1. merged installation, usage, language, architecture, package responsibilities,
+   approval gates, portability law, current status, and release information;
+2. moved historical-only coordination and superseded law out of the live
+   documentation surface;
+3. retained exact former documents in Git history rather than preserving
+   duplicate current-looking files;
+4. changed release packaging to ship the sole project document;
+5. changed conformance from filename-specific cross-document agreement to the
+   stronger invariant that exactly one tracked Markdown document exists;
+6. retained this log as the single non-Markdown historical ledger.
+
+Net result: documentation cannot split into competing current authorities by
+accident, crate-level prose cannot drift from project law, and a release carries
+the same single specification as the source tree.
+
+Former Markdown sources consolidated into `LOCUS64.md` or this history:
+
+- overview, usage, semantic usage, language, stack, constitution, current gates,
+  portability, receipts, status, source manifest, classification, remediation,
+  and release notes;
+- per-package README and symbolic design documents;
+- the historical execution rail, approval ledger, law ledger, and superseded
+  constitution pointer.
 
 ## Former file mapping
 

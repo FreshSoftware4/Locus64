@@ -34,10 +34,10 @@ grep -Fq "TARGET_DIR=\${CARGO_TARGET_DIR:-\$ROOT/target}" scripts/verify-documen
 grep -Fq "\$env:CARGO_TARGET_DIR" scripts/verify-low-memory.ps1 \
   || fail 'PowerShell low-memory gate ignores CARGO_TARGET_DIR'
 
-grep -Fq 'LOCUS64_GOLDEN_PORTABILITY_CONTRACT.md' README.md \
-  || fail 'README does not expose the golden portability contract'
-grep -Fq 'golden-portability-green' L64_APPROVAL_GATES.md \
-  || fail 'live approval gates omit golden portability'
+grep -Fq '## Golden workload and portability contract' LOCUS64.md \
+  || fail 'sole project document does not expose the golden portability contract'
+grep -Fq 'golden-portability-green' LOCUS64.md \
+  || fail 'sole project document omits the golden portability gate'
 
 printf 'GOLDEN_PORTABILITY_GATE v1\n'
 printf 'status=pass\n'

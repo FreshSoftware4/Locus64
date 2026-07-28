@@ -74,10 +74,7 @@ try {
 
     Copy-Item -LiteralPath $cli, $wrapper -Destination $stage
     foreach ($document in @(
-        "README.md",
-        "USAGE_GUIDE.md",
-        "LOCUS64_LANGUAGE_SPEC.md",
-        "RELEASE_NOTES.md",
+        "LOCUS64.md",
         "LICENSE"
     )) {
         Copy-Item -LiteralPath (Join-Path $repository $document) -Destination $stage
