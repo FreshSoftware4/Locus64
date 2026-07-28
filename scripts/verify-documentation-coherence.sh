@@ -68,6 +68,8 @@ for stale in \
 done
 
 for workflow_contact in \
+  'push:' \
+  'branches: [main]' \
   'actions/upload-artifact@v7' \
   'actions/download-artifact@v8' \
   'locus64-portability-receipts' \
@@ -77,6 +79,52 @@ for workflow_contact in \
     || fail "workflow omits portability receipt contact: $workflow_contact"
 done
 scripts/verify-portability-receipts.sh --self-test >/dev/null
+
+# The package map is executable documentation: it must match Cargo membership
+# by exact package name rather than merely repeating the expected count.
+mapfile -t cargo_packages < <(awk '
+  /^members = \[/ { in_members=1; next }
+  in_members && /^\]/ { in_members=0 }
+  in_members && /^[[:space:]]*"[^"]+",?[[:space:]]*$/ {
+    line=$0
+    gsub(/^[[:space:]]*"|",?[[:space:]]*$/, "", line)
+    print line
+  }
+' Cargo.toml | sort -u)
+mapfile -t documented_packages < <(awk '
+  /^## Package responsibilities$/ { in_packages=1; next }
+  in_packages && /^## / { in_packages=0 }
+  in_packages && /^- `l64[^`]*`:/ {
+    line=$0
+    sub(/^- `/, "", line)
+    sub(/`:.*/, "", line)
+    print line
+  }
+' LOCUS64.md | sort -u)
+if [[ "$(printf '%s\n' "${cargo_packages[@]}")" != "$(printf '%s\n' "${documented_packages[@]}")" ]]; then
+  printf 'Cargo packages:\n%s\n' "$(printf '%s\n' "${cargo_packages[@]}")" >&2
+  printf 'documented packages:\n%s\n' "$(printf '%s\n' "${documented_packages[@]}")" >&2
+  fail 'documented package responsibilities differ from Cargo membership'
+fi
+
+# Positive release claims must not resurrect capability vocabulary belonging to
+# the deleted semantic authority island. Negative historical statements remain
+# lawful outside the release improvement inventory.
+release_inventory=$(awk '
+  /^Net improvements:$/ { in_release=1; next }
+  in_release && /^Release assets:$/ { in_release=0 }
+  in_release { print }
+' LOCUS64.md)
+for retired_claim in \
+  'duplex' \
+  'scoped evaluator' \
+  'policy law' \
+  'policy object' \
+  'MechanizationPolicyObject'; do
+  if grep -Fiq "$retired_claim" <<<"$release_inventory"; then
+    fail "release inventory claims absent or retired capability: $retired_claim"
+  fi
+done
 
 mapfile -t retired_commands < <(awk '
   /const RETIRED_LEGACY_COMMANDS:/ { in_list=1; next }

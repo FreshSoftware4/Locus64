@@ -1,6 +1,8 @@
 name: Native core gate
 
 on:
+  push:
+    branches: [main]
   pull_request:
     branches: [main, 'chatgpt/**']
     paths:

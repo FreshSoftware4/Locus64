@@ -363,6 +363,23 @@ Former Markdown sources consolidated into `LOCUS64.md` or this history:
 - the historical execution rail, approval ledger, law ledger, and superseded
   constitution pointer.
 
+### 18. Repository proof and release-claim coherence
+
+The post-consolidation coherence pass closed two narrow repository gaps:
+
+1. native-core verification now runs automatically on every push to `main`, in
+   addition to pull requests and manual dispatch;
+2. the release inventory no longer claims duplex, scoped-evaluator, or policy
+   machinery absent from the live native workspace;
+3. documentation verification derives the exact package set from Cargo and
+   compares it with the sole document's package map;
+4. the same gate continues to derive the public command set from live CLI help
+   and now rejects retired positive capability claims in the release inventory.
+
+The existing current-head manual run and published `v0.1.3` assets were
+independently confirmed before this change. The push trigger prevents future
+direct mainline commits from depending on manual proof dispatch.
+
 ## Former file mapping
 
 | Former file | Consolidated section |

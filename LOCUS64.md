@@ -434,7 +434,7 @@ Net improvements:
 - established deterministic RNA, bounded DNA, fixed-point reconstruction,
   exact diagnostics, typed operations, and streaming transport;
 - added proof-carrying operations, equality congruence, context-relative
-  closure, duplex burdens, scoped evaluators, and deterministic policy law;
+  closure, native obligation burdens, and deterministic canonical ordering;
 - replaced the legacy dispatcher with direct native commands and stable process
   outcomes;
 - added verified certification, observation, change, projection, release, and
