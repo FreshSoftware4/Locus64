@@ -84,7 +84,7 @@ jobs:
           L64_SOURCE_REF: ${{ github.sha }}
         run: ./scripts/write-portability-receipt.sh "portability-receipt/l64-portability-${{ matrix.os }}.json" "${{ matrix.os }}"
       - name: Upload host portability receipt
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: locus64-portability-receipt-${{ matrix.os }}
           path: portability-receipt/l64-portability-${{ matrix.os }}.json
@@ -98,7 +98,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Download host receipts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: locus64-portability-receipt-*
           path: portability-receipts
@@ -106,7 +106,7 @@ jobs:
       - name: Verify exact source-bound host set
         run: ./scripts/verify-portability-receipts.sh portability-receipts "${{ github.sha }}"
       - name: Upload verified receipt set
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: locus64-portability-receipts
           path: portability-receipts/*.json

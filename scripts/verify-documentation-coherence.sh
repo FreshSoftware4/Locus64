@@ -77,8 +77,8 @@ grep -Fq '## Current boundary through Pass 30' LOCUS64_RESEARCH_ADMIN_CLASSIFICA
 grep -Fq 'receipt_schema: L64PORT1' LOCUS64_PORTABILITY_RECEIPT_CONTRACT.md \
   || fail 'portability receipt contract is missing or malformed'
 for workflow_contact in \
-  'actions/upload-artifact@v4' \
-  'actions/download-artifact@v4' \
+  'actions/upload-artifact@v7' \
+  'actions/download-artifact@v8' \
   'locus64-portability-receipts' \
   'scripts/write-portability-receipt.sh' \
   'scripts/verify-portability-receipts.sh'; do
