@@ -37,6 +37,7 @@ jobs:
         shell: bash
         env:
           DELTA_SHA256: eb1c9e98091269b1e7e07e3bb82b396aea06130c2350aef82794cd8d0b17f8c0
+          FIXTURE_SHA256: 2b9cdafc3978f859c8c122bd5b3bc643091295ffee71d0d9f629c00db53a2114
         run: |
           python - <<'PY'
           import base64
@@ -86,6 +87,20 @@ jobs:
               "l64-canon", "l64-atlas", "l64-cert", "l64-testkit",
           ]:
               shutil.rmtree(root / retired, ignore_errors=True)
+
+          fixture_encoded = (root / "remote-proof/current-samples.tar.xz.b64").read_bytes()
+          fixture = base64.b64decode(fixture_encoded, validate=True)
+          fixture_expected = os.environ["FIXTURE_SHA256"]
+          fixture_actual = hashlib.sha256(fixture).hexdigest()
+          if fixture_actual != fixture_expected:
+              raise SystemExit(
+                  f"fixture hash mismatch: expected {fixture_expected}, got {fixture_actual}"
+              )
+          fixture_archive = staging / "current-samples.tar.xz"
+          fixture_archive.write_bytes(fixture)
+          shutil.rmtree(root / "samples", ignore_errors=True)
+          with tarfile.open(fixture_archive, "r:xz") as tf:
+              tf.extractall(root)
           PY
 
       - name: Test exact executable workspace
@@ -99,6 +114,7 @@ jobs:
           FULL_SOURCE_SHA256: 0b4af31494ec25c8fbc66f2a8f4383af34f76f304751828c57e8c3756cbafda2
           BASE_COMMIT: 0ee9274c9ae4b574d89f94cfa2ae13078d28cbed
           DELTA_SHA256: eb1c9e98091269b1e7e07e3bb82b396aea06130c2350aef82794cd8d0b17f8c0
+          FIXTURE_SHA256: 2b9cdafc3978f859c8c122bd5b3bc643091295ffee71d0d9f629c00db53a2114
         run: |
           mkdir -p receipts
           rustc -vV > "$RUNNER_TEMP/rustc-version.txt"
@@ -115,6 +131,7 @@ jobs:
               "full_source_archive_sha256": os.environ["FULL_SOURCE_SHA256"],
               "base_commit": os.environ["BASE_COMMIT"],
               "executable_delta_sha256": os.environ["DELTA_SHA256"],
+              "fixture_archive_sha256": os.environ["FIXTURE_SHA256"],
               "host_label": os.environ["HOST_LABEL"],
               "runner_os": os.environ["RUNNER_OS"],
               "runner_arch": os.environ["RUNNER_ARCH"],
@@ -170,7 +187,8 @@ jobs:
               raise SystemExit(f"host set mismatch: {hosts}")
           invariant_fields = [
               "schema", "proof_scope", "source_ref", "full_source_archive_sha256",
-              "base_commit", "executable_delta_sha256", "package_count",
+              "base_commit", "executable_delta_sha256", "fixture_archive_sha256",
+              "package_count",
               "external_dependencies", "test_command", "result", "head_sha",
           ]
           for field in invariant_fields:
@@ -185,6 +203,7 @@ jobs:
               "source_ref": receipts[0]["source_ref"],
               "base_commit": receipts[0]["base_commit"],
               "executable_delta_sha256": receipts[0]["executable_delta_sha256"],
+              "fixture_archive_sha256": receipts[0]["fixture_archive_sha256"],
               "hosts": sorted(hosts),
               "result": "pass",
               "receipts": [path.name for path in files],
