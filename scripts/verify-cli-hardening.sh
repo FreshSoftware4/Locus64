@@ -56,7 +56,8 @@ if "$CLI" compile-rna samples/native_triangle.rna --artifact-class gene --out "$
 fi
 grep -F -- '--artifact-class was permanently deleted' "$WORK/error" >/dev/null
 
-if rg -n 'Result<bool, String>|Ok\(false\)' l64-cli/src --glob '*.rs' >/dev/null || rg -n '\{error:\?\}' l64-cli/src l64-*/src --glob '*.rs' >/dev/null; then
+if grep -REn --include='*.rs' 'Result<bool, String>|Ok\(false\)' l64-cli/src >/dev/null \
+  || grep -REn --include='*.rs' '\{error:\?\}' l64-cli/src l64-*/src >/dev/null; then
   echo "obsolete fallback or debug diagnostic returned" >&2
   exit 1
 fi

@@ -62,9 +62,9 @@ grep -Fx 'members=2' "$WORK/bundle.out" >/dev/null
 grep -Fx 'member.0.certification_verdict=CERTIFIED' "$WORK/bundle.out" >/dev/null
 grep -Fx 'member.1.certification_verdict=OPEN' "$WORK/bundle.out" >/dev/null
 
-rg -F 'BundleDecoder' l64-cli/src/native_membrane.rs >/dev/null
-rg -F 'BundleEncoder' l64-cli/src/native_membrane.rs >/dev/null
-if rg -n 'read\(&options\.file\)' l64-cli/src/native_membrane.rs >/dev/null; then
+grep -F 'BundleDecoder' l64-cli/src/native_membrane.rs >/dev/null
+grep -F 'BundleEncoder' l64-cli/src/native_membrane.rs >/dev/null
+if grep -En 'read\(&options\.file\)' l64-cli/src/native_membrane.rs >/dev/null; then
   echo 'bundle command returned to whole-file buffering' >&2
   exit 1
 fi
