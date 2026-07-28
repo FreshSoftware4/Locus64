@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - agent/residue-remote-proof-pass30
+  pull_request:
+    branches:
+      - chatgpt/legacy-blake3-removal-pass12
   workflow_dispatch:
 
 permissions:
