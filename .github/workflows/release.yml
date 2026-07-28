@@ -1,0 +1,124 @@
+name: Release binaries
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing version tag to publish
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux-x86_64
+          - os: windows-latest
+            platform: windows-x86_64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - name: Check formatting
+        run: cargo fmt --all --check
+      - name: Test complete workspace offline
+        run: cargo test --locked --offline --workspace
+      - name: Lint complete workspace offline
+        run: cargo clippy --locked --offline --workspace --all-targets -- -D warnings
+      - name: Verify complete release conformance
+        if: matrix.platform == 'linux-x86_64'
+        shell: bash
+        run: |
+          ./scripts/verify-legacy-authority-island-deletion.sh
+          ./scripts/verify-native-carrier.sh
+          ./scripts/verify-cli-hardening.sh
+          ./scripts/verify-process-contract.sh
+          ./scripts/verify-native-scale.sh
+          ./scripts/verify-documentation-coherence.sh
+          ./scripts/verify-golden-portability.sh
+
+  package:
+    name: Package ${{ matrix.platform }} ${{ matrix.profile }}
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [linux-x86_64, windows-x86_64]
+        profile: [compact, perfopt]
+        include:
+          - platform: linux-x86_64
+            os: ubuntu-latest
+          - platform: windows-x86_64
+            os: windows-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build, self-check, and package
+        shell: pwsh
+        run: >
+          ./scripts/package-release.ps1
+          -Profile '${{ matrix.profile }}'
+          -Platform '${{ matrix.platform }}'
+          -Version '${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}'
+      - name: Upload release package
+        uses: actions/upload-artifact@v4
+        with:
+          name: locus64-${{ matrix.platform }}-${{ matrix.profile }}
+          path: release/packages/locus64-*
+          if-no-files-found: error
+          retention-days: 30
+
+  publish:
+    name: Publish GitHub release
+    needs: package
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+          fetch-depth: 0
+      - name: Download release packages
+        uses: actions/download-artifact@v4
+        with:
+          pattern: locus64-*
+          path: dist
+          merge-multiple: true
+      - name: Generate checksums
+        shell: bash
+        run: |
+          cd dist
+          sha256sum locus64-* > SHA256SUMS.txt
+      - name: Publish immutable tagged release
+        shell: bash
+        run: |
+          gh release create "$TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --verify-tag \
+            --title "Locus64 $TAG" \
+            --notes-file RELEASE_NOTES.md \
+            dist/locus64-* \
+            dist/SHA256SUMS.txt

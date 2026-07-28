@@ -4,6 +4,40 @@ Locus64 is a compact, dependency-free native authority and execution system.
 
 Current authority is canonical `L64R1` RNA and `L64D` DNA. `L64B` transports ordered DNA members without creating composite authority. Execution evaluates current authority directly without mutation or persistence. Certification, observation, change, and projection are verified read-only derivatives.
 
+## Install a release
+
+GitHub releases provide four x86-64 packages: compact and
+performance-optimized builds for Windows and Linux. Each package contains both
+`l64` and `l64-cli`; keep them in the same directory because `l64` delegates
+non-audit commands to its sibling `l64-cli`.
+
+After extracting a package, verify the command surface:
+
+```bash
+./l64 authority-audit
+./l64-cli --version
+```
+
+On Windows, use `l64.exe` and `l64-cli.exe`. Validate the downloaded archive
+against `SHA256SUMS.txt` from the same GitHub release.
+
+`compact` minimizes storage footprint. `perfopt` favors execution speed. Both
+profiles use whole-program LTO, one codegen unit, stripped binaries, and aborting
+panics.
+
+## Build release packages
+
+Native packages can be reproduced from PowerShell on the matching host:
+
+```powershell
+./scripts/package-release.ps1 -Profile compact -Platform windows-x86_64 -Version v0.1.3
+./scripts/package-release.ps1 -Profile perfopt -Platform windows-x86_64 -Version v0.1.3
+```
+
+Use `linux-x86_64` on Linux. Pushing a `v*` tag runs the GitHub release workflow,
+which tests Linux and Windows independently, builds all four packages on native
+runners, generates checksums, and publishes one GitHub Release.
+
 ## Verify the workspace
 
 ```bash
