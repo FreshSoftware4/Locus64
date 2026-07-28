@@ -3,6 +3,7 @@ document_status: current
 constitution_scope: live dependency-free native workspace
 workspace_packages: 11
 external_dependencies: 0
+ambient_legacy_authority: deleted_tombstones_only
 ---
 
 # Locus64 Native Constitution
@@ -27,7 +28,7 @@ Evidence: `l64-symbolic`, `l64-native`, `scripts/verify-native-carrier.sh`, full
 4. Equivalence classes, representative caches, reverse indexes, route indexes, and closure memoization are derived accelerators. They do not serialize into RNA or DNA and do not participate in authority identity.
 5. Closure is context-relative and may be `Closed`, `Open`, or `Invalid`; assumption changes create child-context refinements rather than rewriting prior authority.
 
-Evidence: `LOCUS64_CONSTRAINT_CORE_CHANGE_CHAIN.athens`, `LOCUS64_PROOF_CONGRUENCE_CHANGE_CHAIN.athens`, `LOCUS64_INCREMENTAL_CLOSURE_CHANGE_CHAIN.athens`.
+Evidence: `l64-native/tests/constraints.rs`, `l64-native/tests/equality.rs`, `l64-native/tests/closure.rs`, full locked-offline workspace tests.
 
 ## 3. Transport
 
@@ -72,7 +73,7 @@ Evidence: `l64-cli`, `l64`, `LOCUS64_LANGUAGE_SPEC.md`, `scripts/verify-cli-hard
 3. Historical documents may preserve deleted models when explicitly marked `document_status: historical`; they cannot be used as current source-of-truth without current-code verification.
 4. Reintroducing a deleted authority contact requires a new explicit authority law and proof. Historical familiarity is not evidence.
 
-Evidence: `LOCUS64_LEGACY_AUTHORITY_ISLAND_DELETION_CHANGE_CHAIN.athens`, `scripts/verify-legacy-authority-island-deletion.sh`.
+Evidence: `scripts/verify-legacy-authority-island-deletion.sh`, workspace architecture tests, `changelog.log`.
 
 ## 8. Scale and performance
 
@@ -82,7 +83,7 @@ Evidence: `LOCUS64_LEGACY_AUTHORITY_ISLAND_DELETION_CHANGE_CHAIN.athens`, `scrip
 4. No generic digest service, schema router, cache bureaucracy, or alternate graph may be introduced to conceal local work.
 5. The live workspace contains eleven packages, zero external Rust dependencies, and must remain buildable and testable with locked offline Cargo.
 
-Evidence: `LOCUS64_NATIVE_SCALE_CHANGE_CHAIN.athens`, `scripts/verify-native-scale.sh`, full workspace tests and Clippy.
+Evidence: `scripts/verify-native-scale.sh`, native scale and fixed-point tests, full workspace tests and Clippy.
 
 ## 9. Documentation law
 
@@ -92,7 +93,7 @@ Evidence: `LOCUS64_NATIVE_SCALE_CHANGE_CHAIN.athens`, `scripts/verify-native-sca
 4. Every command listed in the native language specification must appear in live CLI help, except the wrapper-local `authority-audit`, which must execute through `l64` only.
 5. Documentation validation must remain a direct contact check over files, Cargo membership, and live help. It may not become a document registry or a parallel architecture database.
 
-Evidence: `LOCUS64_DOCUMENTATION_COHERENCE_CHANGE_CHAIN.athens`, `scripts/verify-documentation-coherence.sh`.
+Evidence: `scripts/verify-documentation-coherence.sh`, current-document contact checks, live CLI help.
 
 ## 10. Golden workload and portability law
 

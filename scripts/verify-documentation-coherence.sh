@@ -26,6 +26,11 @@ for file in "${markdown_docs[@]}"; do
 done
 
 [[ ${#current_docs[@]} -gt 0 ]] || fail 'no current-facing Markdown documents were found'
+[[ -f changelog.log ]] || fail 'consolidated project changelog is missing'
+is_historical changelog.log || fail 'consolidated project changelog is not marked historical'
+if find . -type f -name '*.athens' -not -path './target/*' -not -path './.git/*' | grep -q .; then
+  fail 'completed Athens rails returned instead of remaining consolidated in changelog.log'
+fi
 
 package_count=$(awk '
   /^members = \[/ { in_members=1; next }
@@ -41,22 +46,19 @@ grep -Fq 'eleven packages' LOCUS64_STACK.md \
   || fail 'stack document does not state the Cargo-derived package count'
 grep -Fq 'eleven dependency-free native packages' HANDOFF_STATUS.md \
   || fail 'handoff does not state the Cargo-derived package count'
-grep -Fq 'field=key=live_workspace_packages;value=11' LOCUS64_EXECUTION_COHERENCE_RAIL.athens \
-  || fail 'current execution rail package count disagrees with Cargo'
-
 for stale in \
   'l64-cli legacy ...' \
   'available only through `l64-cli legacy' \
   'replacement and quarantine of the legacy runtime' \
   'transitional legacy workspace' \
   'field=key=ambient_legacy_authority;value=explicit_only'; do
-  if grep -Fq "$stale" "${current_docs[@]}" LOCUS64_EXECUTION_COHERENCE_RAIL.athens; then
+  if grep -Fq "$stale" "${current_docs[@]}"; then
     fail "stale live claim remains: $stale"
   fi
 done
 
-grep -Fq 'field=key=ambient_legacy_authority;value=deleted_tombstones_only' LOCUS64_EXECUTION_COHERENCE_RAIL.athens \
-  || fail 'legacy authority field is not deleted_tombstones_only'
+grep -Fq 'ambient_legacy_authority: deleted_tombstones_only' LOCUS64_NATIVE_CONSTITUTION.md \
+  || fail 'native constitution does not bind deleted-tombstone-only legacy authority'
 
 [[ -f LOCUS64_GOLDEN_PORTABILITY_CONTRACT.md ]] \
   || fail 'golden portability contract is missing'

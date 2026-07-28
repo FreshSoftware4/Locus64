@@ -16,19 +16,19 @@
 
 ## Governing closure
 
-- `LOCUS64_LEGACY_AUTHORITY_ISLAND_DELETION_CHANGE_CHAIN.athens`
-- `LOCUS64_NATIVE_EXECUTION_CHANGE_CHAIN.athens`
-- `LOCUS64_NATIVE_CLI_HARDENING_CHANGE_CHAIN.athens`
-- `LOCUS64_NATIVE_PROCESS_CONTRACT_CHANGE_CHAIN.athens`
-- `LOCUS64_NATIVE_SCALE_CHANGE_CHAIN.athens`
-- `LOCUS64_DOCUMENTATION_COHERENCE_CHANGE_CHAIN.athens`
-- `LOCUS64_GOLDEN_PORTABILITY_CHANGE_CHAIN.athens`
-- `LOCUS64_RESIDUE_REMOTE_PROOF_CHANGE_CHAIN.athens`
-- `LOCUS64_EXECUTION_COHERENCE_RAIL.athens`
+- `LOCUS64_NATIVE_CONSTITUTION.md`
+- `L64_APPROVAL_GATES.md`
+- `LOCUS64_LANGUAGE_SPEC.md`
+- `LOCUS64_GOLDEN_PORTABILITY_CONTRACT.md`
+- `LOCUS64_PORTABILITY_RECEIPT_CONTRACT.md`
+- `HANDOFF_STATUS.md`
 
 ## Restore and historical recovery
 
 The removed legacy source is external to the live workspace in the Pass 19–23 forensic archives. The complete Pass 29 source archive is the restore boundary for Pass 30. The removed pre-native torture harness is retained only in the external Pass 30 forensic backup; it is not a live verification contact.
+
+The completed in-repository development rails and change chains are consolidated
+in `changelog.log`. Exact former files remain recoverable through Git history.
 
 ## Direct verification
 
@@ -57,4 +57,4 @@ The removed legacy source is external to the live workspace in the Pass 19–23 
 - `scripts/verify-portability-receipts.sh` requires the exact Linux, macOS, and Windows receipt set and provides a local contract self-test.
 - `.github/workflows/native-core.yml` retains per-host and combined receipt artifacts.
 - `scripts/verify-documentation-coherence.sh` rejects a returned torture harness, retired-command use in current scripts, stale restore-boundary prose, and missing receipt contacts.
-- `LOCUS64_RESIDUE_REMOTE_PROOF_CHANGE_CHAIN.athens` records the bounded closure.
+- `changelog.log` preserves the consolidated historical closure.

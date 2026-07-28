@@ -1,0 +1,360 @@
+---
+document_status: historical
+superseded_by:
+  - LOCUS64_NATIVE_CONSTITUTION.md
+  - L64_APPROVAL_GATES.md
+scope: consolidated implementation history through Pass 30
+authority: none
+preservation_reason: retain development causality without keeping completed rails as live coordination surfaces
+---
+
+# Locus64 Project History
+
+This document consolidates the completed development rails and change chains
+that formerly occupied twenty separate `.athens` files. It records how the
+current native system was reached, but it does not define current architecture,
+authority, wire formats, commands, or promotion state.
+
+Current law lives in `LOCUS64_NATIVE_CONSTITUTION.md`. Current executable gates
+live in `L64_APPROVAL_GATES.md`. Current operational status lives in
+`HANDOFF_STATUS.md`. The repository's Git history and archival tags retain the
+exact former files.
+
+## Historical trajectory
+
+### 1. RNA/DNA authority cutover
+
+The first native rail established canonical RNA ingestion, canonical DNA
+encoding, fixed-point reconstruction, and an in-process command membrane. The
+sequence was:
+
+1. prove the native RNA pilot;
+2. route `l64-cli` through the native membrane;
+3. demote old contacts to explicit migration ingress;
+4. remove compatibility fallback from the public command path.
+
+Completed gates included `native-rna-pilot-green`,
+`native-cli-membrane-green`, and `legacy-demotion-green`.
+
+Net result: canonical `L64R1` RNA and `L64D` DNA became the only live authority
+surfaces.
+
+### 2. Native constraint core
+
+The constraint-core chain added dimensional algebra, context consistency,
+guarded obligations, and native admission:
+
+1. represent dimensions in the native carrier;
+2. reject inconsistent context refinements transactionally;
+3. distinguish proven, unresolved, and refuted guards;
+4. produce native evidence for discharged guards;
+5. verify the complete fixed point through RNA and DNA.
+
+Completed gates included `dimension-algebra-green`,
+`context-consistency-green`, `guarded-obligation-green`, and
+`constraint-core-closure-green`.
+
+Net result: invalid dimensions and refuted guards cannot commit; unresolved
+guards survive as explicit obligations.
+
+### 3. Proof-producing equality and congruence
+
+The proof-congruence chain replaced ungrounded equality merging with checked
+judgments:
+
+1. make equality a native judgment;
+2. require primitive equality witnesses;
+3. lift equality through congruence only from checked premise paths;
+4. validate evidence paths during decode;
+5. derive canonical representatives without making the cache authoritative;
+6. reject forged merges before mutation.
+
+Completed gates included `equality-judgment-green`,
+`primitive-equality-witness-green`, `congruence-lifting-green`,
+`evidence-path-validation-green`, `canonical-representative-green`, and
+`forged-merge-closure-green`.
+
+Net result: equality is proof-producing, context-scoped, replayable, and
+revalidated from canonical authority.
+
+### 4. Exact incremental closure
+
+The closure chain introduced reverse incidence and context-relative
+recomputation:
+
+1. derive the reverse dependency index;
+2. evaluate `Closed`, `Open`, and `Invalid` state per context;
+3. derive the exact impact of a context refinement;
+4. recompute only affected dependents;
+5. prove local and global closure consistency;
+6. prove incremental results equal full recomputation.
+
+Completed gates included `reverse-incidence-green`,
+`closure-state-evaluator-green`, `context-refinement-impact-green`,
+`exact-affected-recompute-green`, `local-global-closure-green`, and
+`incremental-closure-green`.
+
+Net result: closure updates avoid a second authority store while retaining exact
+full-recomputation semantics.
+
+### 5. Read-only upper projections
+
+The upper-projection chain reconstructed useful higher-level views without
+restoring upper-stack authority:
+
+1. define the projection contract;
+2. expose read-only native queries;
+3. derive atlas/candidate views;
+4. derive certification burdens;
+5. derive replay and causal views;
+6. derive report and research views;
+7. prove deterministic regeneration and stale/forged rejection.
+
+Completed gates included `projection-contract-green`,
+`read-only-query-green`, `atlas-view-green`, `certification-view-green`,
+`replay-view-green`, `report-research-view-green`, and
+`native-upper-projection-green`.
+
+Net result: projections are reconstructible, verifiable, and non-authoritative.
+
+### 6. Symbolic commitments
+
+The symbolic-commitment chain removed generic cryptographic identity machinery
+from the dependency-free native workspace:
+
+1. define exact identity as domain plus canonical bytes;
+2. introduce a compact seal that can prove inequality but not equality;
+3. define deterministic coordinate composition;
+4. bind native sections and DNA frames to symbolic commitments;
+5. bind projections back to exact source authority;
+6. expose developer-facing audit surfaces.
+
+Completed gates included `exact-identity-envelope-green`,
+`seal-coordinate-algebra-green`, `composition-grammar-green`,
+`native-section-symbol-green`, `dna-v2-symbolic-frame-green`,
+`projection-symbol-binding-green`, and `symbolic-commitment-green`.
+
+Net result: exact canonical representation remains identity; compact seals are
+non-authoritative accelerators.
+
+### 7. Legacy authority quarantine
+
+Before deletion, the old execution island was forced behind explicit boundaries:
+
+1. cut ambient authority ingress;
+2. classify old upper-stack dispatch and document formats as compatibility or
+   forensic contacts;
+3. establish native execution, release, transport, certification, observation,
+   and change replacements;
+4. prohibit composite bundle authority, certification, observation, and change;
+5. close the quarantine after native carriers passed.
+
+Historical gates included `ambient-authority-rejection-green`,
+`explicit-recovery-green`, `native-bundle-transport-green`,
+`native-certification-carrier-green`, `native-observation-carrier-green`,
+`native-change-carrier-green`, and `legacy-authority-quarantine-green`.
+
+Net result: old formats could no longer enter authority implicitly.
+
+### 8. Legacy storage and policy deletion
+
+Four completed deletion chains removed superseded persistence and coordination
+mechanisms after native replacements existed:
+
+1. delete legacy cache leaves and sever certification-cache dependence;
+2. delete lineage/readiness record schemas and their storage references;
+3. delete plan storage, packet stores, and their retired ingress;
+4. delete registry overlays and policy admission in favor of native transport
+   plus direct execution.
+
+Each deletion followed the same law: preserve forensic recovery externally,
+remove the live schema and storage contact, reject retired ingress, then prove
+the native workspace.
+
+Net result: caches, readiness records, plans, overlays, and policy objects no
+longer act as shadow authority or maintenance obligations.
+
+### 9. Legacy authority-island deletion
+
+After replacement and quarantine, the complete theorem/campaign/research/
+registry/tower execution island was removed:
+
+1. preserve the former source in external forensic archives;
+2. delete the old crates, seed registry, and dispatcher;
+3. close the dependency-free native workspace;
+4. retain rejected command names only as tombstones.
+
+Completed gates included `historical-export-green`,
+`legacy-island-absent-green`, and `native-workspace-green`.
+
+Net result: the live product no longer contains an executable compatibility
+architecture.
+
+### 10. Direct native execution
+
+The execution chain established one non-persistent carrier:
+
+1. execute a single canonical authority directly;
+2. reuse the same carrier for each bundle member;
+3. prove the end-to-end RNA/DNA execution and release demonstration.
+
+Completed gates included `execution-carrier-green`, `execution-cli-green`, and
+`execution-demo-green`.
+
+Net result: execution consumes current authority without mutation, scheduler
+persistence, or bundle-level composite truth.
+
+### 11. CLI hardening
+
+The CLI hardening chain made the public process boundary direct and predictable:
+
+1. remove fallback dispatch;
+2. stabilize human-readable diagnostics;
+3. create outputs atomically and refuse overwrite;
+4. expose command-specific help and version discovery;
+5. close with full workspace and CLI gates.
+
+Completed gates included `direct-dispatch-green`,
+`stable-diagnostics-green`, `atomic-output-green`,
+`command-discovery-green`, and `workspace-green`.
+
+Net result: wrong formats fail at the requested contact and file-producing
+commands cannot silently replace authority.
+
+### 12. Process and streaming contract
+
+The process-contract chain bound shell behavior and memory shape:
+
+1. map certified, open, incomplete, invalid, and operational outcomes to stable
+   exit codes;
+2. attach exact source spans to RNA errors;
+3. stream bundle members one at a time;
+4. prove member-local authority and verdicts.
+
+Completed gates included `verdict-status-green`, `rna-span-green`,
+`streaming-transport-green`, and `workspace-green`.
+
+Net result: process automation can distinguish mathematical verdicts from
+operational failures without retaining whole bundles in memory.
+
+### 13. Measured native scaling
+
+The scaling chain optimized measured structural hot paths while preserving exact
+authority:
+
+1. establish profiling baselines;
+2. bulk-construct canonical RNA graphs and derive the final symbol once;
+3. index primary routes, share closure analysis, and traverse equality edges
+   locally;
+4. avoid immediately rederiving fresh in-process projections;
+5. retain explicit rederive-and-compare checks for external projections;
+6. bind the result with scale workloads and full conformance tests.
+
+Completed gates included `bulk-rna-green`, `indexed-route-green`,
+`shared-closure-green`, `edge-local-equality-green`,
+`fresh-derivation-green`, and `scale-workload-green`.
+
+Net result: repeated whole-state and whole-graph work was removed without
+changing canonical bytes, journals, bundle order, verdicts, or stale-projection
+rejection.
+
+### 14. Documentation coherence
+
+The documentation chain separated current law from historical narrative:
+
+1. classify current and historical sources;
+2. repair stale live claims;
+3. separate the current constitution and current approval gates from their
+   historical ledgers;
+4. document the `l64`/`l64-cli` binary boundary;
+5. reject deleted crate and command contacts;
+6. compare the language specification directly with live CLI help.
+
+Completed gates included `documentation-coherence-green` and
+`workspace-green`.
+
+Net result: current documentation must reconstruct the executable product and
+historical documents cannot authorize behavior.
+
+### 15. Golden workloads and host portability
+
+The portability chain bound representative product behavior across hosts:
+
+1. select certified, equality, open, invalid, and matrix workloads;
+2. snapshot canonical RNA, DNA, execution, and certification;
+3. bind comparison, transport, observation, and release journeys;
+4. prove LF/CRLF equivalence and Unicode/space path handling;
+5. run the complete workspace on Linux, macOS, and Windows;
+6. emit source-bound host receipts and verify the exact three-host set.
+
+Completed gates included `golden-portability-green` and `workspace-green`.
+
+Net result: canonical bytes and stable product outputs have executable,
+source-bound portability evidence.
+
+### 16. Pass 30 residue and remote-proof closure
+
+The final historical change chain removed remaining live residue and closed the
+external proof boundary:
+
+1. remove the obsolete torture harness from live source;
+2. recompute current restore-boundary and research-classification documents;
+3. scan scripts and current documents for retired contacts;
+4. emit one `L64PORT1` receipt per CI host;
+5. verify Linux, macOS, and Windows receipts against one source commit;
+6. retain per-host and combined proof artifacts externally.
+
+Completed gates included `residue-remote-proof-green`,
+`documentation-coherence-green`, and `golden-portability-green`.
+
+Net result: Pass 30 ended with eleven dependency-free packages, no live legacy
+execution island, source-bound three-host evidence, and no runtime dependence on
+the receipt machinery.
+
+## Historical final state
+
+At the end of the consolidated rails:
+
+- current stage: complete;
+- next stage: none;
+- live workspace packages: eleven;
+- external Rust dependencies: zero;
+- native identity: exact domain-qualified canonical representation;
+- compact seal: non-authoritative;
+- public authority: canonical RNA and DNA;
+- bundle transport: ordered DNA members with no composite authority;
+- execution: direct and non-persistent;
+- projections: verified and non-authoritative;
+- legacy authority: deleted, with tombstones and external forensic history only;
+- scale strategy: measured bulk construction, indexed routes, shared closure,
+  and edge-local equality;
+- portability: source-bound Linux, macOS, and Windows execution receipts.
+
+These statements describe the completed historical boundary. Current code,
+constitution, gates, tests, and CI remain the only valid way to establish the
+present state.
+
+## Former file mapping
+
+| Former file | Consolidated section |
+|---|---|
+| `LOCUS64_NATIVE_RAIL.athens` | RNA/DNA authority cutover |
+| `LOCUS64_CONSTRAINT_CORE_CHANGE_CHAIN.athens` | Native constraint core |
+| `LOCUS64_PROOF_CONGRUENCE_CHANGE_CHAIN.athens` | Proof-producing equality and congruence |
+| `LOCUS64_INCREMENTAL_CLOSURE_CHANGE_CHAIN.athens` | Exact incremental closure |
+| `LOCUS64_NATIVE_UPPER_PROJECTION_CHANGE_CHAIN.athens` | Read-only upper projections |
+| `LOCUS64_SYMBOLIC_COMMITMENT_CHANGE_CHAIN.athens` | Symbolic commitments |
+| `LOCUS64_LEGACY_AUTHORITY_QUARANTINE_CHANGE_CHAIN.athens` | Legacy authority quarantine |
+| `LOCUS64_LEGACY_CACHE_DELETION_CHANGE_CHAIN.athens` | Legacy storage and policy deletion |
+| `LOCUS64_LEGACY_LINEAGE_READINESS_DELETION_CHANGE_CHAIN.athens` | Legacy storage and policy deletion |
+| `LOCUS64_LEGACY_PLAN_STORAGE_DELETION_CHANGE_CHAIN.athens` | Legacy storage and policy deletion |
+| `LOCUS64_LEGACY_REGISTRY_OVERLAY_POLICY_DELETION_CHANGE_CHAIN.athens` | Legacy storage and policy deletion |
+| `LOCUS64_LEGACY_AUTHORITY_ISLAND_DELETION_CHANGE_CHAIN.athens` | Legacy authority-island deletion |
+| `LOCUS64_NATIVE_EXECUTION_CHANGE_CHAIN.athens` | Direct native execution |
+| `LOCUS64_NATIVE_CLI_HARDENING_CHANGE_CHAIN.athens` | CLI hardening |
+| `LOCUS64_NATIVE_PROCESS_CONTRACT_CHANGE_CHAIN.athens` | Process and streaming contract |
+| `LOCUS64_NATIVE_SCALE_CHANGE_CHAIN.athens` | Measured native scaling |
+| `LOCUS64_DOCUMENTATION_COHERENCE_CHANGE_CHAIN.athens` | Documentation coherence |
+| `LOCUS64_GOLDEN_PORTABILITY_CHANGE_CHAIN.athens` | Golden workloads and host portability |
+| `LOCUS64_RESIDUE_REMOTE_PROOF_CHANGE_CHAIN.athens` | Pass 30 residue and remote-proof closure |
+| `LOCUS64_EXECUTION_COHERENCE_RAIL.athens` | Historical final state |

@@ -1,6 +1,6 @@
 ---
 document_status: historical
-superseded_by: LOCUS64_EXECUTION_COHERENCE_RAIL.athens
+superseded_by: LOCUS64_NATIVE_CONSTITUTION.md
 current_handoff: HANDOFF_STATUS.md
 scope: migration and implementation trajectory through Pass 27
 ---

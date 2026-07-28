@@ -112,4 +112,6 @@ Run the direct local gate:
 - [`LOCUS64_GOLDEN_PORTABILITY_CONTRACT.md`](LOCUS64_GOLDEN_PORTABILITY_CONTRACT.md): exact workload and host-portability law.
 - [`HANDOFF_STATUS.md`](HANDOFF_STATUS.md): current pass boundary.
 
-Historical trajectory is retained in explicitly marked ledgers and rails; it is not a current architecture source.
+Historical trajectory is consolidated in [`changelog.log`](changelog.log) and
+the explicitly marked historical ledgers. It is not a current architecture
+source.

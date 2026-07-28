@@ -120,21 +120,21 @@ No bulk status promotion is allowed. Evidence is gate-specific even when one tes
 
 ## G069 — Legacy authority island deletion
 
-Approved. The complete historical theorem/campaign/research/registry/tower execution island was externally exported and deleted. The live workspace has eleven dependency-free packages and passes full offline tests and Clippy. Evidence: `LOCUS64_LEGACY_AUTHORITY_ISLAND_DELETION_CHANGE_CHAIN.athens`.
+Approved. The complete historical theorem/campaign/research/registry/tower execution island was externally exported and deleted. The live workspace has eleven dependency-free packages and passes full offline tests and Clippy. Evidence: `changelog.log` and `scripts/verify-legacy-authority-island-deletion.sh`.
 
 ## G070 — Direct native execution carrier
 
-Approved. `l64-execution` provides direct, non-persistent RNA/DNA structural evaluation; bundle execution reuses the same member carrier. Full offline workspace tests, Clippy, and the end-to-end native demo pass. Evidence: `LOCUS64_NATIVE_EXECUTION_CHANGE_CHAIN.athens`.
+Approved. `l64-execution` provides direct, non-persistent RNA/DNA structural evaluation; bundle execution reuses the same member carrier. Full offline workspace tests, Clippy, and the end-to-end native demo pass. Evidence: `changelog.log` and execution tests.
 
 ## G071 — Direct Native CLI Hardening
 
-Approved. The current CLI has no boolean compatibility fallback, rejects wrong carrier formats at the requested contact, exposes command-specific help and version output, emits stable human-readable diagnostics, rejects dead artifact-class routing, and creates authority/bundle files atomically without overwriting existing paths. Evidence: `LOCUS64_NATIVE_CLI_HARDENING_CHANGE_CHAIN.athens` and `scripts/verify-cli-hardening.sh`.
+Approved. The current CLI has no boolean compatibility fallback, rejects wrong carrier formats at the requested contact, exposes command-specific help and version output, emits stable human-readable diagnostics, rejects dead artifact-class routing, and creates authority/bundle files atomically without overwriting existing paths. Evidence: `changelog.log` and `scripts/verify-cli-hardening.sh`.
 
 
 ## G072 — Verdict-Aware Process and Bounded Transport
 
-Approved. Certification-bearing commands emit complete output and use stable member-local verdict process codes; RNA parser failures carry exact token spans; bundle creation and bundle-facing CLI operations process members sequentially while preserving exact ordered `L64B` transport. Evidence: `LOCUS64_NATIVE_PROCESS_CONTRACT_CHANGE_CHAIN.athens` and `scripts/verify-process-contract.sh`.
+Approved. Certification-bearing commands emit complete output and use stable member-local verdict process codes; RNA parser failures carry exact token spans; bundle creation and bundle-facing CLI operations process members sequentially while preserving exact ordered `L64B` transport. Evidence: `changelog.log` and `scripts/verify-process-contract.sh`.
 
 ## G073 — Measured Native Scale Law
 
-Approved. Profiling identified per-mutation whole-state recomputation, repeated closure memo allocation, whole-route scans, and whole-graph equality scans as structural hot paths. Canonical source compilation now bulk-constructs and derives its final state symbol once; routes are indexed per node; closure analysis is shared per context; equality traversal is edge-local; and freshly derived in-process projections are not immediately rederived. Exact RNA/DNA fixed points, tracked mutation journals, stale/forged projection rejection, packet bytes, bundle framing, and member-local authority remain unchanged. Evidence: `LOCUS64_NATIVE_SCALE_CHANGE_CHAIN.athens`, `scripts/verify-native-scale.sh`, the Pass 27 benchmark corpus, and full offline tests/Clippy.
+Approved. Profiling identified per-mutation whole-state recomputation, repeated closure memo allocation, whole-route scans, and whole-graph equality scans as structural hot paths. Canonical source compilation now bulk-constructs and derives its final state symbol once; routes are indexed per node; closure analysis is shared per context; equality traversal is edge-local; and freshly derived in-process projections are not immediately rederived. Exact RNA/DNA fixed points, tracked mutation journals, stale/forged projection rejection, packet bytes, bundle framing, and member-local authority remain unchanged. Evidence: `changelog.log`, `scripts/verify-native-scale.sh`, the Pass 27 benchmark corpus, and full offline tests/Clippy.

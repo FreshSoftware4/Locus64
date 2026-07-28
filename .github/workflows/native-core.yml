@@ -31,8 +31,6 @@ on:
       - scripts/verify-legacy-authority-island-deletion.sh
       - samples/native_triangle.rna
       - samples/native_equality.rna
-      - LOCUS64_*_RAIL.athens
-      - LOCUS64_*_CHANGE_CHAIN.athens
       - .github/workflows/native-core.yml
   workflow_dispatch:
 

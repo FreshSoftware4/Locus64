@@ -10,5 +10,6 @@ release/*.zip
 /*.zip
 *.tmp
 *.log
+!changelog.log
 .DS_Store
 Thumbs.db
