@@ -1,0 +1,22 @@
+ATHENS_DEVELOPMENT_RAIL v1
+field=key=rail_version;value=1
+field=key=schema_version;value=1
+field=key=restore_boundary;value=pass22-source
+field=key=historical_export;value=locus64-legacy-authority-island-history-pass23-v1
+field=key=live_workspace_packages;value=10
+field=key=external_dependencies;value=0
+gate=id=historical-export-green
+gate=id=legacy-island-absent-green
+gate=id=native-workspace-green
+stage=id=historical-export
+stage_field=stage=historical-export;key=status;value=complete
+stage=id=legacy-island-deletion
+stage_field=stage=legacy-island-deletion;key=depends_on;value=historical-export
+stage_field=stage=legacy-island-deletion;key=status;value=complete
+stage=id=native-workspace-closure
+stage_field=stage=native-workspace-closure;key=depends_on;value=legacy-island-deletion
+stage_field=stage=native-workspace-closure;key=status;value=complete
+history=evidence=local%3Aforensic-archive-plus-vault-byte-match;kind=dogfood_promotion_receipt;stage_id=historical-export
+history=evidence=local%3A12-legacy-crates-plus-seed-registry-and-dispatcher-deleted;kind=dogfood_promotion_receipt;stage_id=legacy-island-deletion
+history=evidence=local%3A10-package-offline-test-and-clippy-green;kind=dogfood_promotion_receipt;stage_id=native-workspace-closure
+END

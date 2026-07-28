@@ -1,0 +1,10 @@
+[package]
+name = "l64-transport"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+[dependencies]
+l64-native = { path = "../l64-native" }
+l64-execution = { path = "../l64-execution" }
+l64-certification = { path = "../l64-certification" }

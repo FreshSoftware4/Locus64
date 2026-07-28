@@ -32,7 +32,7 @@ Every exported failure or friction signal should cash out into:
 
 ## Current machine absorption state
 
-The remediation ledger is no longer only prose. It now coexists with warm-host routing, promotion-readiness, claim packets, and producer-host specs, so export-derived seams can participate in actual route choice and readiness gating rather than remaining detached notes.
+The remediation ledger remains an explicit compatibility record beside route, claim, and producer-host records. Promotion-readiness and lineage stores were deleted; remediation notes cannot manufacture promotion state or authority.
 
 ## Current coherence checkpoint
 

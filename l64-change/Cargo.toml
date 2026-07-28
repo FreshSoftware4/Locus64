@@ -1,0 +1,11 @@
+[package]
+name = "l64-change"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+l64-native = { path = "../l64-native" }
+l64-transport = { path = "../l64-transport" }
+l64-certification = { path = "../l64-certification" }
+l64-observation = { path = "../l64-observation" }

@@ -1,0 +1,19 @@
+L64 NATIVE EXECUTION v1
+source=rna
+mode=structural_authority_evaluation
+authority=exact_canonical_l64d
+authority_mutation=none
+canonical_roundtrip=true
+projection_authority=non_authoritative
+projection_verified=true
+certification_verdict=CERTIFIED
+symbol=⟦l64.native.state.v2 ∷ Σ53dea54250a752ed ⊗ Π517a0fadd79730e6 ⊗ Δbfd77bcbcaf4f4a5 ⊗ Ωc2eac328960843f3⟧ ∣ nodes=s1:5400fc4250e08eda.1414c1b873270cb3.a237f5b6505a6fe7.0587d8f7506f06f9 ports=s1:541c9b42512c4c4c.a9daa275c7080903.fcb50f3277772c96.0bfd9739830427e0 contexts=s1:538738424fa624de.21d1f53721bc401b.d390bda4f777f628.71e09ef877ac42fb routes=s1:53fa3d4250cc1e62.406ec851b4346a7c.5bce9a1e6ab0b74d.68d0f15cb62bd182
+nodes=8
+ports=9
+contexts=1
+journal=0
+root.closed=8
+root.open=0
+root.invalid=0
+root.research_candidates=3/3
+context.0.verdict=CERTIFIED

@@ -1,71 +1,60 @@
-# Locus64 Source Reference Manifest
+# Source Reference Manifest
 
-This repository snapshot is intended to be usable as a source-only reference for Locus64 patterns in other projects.
+## Live source
 
-## What This Snapshot Represents
+- `l64-symbolic`
+- `l64-native`
+- `l64-projection`
+- `l64-release`
+- `l64-execution`
+- `l64-transport`
+- `l64-certification`
+- `l64-observation`
+- `l64-change`
+- `l64-cli`
+- `l64`
 
-The current coherent state is:
+## Governing closure
 
-```text
-RNA/DNA public authority
--> lower-chain canonical structure
--> DNA validation and fixed-point reconstruction
--> duplex/domain closure gates
--> deterministic policy and parallel receipts
--> warm-host research projections
-```
+- `LOCUS64_LEGACY_AUTHORITY_ISLAND_DELETION_CHANGE_CHAIN.athens`
+- `LOCUS64_NATIVE_EXECUTION_CHANGE_CHAIN.athens`
+- `LOCUS64_NATIVE_CLI_HARDENING_CHANGE_CHAIN.athens`
+- `LOCUS64_NATIVE_PROCESS_CONTRACT_CHANGE_CHAIN.athens`
+- `LOCUS64_NATIVE_SCALE_CHANGE_CHAIN.athens`
+- `LOCUS64_DOCUMENTATION_COHERENCE_CHANGE_CHAIN.athens`
+- `LOCUS64_GOLDEN_PORTABILITY_CHANGE_CHAIN.athens`
+- `LOCUS64_RESIDUE_REMOTE_PROOF_CHANGE_CHAIN.athens`
+- `LOCUS64_EXECUTION_COHERENCE_RAIL.athens`
 
-The important distinction is that projections, reports, rendered views, release products, cache records, and research-host derivatives may guide work, but they are not authority by default.
+## Restore and historical recovery
 
-## Core Documents
+The removed legacy source is external to the live workspace in the Pass 19–23 forensic archives. The complete Pass 29 source archive is the restore boundary for Pass 30. The removed pre-native torture harness is retained only in the external Pass 30 forensic backup; it is not a live verification contact.
 
-- `README.md`: project overview, quick start, command examples, and current coherence checkpoint.
-- `USAGE_GUIDE.md`: operational command guide.
-- `SEMANTIC_USAGE_GUIDE.md`: claim-governance and research-framework integration guide.
-- `LOCUS64_LANGUAGE_SPEC.md`: concrete RNA/DNA, bundle-entry, and policy-object syntax.
-- `LINEAR_EXECUTION_RAIL.md`: path-optimized development dependency rail.
-- `L64_APPROVAL_GATES.md`: candidate/proven architectural law and required proof classes.
-- `LOCUS64_ARCHITECTURAL_CONSTITUTION_V1.md`: mechanically proven architectural law only.
-- `LOCUS64_STACK.md`: architectural stack overview.
-- `HANDOFF_STATUS.md`: developer handoff and verification notes.
-- `EXPORT_STRESS_REMEDIATION_LEDGER.md`: exported-finding remediation doctrine.
+## Direct verification
 
-## Latest Proven Authority Rules
+- `scripts/verify-legacy-authority-island-deletion.sh`
+- `scripts/verify-native-carrier.sh`
+- `scripts/verify-cli-hardening.sh`
+- `scripts/verify-process-contract.sh`
+- `scripts/verify-native-scale.sh`
+- `scripts/verify-documentation-coherence.sh`
+- `scripts/verify-golden-portability.sh`
+- `scripts/verify-portability-receipts.sh --self-test`
+- `scripts/run-native-demo.sh`
 
-- Authored obligation status is intent, not evidence.
-- Evaluator authority is explicit, named, and scoped.
-- Report-derived research records are projections until replayed.
-- Policy precedence emits deterministic receipts.
-- RNA and DNA remain the only public authority surfaces.
-- Generated release artifacts are role-marked views, records, receipts, or projections unless explicitly reconstructed into canonical RNA.
+## Current product evidence
 
-## Source-Only Archive Policy
+- `samples/native_triangle.rna`
+- `samples/native_equality.rna`
+- `samples/golden/*.rna`
+- `samples/golden/expected/*`
+- `LOCUS64_GOLDEN_PORTABILITY_CONTRACT.md`
+- `LOCUS64_PORTABILITY_RECEIPT_CONTRACT.md`
 
-A clean reference archive should include:
+## Pass 30 residue and remote-proof surfaces
 
-- Rust source crates
-- scripts
-- samples
-- fixtures
-- documentation
-- `Cargo.toml` and `Cargo.lock`
-
-It should exclude:
-
-- `.git`
-- `target`
-- `.l64-cache`
-- `release`
-- generated zip files
-- transient logs
-- local garbage/scratch directories
-
-## Verification Baseline
-
-At the time this manifest was added, the workspace passed:
-
-```powershell
-cargo test --workspace
-```
-
-Use `scripts/verify-low-memory.ps1` if full workspace verification is too heavy for the machine.
+- `scripts/write-portability-receipt.sh` emits one source-bound host receipt after the complete host-neutral workspace test passes.
+- `scripts/verify-portability-receipts.sh` requires the exact Linux, macOS, and Windows receipt set and provides a local contract self-test.
+- `.github/workflows/native-core.yml` retains per-host and combined receipt artifacts.
+- `scripts/verify-documentation-coherence.sh` rejects a returned torture harness, retired-command use in current scripts, stale restore-boundary prose, and missing receipt contacts.
+- `LOCUS64_RESIDUE_REMOTE_PROOF_CHANGE_CHAIN.athens` records the bounded closure.

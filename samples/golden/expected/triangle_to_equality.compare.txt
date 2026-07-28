@@ -1,0 +1,38 @@
+L64 NATIVE AUTHORITY CHANGE v1
+scope=exact_native_authority_change
+before_authority=exact_canonical_l64d
+after_authority=exact_canonical_l64d
+exact_equal=false
+symbol_authority=non_authoritative
+before_symbol=⟦l64.native.state.v2 ∷ Σ53dfec4250aa61e2 ⊗ Π7d622e10ef2220a3 ⊗ Δ92ec6a8373dca073 ⊗ Ωa4b5d11d09f210a8⟧ ∣ nodes=s1:54371242518ce4e4.171ac04630b7db8c.b9cdbd8c5f5257ab.4369625a3e5f79e7 ports=s1:544b7e4251d3ed32.68c8166ab64ff36c.e22ede3ed517d34f.9703cbc38e72b5fa contexts=s1:538738424fa624de.21d1f53721bc401b.d390bda4f777f628.71e09ef877ac42fb routes=s1:542d01425171fea0.6929bcaa7b24d905.e9346d1e2435b43e.39f87e00fff92980
+after_symbol=⟦l64.native.state.v2 ∷ Σ53dea54250a752ed ⊗ Π517a0fadd79730e6 ⊗ Δbfd77bcbcaf4f4a5 ⊗ Ωc2eac328960843f3⟧ ∣ nodes=s1:5400fc4250e08eda.1414c1b873270cb3.a237f5b6505a6fe7.0587d8f7506f06f9 ports=s1:541c9b42512c4c4c.a9daa275c7080903.fcb50f3277772c96.0bfd9739830427e0 contexts=s1:538738424fa624de.21d1f53721bc401b.d390bda4f777f628.71e09ef877ac42fb routes=s1:53fa3d4250cc1e62.406ec851b4346a7c.5bce9a1e6ab0b74d.68d0f15cb62bd182
+section.nodes.changed=true
+section.ports.changed=true
+section.contexts.changed=false
+section.routes.changed=true
+nodes.before=11
+nodes.after=8
+nodes.delta=-3
+contexts.before=1
+contexts.after=1
+contexts.delta=+0
+journal.before=0
+journal.after=0
+journal.delta=+0
+before_verdict=CERTIFIED
+after_verdict=CERTIFIED
+context.0.contact=CHANGED
+context.0.before_verdict=CERTIFIED
+context.0.after_verdict=CERTIFIED
+context.0.closed.before=11
+context.0.closed.after=8
+context.0.closed.delta=-3
+context.0.open.before=0
+context.0.open.after=0
+context.0.open.delta=+0
+context.0.invalid.before=0
+context.0.invalid.after=0
+context.0.invalid.delta=+0
+context.0.replay_steps.before=0
+context.0.replay_steps.after=0
+context.0.replay_steps.delta=+0

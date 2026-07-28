@@ -1,0 +1,116 @@
+name: Native core gate
+
+on:
+  pull_request:
+    branches: [main, 'chatgpt/**']
+    paths:
+      - Cargo.toml
+      - Cargo.lock
+      - l64-symbolic/**
+      - l64-native/**
+      - l64-projection/**
+      - l64-release/**
+      - l64-execution/**
+      - l64-transport/**
+      - l64-certification/**
+      - l64-observation/**
+      - l64-change/**
+      - l64-cli/**
+      - l64/**
+      - scripts/verify-native-carrier.sh
+      - scripts/verify-cli-hardening.sh
+      - scripts/verify-process-contract.sh
+      - scripts/verify-native-scale.sh
+      - scripts/verify-documentation-coherence.sh
+      - scripts/verify-golden-portability.sh
+      - scripts/write-portability-receipt.sh
+      - scripts/verify-portability-receipts.sh
+      - samples/golden/**
+      - '**/*.md'
+      - scripts/run-native-demo.sh
+      - scripts/verify-legacy-authority-island-deletion.sh
+      - samples/native_triangle.rna
+      - samples/native_equality.rna
+      - LOCUS64_*_RAIL.athens
+      - LOCUS64_*_CHANGE_CHAIN.athens
+      - .github/workflows/native-core.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - name: Check formatting
+        run: cargo fmt --all --check
+      - name: Verify legacy authority island deletion
+        run: ./scripts/verify-legacy-authority-island-deletion.sh
+      - name: Verify dependency-free native carrier
+        run: ./scripts/verify-native-carrier.sh
+      - name: Verify hardened CLI boundary
+        run: ./scripts/verify-cli-hardening.sh
+      - name: Verify process outcomes, RNA spans, and streaming bundles
+        run: ./scripts/verify-process-contract.sh
+      - name: Verify measured native scale boundaries
+        run: ./scripts/verify-native-scale.sh
+      - name: Verify current documentation coherence
+        run: ./scripts/verify-documentation-coherence.sh
+      - name: Verify golden workloads and portability contract
+        run: ./scripts/verify-golden-portability.sh
+      - name: Test complete workspace offline
+        run: cargo test --locked --offline --workspace
+      - name: Lint complete workspace offline
+        run: cargo clippy --locked --offline --workspace --all-targets -- -D warnings
+
+  portable-rust:
+    name: Portable Rust workspace (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Test complete dependency-free workspace
+        run: cargo test --locked --offline --workspace
+      - name: Write source-bound portability receipt
+        shell: bash
+        env:
+          L64_SOURCE_REF: ${{ github.sha }}
+        run: ./scripts/write-portability-receipt.sh "portability-receipt/l64-portability-${{ matrix.os }}.json" "${{ matrix.os }}"
+      - name: Upload host portability receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: locus64-portability-receipt-${{ matrix.os }}
+          path: portability-receipt/l64-portability-${{ matrix.os }}.json
+          if-no-files-found: error
+          retention-days: 30
+
+  portable-receipts:
+    name: Verify combined portability receipts
+    needs: portable-rust
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download host receipts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: locus64-portability-receipt-*
+          path: portability-receipts
+          merge-multiple: true
+      - name: Verify exact source-bound host set
+        run: ./scripts/verify-portability-receipts.sh portability-receipts "${{ github.sha }}"
+      - name: Upload verified receipt set
+        uses: actions/upload-artifact@v4
+        with:
+          name: locus64-portability-receipts
+          path: portability-receipts/*.json
+          if-no-files-found: error
+          retention-days: 30

@@ -1,0 +1,9 @@
+[package]
+name = "l64-release"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+[dependencies]
+l64-native = { path = "../l64-native" }
+l64-projection = { path = "../l64-projection" }

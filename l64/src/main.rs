@@ -1,125 +1,83 @@
-use anyhow::{Result, anyhow};
-use std::env;
-use std::path::{Path, PathBuf};
-use std::process::{Command, exit};
+use std::{
+    env,
+    path::{Path, PathBuf},
+    process::{Command, exit},
+};
 
-const ADMIN_COMMANDS: &[&str] = &[
-    "lock-bundle",
-    "dump-execution-manifest",
-    "dump-runtime-roots",
-    "replay-with-lock",
-    "observe-run",
-    "compare-locks",
-    "compare-reports",
-    "compare-manifests",
-    "compare-report-manifest",
-    "predict-impact",
-    "plan-recompute",
-    "execute-plan",
-    "explain-execution",
-    "dump-execution-dag",
-    "dump-lane-plan",
-    "explain-obligation-plan",
-    "dump-obligation-dag",
-    "dump-obligation-lanes",
-    "compare-obligation-executions",
-    "compare-schedules",
-    "explain-plan",
-    "explain-drift",
-    "compare-executions",
-    "assess-prediction",
-    "reconcile-run",
-    "dump-policy-graph",
-    "explain-policy-resolution",
-    "resolve-artifact-path",
-    "classify-artifact",
-    "check-command-input",
-    "dump-command-contracts",
-    "dump-artifact-contracts",
-    "dump-capability-readiness",
-    "dump-cache-namespaces",
-];
-
-fn main() -> Result<()> {
+fn main() {
     let args = env::args().skip(1).collect::<Vec<_>>();
-    if args.is_empty() || matches!(args[0].as_str(), "-h" | "--help" | "help") {
-        print_help();
-        return Ok(());
-    }
-    if args[0] == "authority-audit" {
+    if args.first().is_some_and(|arg| arg == "authority-audit") {
         print_authority_audit();
-        return Ok(());
+        return;
     }
-
-    let target = if ADMIN_COMMANDS.iter().any(|cmd| *cmd == args[0]) {
-        sibling_binary("l64-admin")
-    } else {
-        sibling_binary("l64-cli")
-    }?;
-
-    let status = Command::new(target).args(&args).status()?;
+    let target = sibling_binary("l64-cli").unwrap_or_else(|error| fail(&error));
+    let status = Command::new(target)
+        .args(&args)
+        .status()
+        .unwrap_or_else(|error| fail(&format!("failed to run l64-cli: {error}")));
     match status.code() {
         Some(code) => exit(code),
-        None => Err(anyhow!("child process terminated without an exit code")),
+        None => fail("l64-cli terminated without an exit code"),
     }
 }
 
-fn sibling_binary(name: &str) -> Result<PathBuf> {
-    let exe = env::current_exe()?;
+fn sibling_binary(name: &str) -> Result<PathBuf, String> {
+    let exe = env::current_exe().map_err(|error| error.to_string())?;
     let dir = exe
         .parent()
-        .ok_or_else(|| anyhow!("current executable has no parent directory"))?;
-    let candidates = binary_candidates(dir, name);
-    candidates
+        .ok_or("current executable has no parent directory")?;
+    binary_candidates(dir, name)
         .into_iter()
         .find(|path| path.exists())
-        .ok_or_else(|| anyhow!("could not locate sibling binary `{name}`"))
+        .ok_or_else(|| format!("could not locate sibling binary `{name}`"))
 }
 
 fn binary_candidates(dir: &Path, name: &str) -> Vec<PathBuf> {
-    #[cfg(windows)]
-    let mut paths = vec![dir.join(name)];
-    #[cfg(not(windows))]
-    let paths = vec![dir.join(name)];
-    #[cfg(windows)]
-    {
-        paths.push(dir.join(format!("{name}.exe")));
-    }
-    paths
+    binary_candidates_for_host(dir, name, cfg!(windows))
 }
 
-fn print_help() {
-    println!("l64");
-    println!();
-    println!("Canonical Locus64 wrapper.");
-    println!("Routes into the Locus Kernel command surface.");
-    println!("Runs `l64-cli` or `l64-admin` based on the first command verb.");
-    println!();
-    println!("Examples:");
-    println!("  l64 authority-audit");
-    println!("  l64 normalize-rna sample.gene.rna");
-    println!("  l64 compile-rna sample.gene.rna --out sample.gene.dna --artifact-class gene");
-    println!("  l64 sequence-dna sample.gene.dna");
-    println!("  l64 inspect-dna sample.gene.dna");
-    println!("  l64 verify-roundtrip sample.gene.rna --artifact-class gene");
-    println!(
-        "  l64 export-genome-release --rna sample.gene.rna --out sample-release --artifact-class gene"
-    );
-    println!("  l64 certify-derived --campaign CPG_CHAIN_RULE");
-    println!("  l64 observe-run --report REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE");
-    println!("  l64 research-import --kind task samples/research/task_operational_truth.json");
-    println!(
-        "  l64 research-route --task-id TASK_OPERATIONAL_TRUTH_HARDENING --signature-id SIG_OPERATIONAL_TRUTH_HARDENING"
-    );
+fn binary_candidates_for_host(dir: &Path, name: &str, windows: bool) -> Vec<PathBuf> {
+    if windows {
+        vec![dir.join(name), dir.join(format!("{name}.exe"))]
+    } else {
+        vec![dir.join(name)]
+    }
 }
 
 fn print_authority_audit() {
     println!("Locus64 authority audit");
-    println!("substrate_authority: RNA,DNA,lower-chain receipts");
-    println!("derived_semantic: certification,research,coverage,tower reports");
-    println!("extraction_sources: bundle-entry text,governed research imports");
-    println!("deleted_projection_paths: l64-qk0");
-    println!("deleted_projection_crates: l64-qc0,l64-qa0,l64-qk0,l64-qm0,l64-surfaces");
-    println!("public_surface_target: RNA,DNA");
-    println!("public_command_target: l64");
+    println!("authority: exact canonical L64R1/L64D");
+    println!("transport: ordered L64B members; no composite authority");
+    println!("execution: direct non-persistent RNA/DNA structural evaluation");
+    println!("derived: projection, certification, observation, change");
+    println!("deleted: legacy theorem/campaign/research/registry/tower execution island");
+    println!("workspace: dependency-free native carriers");
+}
+
+fn fail(message: &str) -> ! {
+    eprintln!("{message}");
+    exit(2)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{binary_candidates, binary_candidates_for_host};
+    use std::path::Path;
+
+    #[test]
+    fn portability_binary_candidates_follow_host_executable_law() {
+        let dir = Path::new("portable bin");
+        assert_eq!(
+            binary_candidates_for_host(dir, "l64-cli", false),
+            vec![dir.join("l64-cli")]
+        );
+        assert_eq!(
+            binary_candidates_for_host(dir, "l64-cli", true),
+            vec![dir.join("l64-cli"), dir.join("l64-cli.exe")]
+        );
+        assert_eq!(
+            binary_candidates(dir, "l64-cli"),
+            binary_candidates_for_host(dir, "l64-cli", cfg!(windows))
+        );
+    }
 }

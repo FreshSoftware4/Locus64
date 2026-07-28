@@ -1,4 +1,13 @@
-# Locus64 Linear Execution Rail
+---
+document_status: historical
+superseded_by: LOCUS64_EXECUTION_COHERENCE_RAIL.athens
+current_handoff: HANDOFF_STATUS.md
+scope: migration and implementation trajectory through Pass 27
+---
+
+> Historical trajectory only. This rail preserves the correction and migration path, including assumptions that were later deleted. Resume current work from `HANDOFF_STATUS.md`, `LOCUS64_NATIVE_CONSTITUTION.md`, and the closed current rail.
+
+# Historical Linear Execution Rail — Superseded
 
 This is the authoritative linear execution rail for Locus64.
 
@@ -129,9 +138,12 @@ Use the following decision order:
 Current active selector output:
 
 ```text
-Band F strategic migration membrane
--> route remaining transitional bundle/product/campaign paths through native authority products
--> remove or quarantine residual transitional fields once native products carry equivalent evidence
+Post-quarantine native product hardening
+-> exact RNA/DNA authority, execution, release, ordered transport, certification, observation, and change are live
+-> legacy authority island and compatibility runtime are deleted
+-> direct CLI boundary, stable verdict outcomes, exact RNA spans, and sequential L64B processing are complete
+-> large native authorities and transport members are profiled; measured construction, route, closure, equality, and fresh-derivation hot paths are optimized
+-> next performance work requires a new reproducible workload and measured causal bottleneck
 ```
 
 Rationale:
@@ -139,7 +151,10 @@ Rationale:
 - Digest-role separation, DNA payload commitments, and authority decode modes have landed as the current packet membrane.
 - Production authority paths now use current-authority decoding; migration/forensic decoding is explicit rather than ambient.
 - Node 07A/08, canonical instruction, duplex local admission, domain closure, deterministic merge, and first bundle migration slices have landed enough lower-chain law for the first real structure family: distinction classes, transition law, equivalence coupling, versioned canonical instruction bytes, local semantic/complement pair validation, promotion-blocking domain closure, worker-count-independent authority merge, and bundle parity evidence over native authority products now exist.
-- The next burden reducer is routing remaining transitional bundle/product/campaign paths through native authority products because bundle parity now carries duplex, closure, and deterministic merge evidence.
+- Native release export and ordered `L64B` transport now carry current output and bundle movement without manifests, overlays, or composite authority.
+- Exact-DNA, all-context native certification carries lawful structural verdicts; native observation binds those verdicts to verified replay and closure/opcode projections without persistence.
+- Direct DNA/bundle change analysis replaces report/lock/manifest comparison, drift explanation, impact prediction, and recompute planning.
+- Pass 19 removed cache/admin storage. Pass 20 removed prediction/plan/lock/manifest storage. Pass 21 removed report-derived lineage/readiness/queue/handoff schemas and stores. Registry-overlay, policy, and remaining research-record stores remain explicit compatibility and deletion-bound.
 - Any migration slice must preserve capability but reject category errors exposed by the new role, distinction, duplex, closure, deterministic merge, and bundle parity law.
 
 If a future pass finds a higher-scoring slice, it must update this selector before implementing it.
@@ -187,15 +202,15 @@ Do not cross these boundaries in one unclassified burst:
 Current slice classification:
 
 ```text
-Node: Band F / Node 11D surface-schema replacement
-Slice: deprecated surface-schema lookup/materialization/admission retirement
-Role: authority-path
-Authority impact: removes deprecated surface-schema lookup methods from the active registry trait and prevents surface-schema records from entering active bundle registries or generic bundle-entry JSON admission
-Promotion status: load-bearing runtime behavior, not constitutional promotion
-Expected files: l64-core/src/lib.rs, l64-registry/src/lib.rs, l64-bundle/src/lib.rs, l64-testkit/src/lib.rs, l64-policy/src/lib.rs, l64-selector/src/lib.rs, LINEAR_EXECUTION_RAIL.md
-Required verification: cargo test -p l64-bundle; cargo check --workspace
-Stop condition: deprecated surface-schema records remain deserializable storage residue but cannot be looked up, materialized into active local registries, or admitted through generic/bundle-entry text
-Rollback trigger: active native registry lookup or bundle import behavior loses valid theorem/campaign/certificate/evidence functionality
+Node: post-quarantine native hardening / Pass 26
+Slice: verdict-aware process outcomes, exact RNA spans, and sequential bundle I/O
+Role: burden-reduction
+Authority impact: none; all outcomes and diagnostics are projections over exact native authority
+Promotion status: complete and mechanically proven
+Expected files: l64-native RNA parser, l64-transport streaming carrier, l64-cli membrane, tests, gates, docs, CI
+Required verification: exact span tests; process-code gate; streaming byte-equivalence and bounded-read tests; full offline tests and Clippy
+Stop condition: verdict commands return stable status; malformed RNA points to one exact token; bundle commands retain one member/graph at a time
+Rollback trigger: output is suppressed on non-certified verdicts, status changes authority, source spans become heuristic, or L64B bytes/order change
 ```
 
 ## Persistent Execution Mandate
@@ -3402,6 +3417,8 @@ Downstream payoff:
 
 ### Node 11F - Legacy Quarantine
 
+Pass 17 status: native `L64B` transport, exact-DNA certification, and certification/replay/report observation are implemented; legacy campaign/report contacts are explicit compatibility ingress. Research/admin JSON promotion and residual report/cache deletion remain open.
+
 Purpose:
 
 - remove or quarantine transitional release/bundle paths after replacement authority is proven
@@ -4451,7 +4468,7 @@ The rail is implemented when:
 - Q-surface crates are removed and no longer shape the architecture
 - public command/crate naming does not mislead users, implementation, authority boundaries, or deletion sequencing
 - compatibility imports are removed unless backed by a concrete active requirement and deletion condition
-- persisted cross-binary cache/report/lock keys use the shared cache-hash policy rather than ad hoc local hashers
+- deleted cache/report/lock/overlay/policy storage remains absent and cannot return through a replacement keying layer
 - public documentation does not recommend QC0, QA0, QM0, or QK0 as public languages or active authority routes
 - wrapper commands do not route deleted or retired commands as live behavior
 - conformance, fuzz, torture, replay, migration, and cross-platform determinism tests pass
@@ -4461,7 +4478,7 @@ The rail is implemented when:
 - every digest/cache key resolves to a witness form in the product index
 - no release artifact can be ingested by `compile-rna` unless it has an explicit source/reconstruction role over RNA or canonical RNA
 - inspection reports, generated views, receipts, `.pep`, `.prot`, `.ptome`, `.cell` product text, claim pages, closure maps, stress maps, replay records, and lineages are rejected as source
-- release gates include dependency closure, parent-before-child constructive order, explicit open obligations, validation receipts, replay records, status propagation, and projection/authority separation
+- release gates preserve exact authority, explicit open obligations, constructive order, and projection/authority separation without recreating deleted report, replay, lineage, overlay, or policy stores
 
 ## 34. Final System Definition
 
@@ -4475,3 +4492,43 @@ structure is authority
 canonical form is identity
 reuse is proven rather than assumed
 ```
+
+
+## Pass 22 Registry Overlay and Policy Deletion
+
+The registry-overlay and stored-policy compatibility layer is closed:
+
+1. `l64-bundle` and `l64-policy` were exported and deleted.
+2. `BundleWorld`, overlay merge, namespace import, conflict policy, bundle-world caching, and overlay-only execution are permanently rejected.
+3. Registry admission no longer accepts policy objects, bindings, or resolutions.
+4. Certification uses one direct in-process execution profile and emits no policy ID, hash, precedence trace, or persistent policy record.
+5. The workspace contains 22 packages.
+6. The next deletion slice is surviving research registry/producer-host/tower persistence, followed by seed theorem/campaign registry retirement.
+
+## Pass 23 closure
+
+Slice: surviving research/producer-host/tower persistence and seed theorem/campaign registry retirement.
+
+Result: the complete twelve-crate legacy authority island and included dispatcher were externally archived and deleted. The workspace collapsed from 22 packages to 10, external dependencies from the live graph fell to zero, and full offline workspace tests and Clippy passed. `legacy-authority-quarantine` is complete; no further compatibility runtime remains.
+
+## Pass 25 — Native CLI hardening
+
+- Removed the obsolete boolean fallback membrane after final legacy deletion.
+- Wrong L64R1/L64D/L64B contacts now fail directly with path-specific diagnostics.
+- Added stable `Display` diagnostics across the public native error chain.
+- Added `--version`, grouped help, and command-specific help.
+- `compile-rna` and `compile-bundle` now use atomic create-new promotion and never overwrite existing outputs.
+- Removed silent `--artifact-class gene` acceptance.
+- Added `scripts/verify-cli-hardening.sh` and CI coverage.
+
+## 34. Measured Native Scale Closure
+
+1. The pre-change source compiler recomputed the complete state symbol after every instruction: 500 linear atoms required 3.17 seconds, 1,000 required 12.78 seconds, and 100,000 did not finish within the bounded profile.
+2. Canonical RNA compilation now uses bulk graph construction, records no intermediate journal, and computes the exact final state symbol once. Direct graph mutation remains tracked and journaled.
+3. Per-node route lookup is a derived exact index rather than a route-map scan. The index is excluded from authority and rebuilt from canonical state.
+4. Projection derivation computes visible closure states once per context and shares the result across atlas, certification, report, replay, and research views.
+5. Equality canonicalization traverses actual equality edges through the reverse index rather than scanning the full graph for every operation.
+6. Fresh in-process projections are graph-bound by construction and are not immediately rederived. Retained and external projections retain explicit stale/forgery verification.
+7. `scripts/verify-native-scale.sh` rejects reintroduction of the measured structural hot paths and executes bounded large linear and operation-heavy workloads.
+8. No authority bytes, packet framing, bundle ordering, verdict law, or public projection content changed.
+9. Further optimization requires a new measured workload and causal profile; speculative performance abstraction is prohibited.

@@ -1,0 +1,5 @@
+[package]
+name = "l64-symbolic"
+edition.workspace = true
+version.workspace = true
+license.workspace = true

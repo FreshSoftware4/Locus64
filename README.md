@@ -1,113 +1,81 @@
 # Locus64
 
-Locus64 is a Rust command-line certification framework for routed mathematical campaigns, lower-chain RNA/DNA compilation, adequacy checking, replayable execution, proof coverage, and governed research artifacts.
+Locus64 is a compact, dependency-free native authority and execution system.
 
-The primary binary is `l64`. It routes commands to the CLI or admin implementation as needed. `l64-cli` and `l64-admin` are still shipped as direct entry points for automation and lower-level debugging.
+Current authority is canonical `L64R1` RNA and `L64D` DNA. `L64B` transports ordered DNA members without creating composite authority. Execution evaluates current authority directly without mutation or persistence. Certification, observation, change, and projection are verified read-only derivatives.
 
-## Current Architecture
+## Verify the workspace
 
-- **Locus Kernel**: cold semantic authority for certification, adequacy, replay, and promotion decisions.
-- **RNA/DNA lower chain**: `TOKENIZE -> RNORM -> SSR -> CNORM -> DNA` is the active authority path. SSR remains ephemeral; CNORM now consumes explicit distinction/equivalence law and emits versioned canonical instructions.
-- **Locus Genome**: `.dna` is the machine authority artifact. Legacy packet decoding is explicit migration/forensic behavior, not an ambient authority fallback.
-- **Bundle substrate migration**: `.dna` bundle imports must pass native molecular-envelope parity, duplex local validation, domain closure, and deterministic merge evidence before persistence.
-- **Research Host**: governed task, signature, review, challenge, lineage, promotion, handoff, and remediation surfaces. Research objects derived from reports are projection-class until a replay-specific authority path promotes them.
-- **Tower/Coverage**: proof coverage dispatch, lawful reuse receipts, residual verification, distress/help, recipes, and promotion candidates.
-- **Policy authority**: evaluator behavior is selected through named, scoped policy objects. Policy precedence emits deterministic receipts independent of registry insertion order.
-
-## Quick Start
-
-```powershell
-cargo test -q
-cargo build --release -p l64 -p l64-cli -p l64-admin
-.\target\release\l64.exe clear-cache --scope all
-.\target\release\l64.exe certify-derived --campaign CPG_CHAIN_RULE
-.\target\release\l64.exe observe-run --report REPORT_THS_CHAIN_RULE_CPG_CHAIN_RULE
+```bash
+cargo test --locked --offline --workspace
+cargo clippy --locked --offline --workspace --all-targets -- -D warnings
+cargo fmt --all --check
+./scripts/verify-legacy-authority-island-deletion.sh
+./scripts/verify-native-carrier.sh
+./scripts/verify-cli-hardening.sh
+./scripts/verify-process-contract.sh
+./scripts/verify-native-scale.sh
+./scripts/verify-documentation-coherence.sh
+./scripts/verify-golden-portability.sh
 ```
 
-If the local machine is under memory pressure during a full rebuild, use the low-memory verifier:
+## Command surfaces
 
-```powershell
-.\scripts\verify-low-memory.ps1 -Scope workspace
-.\scripts\verify-low-memory.ps1 -Scope all
+`l64-cli` owns the complete native command grammar. `l64` is a small sibling-binary wrapper: it adds `authority-audit`, forwards every other argument unchanged to `l64-cli`, and preserves the child exit code. It is not a second parser, execution layer, or compatibility route.
+
+```bash
+cargo run -p l64-cli -- --help
+cargo run -p l64-cli -- help run-rna
+cargo run -p l64-cli -- --version
+cargo run -p l64 -- authority-audit
 ```
 
-Expected seeded verdicts:
+Primary commands:
 
-- `Integrated`: `CPG_CHAIN_RULE`, `CPG_CHAIN_RULE_RECIPE`, `CPG_CHAIN_RULE_TRANSPORT`
-- `Certified`: `CPG_BAYES_BRACE`, `CPG_EXEC_INFER`, `CPG_PROB_JUDG`, `CPG_CERT_PROP`, `CPG_CH_NORM`, `CPG_CH_INH`
-
-## RNA/DNA Flow
-
-```powershell
-Set-Content .\sample.gene.rna "ι ≔ σ ‖ κ" -Encoding UTF8
-.\target\release\l64.exe normalize-rna .\sample.gene.rna
-.\target\release\l64.exe compile-rna .\sample.gene.rna --out .\sample.gene.dna --artifact-class gene --persist-lineage
-.\target\release\l64.exe sequence-dna .\sample.gene.dna
-.\target\release\l64.exe inspect-dna .\sample.gene.dna
-.\target\release\l64.exe verify-roundtrip .\sample.gene.rna --artifact-class gene
-.\target\release\l64.exe export-genome-release --rna .\sample.gene.rna --out .\sample-release --artifact-class gene
+```bash
+cargo run -p l64-cli -- run-rna samples/native_triangle.rna
+cargo run -p l64-cli -- compile-rna samples/native_triangle.rna --out triangle.dna
+# New authority and bundle outputs are created atomically and never overwrite existing paths.
+cargo run -p l64-cli -- run-dna triangle.dna
+cargo run -p l64-cli -- certify-dna triangle.dna
+cargo run -p l64-cli -- observe-dna triangle.dna
+cargo run -p l64-cli -- inspect-dna triangle.dna
 ```
 
-`sequence-dna` emits canonical reconstructable RNA. `inspect-dna` emits inspection JSON. `compile-rna` rejects inspection/report/projection text as source.
-`export-genome-release` emits a coordinate-bearing release spine from RNA/DNA authority: genome, source sequence, claim page, dependency spine, closure map, frontier, stress map, replay record, views, and view receipts. Only generated source/canonical RNA are re-compilable; the other release artifacts use projection/record/receipt roles and extensions.
+The legacy theorem, campaign, research, registry, producer-host, tower, policy, overlay, cache, planning, and administration execution island was historically exported and deleted. No live compatibility dispatcher remains.
 
-RNA is the human symbolic surface. DNA is the machine artifact surface. SSR is ephemeral and must not be treated as public authority.
+Run the complete offline demonstration:
 
-## Sample Bundles
-
-```powershell
-.\target\release\l64.exe certify-bundle --file samples/chain_rule_bundle.dna --conflict-policy exact-match
-.\target\release\l64.exe certify-bundle --file samples/chain_rule_integrated_bundle.dna --conflict-policy exact-match
-.\target\release\l64.exe certify-bundle --file samples/imported_claim_bundle.dna --conflict-policy exact-match
-.\target\release\l64.exe certify-bundle --file samples/imported_claim_stress_gap_bundle.dna --conflict-policy exact-match
+```bash
+./scripts/run-native-demo.sh /tmp/l64-demo
 ```
 
-The imported-claim samples exercise evidence contracts, benchmark receipts, challenge receipts, reproducibility packets, and sharp stress-gap blocking.
+## Process and memory contract
 
-If you have bundle-entry text, compile it into a `.dna` packet before using it as a certification input:
+Verdict-bearing commands keep their output and return stable process codes: `0` certified/success, `10` open, `11` incomplete, `12` invalid, and `2` for usage/input/filesystem/processing failure. RNA parse failures include exact line, column, source excerpt, and caret span. Bundle creation and bundle-facing commands process one canonical DNA member at a time rather than retaining the complete transport and every graph simultaneously.
 
-```powershell
-.\target\release\l64.exe compile-bundle .\bundle.locus.rna --out .\bundle.dna
+## Measured scale contract
+
+Large-authority work is optimized only after profiling. Canonical RNA source compilation uses a bulk graph-construction path that suppresses per-instruction whole-state symbol and journal recomputation, then derives the exact final state once. Direct interactive graph mutations remain journaled. Route lookup is indexed per node; closure analysis is shared per context; equality canonicalization traverses real equality edges; retained/external projections remain explicitly reverified.
+
+
+## Golden workload and portability contract
+
+Five representative authority fixtures bind exact normalized RNA, canonical DNA bytes, execution text, certification text, mixed-verdict transport behavior, and native release contents. The host-neutral Rust tests also prove LF/CRLF equivalence and paths containing spaces and Unicode. CI runs the complete Rust workspace on Linux, macOS, and Windows; Unix shell gates remain release orchestration rather than runtime dependencies.
+
+Run the direct local gate:
+
+```bash
+./scripts/verify-golden-portability.sh
 ```
 
-Bundle-entry text must start with `!l64-bundle v1` and contain at least one entry. Obsolete `!qc0`/`!qa0` headers and header-only bundles are rejected.
+## Current source-of-truth documents
 
-## Torture Test
+- [`LOCUS64_NATIVE_CONSTITUTION.md`](LOCUS64_NATIVE_CONSTITUTION.md): live architecture law.
+- [`L64_APPROVAL_GATES.md`](L64_APPROVAL_GATES.md): live executable gates.
+- [`LOCUS64_LANGUAGE_SPEC.md`](LOCUS64_LANGUAGE_SPEC.md): authority, transport, binary, command, and process specification.
+- [`LOCUS64_STACK.md`](LOCUS64_STACK.md): current eleven-package contact map.
+- [`LOCUS64_GOLDEN_PORTABILITY_CONTRACT.md`](LOCUS64_GOLDEN_PORTABILITY_CONTRACT.md): exact workload and host-portability law.
+- [`HANDOFF_STATUS.md`](HANDOFF_STATUS.md): current pass boundary.
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\torture-test.ps1
-```
-
-The harness builds release binaries, runs the full test suite, exercises seeded campaigns, sample bundles, report DNA export/import, validation DNA bundle export/import, lock/replay, research reconnect, and RNA/DNA normalize/compile/sequence checks. Output lands in `release\torture` unless overridden.
-
-## Release Layout
-
-Prepared release artifacts are generated under:
-
-- `release\perfopt`: speed-optimized Windows and Linux binaries plus docs
-- `release\compact`: footprint-minimized Windows and Linux binaries plus docs
-- `release\src`: source release with usage and developer docs
-
-Zip files for all five release packages are placed directly under `release`.
-
-## Development References
-
-- `LINEAR_EXECUTION_RAIL.md`: authoritative linear rail; compounding change chains are trajectory-preserving changes to this file
-- `L64_APPROVAL_GATES.md`: candidate/proven architectural laws and their executable evidence
-- `LOCUS64_ARCHITECTURAL_CONSTITUTION_V1.md`: proven constitutional rules only; do not treat candidate gates as implemented law
-- `LOCUS64_LANGUAGE_SPEC.md`: RNA/DNA command and language reference
-- `USAGE_GUIDE.md`: command guide
-- `SEMANTIC_USAGE_GUIDE.md`: semantic/claim-governance guide for research frameworks and indirect ChatGPT workflows
-- `HANDOFF_STATUS.md`: developer handoff and verification notes
-- `LOCUS64_STACK.md`: stack overview
-
-## Current Coherence Checkpoint
-
-The latest verified authority gates prove that:
-
-- authored obligation status is intent, not evidence
-- evaluator authority is named and scoped through policy objects
-- report-derived research records are projections until replayed
-- policy precedence receipts are deterministic across equivalent registry orderings
-
-Use these rules when adapting Locus64 patterns to other projects: derive views freely, but promote only through explicit replay, scope, lineage, and receipt gates.
+Historical trajectory is retained in explicitly marked ledgers and rails; it is not a current architecture source.

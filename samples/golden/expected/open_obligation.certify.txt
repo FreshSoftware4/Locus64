@@ -1,0 +1,17 @@
+L64 NATIVE CERTIFICATION v1
+scope=native_structural_closure
+authority=exact_canonical_l64d
+canonical_dna=true
+symbol=⟦l64.native.state.v2 ∷ Σ53e2714250b1be51 ⊗ Πa7d1849f5a837d78 ⊗ Δ03943049f4039d87 ⊗ Ω51f3e939a25a0f08⟧ ∣ nodes=s1:53d8e242506e1cad.a2a0d40c7373d98a.af110f69b9951d3a.fbbe8017b85dd7d7 ports=s1:53df3042507ddd35.7850f1c89ccfda76.5d3bb5659d300ee5.7323f9f42b8c822d contexts=s1:538738424fa624de.21d1f53721bc401b.d390bda4f777f628.71e09ef877ac42fb routes=s1:53db87425075ed4c.134c9697d5a37d28.b0ef8e19a20831e2.64bc8f92375db7b0
+symbol_authority=non_authoritative
+nodes=6
+contexts=1
+journal=0
+verdict=OPEN
+context.0.projection_verified=true
+context.0.verdict=OPEN
+context.0.burdens=1
+context.0.discharged=0
+context.0.open=1
+context.0.invalid=0
+context.0.missing_evidence=0
