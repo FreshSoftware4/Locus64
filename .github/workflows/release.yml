@@ -112,7 +112,7 @@ jobs:
         run: |
           cd dist
           sha256sum locus64-* > SHA256SUMS.txt
-      - name: Publish immutable tagged release
+      - name: Publish tagged release
         shell: bash
         run: |
           gh release create "$TAG" \
