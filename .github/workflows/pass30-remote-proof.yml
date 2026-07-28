@@ -80,6 +80,12 @@ jobs:
 
           overlay = extracted / "overlay"
           shutil.copytree(overlay, root, dirs_exist_ok=True)
+          for retired in [
+              "l64-core", "l64-locus", "l64-research", "l64-kernel",
+              "l64-command", "l64-registry", "l64-selector", "l64-runtime",
+              "l64-canon", "l64-atlas", "l64-cert", "l64-testkit",
+          ]:
+              shutil.rmtree(root / retired, ignore_errors=True)
           PY
 
       - name: Test exact executable workspace
