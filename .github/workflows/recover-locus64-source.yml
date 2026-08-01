@@ -1,0 +1,93 @@
+name: Recover Locus64 source authority
+
+on:
+  push:
+    branches:
+      - recovery/locus64-math-20260731
+
+permissions:
+  contents: write
+
+jobs:
+  recover:
+    if: ${{ !contains(github.event.head_commit.message, '[recovery-result]') }}
+    runs-on: ubuntu-latest
+    env:
+      SOURCE_SHA: 03b454b777bfaba31a4ad3cb9cc28159967b4df9
+    steps:
+      - name: Check out recovery branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Rust verification toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Materialize exact source tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/locus64-source recovered
+          git cat-file -e "${SOURCE_SHA}^{commit}"
+          git worktree add --detach /tmp/locus64-source "${SOURCE_SHA}"
+          test "$(git -C /tmp/locus64-source rev-parse HEAD)" = "${SOURCE_SHA}"
+          mkdir -p recovered
+          git archive --format=zip --output=recovered/Locus64_source_03b454b.zip "${SOURCE_SHA}"
+          git ls-tree -r --full-tree "${SOURCE_SHA}" > recovered/GIT_TREE.txt
+          git rev-parse "${SOURCE_SHA}^{tree}" > recovered/GIT_TREE_SHA.txt
+          (cd /tmp/locus64-source && find . -type f -not -path './.git/*' -print0 | sort -z | xargs -0 sha256sum) > recovered/SOURCE_SHA256SUMS.txt
+
+      - name: Run repository verification gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd /tmp/locus64-source
+          cargo fmt --all --check
+          ./scripts/verify-legacy-authority-island-deletion.sh
+          ./scripts/verify-native-carrier.sh
+          ./scripts/verify-cli-hardening.sh
+          ./scripts/verify-process-contract.sh
+          ./scripts/verify-native-scale.sh
+          ./scripts/verify-documentation-coherence.sh
+          ./scripts/verify-golden-portability.sh
+          cargo test --locked --offline --workspace
+          cargo clippy --locked --offline --workspace --all-targets -- -D warnings
+
+      - name: Record exact recovery result
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_zip_sha=$(sha256sum recovered/Locus64_source_03b454b.zip | awk '{print $1}')
+          tree_sha=$(cat recovered/GIT_TREE_SHA.txt)
+          cat > recovered/RECOVERY_RESULT.json <<EOF
+          {
+            "repository": "FreshSoftware4/Locus64",
+            "source_commit": "${SOURCE_SHA}",
+            "source_tree": "${tree_sha}",
+            "source_archive_sha256": "${source_zip_sha}",
+            "workflow_run_id": "${GITHUB_RUN_ID}",
+            "workflow_run_attempt": "${GITHUB_RUN_ATTEMPT}",
+            "repository_gates": "passed"
+          }
+          EOF
+          sha256sum recovered/* > recovered/RECOVERY_SHA256SUMS.txt
+
+      - name: Commit recovery receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add recovered
+          git commit -m "[recovery-result] Materialize verified Locus64 source authority"
+          git push
+
+      - name: Upload verified source authority
+        uses: actions/upload-artifact@v4
+        with:
+          name: locus64-source-authority-03b454b
+          path: recovered
+          if-no-files-found: error
+          retention-days: 2
