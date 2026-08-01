@@ -1,9 +1,11 @@
 name: One-shot source export 20260801
 
 on:
-  push:
+  pull_request:
     branches:
-      - automation/source-export-20260801
+      - main
+    paths:
+      - '.github/workflows/source-export-20260801.yml'
 
 permissions:
   contents: read
