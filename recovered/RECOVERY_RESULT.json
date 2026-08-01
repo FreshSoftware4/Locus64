@@ -1,0 +1,9 @@
+{
+  "repository": "FreshSoftware4/Locus64",
+  "source_commit": "03b454b777bfaba31a4ad3cb9cc28159967b4df9",
+  "source_tree": "502c9466ba15308186324034d7e8d57a8f2d630a",
+  "source_archive_sha256": "0cde209ff061deaea00bd09b9f55a4deef59e074ba97857989913a33979b3e71",
+  "workflow_run_id": "30683660140",
+  "workflow_run_attempt": "1",
+  "repository_gates": "passed"
+}
