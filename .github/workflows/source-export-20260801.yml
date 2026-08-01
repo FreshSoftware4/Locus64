@@ -1,0 +1,31 @@
+name: One-shot source export 20260801
+
+on:
+  push:
+    branches:
+      - automation/source-export-20260801
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Package exact source tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p export
+          git archive --format=tar --prefix=Locus64-source/ HEAD | xz -9e > export/Locus64-source-${GITHUB_SHA}.tar.xz
+          sha256sum export/Locus64-source-${GITHUB_SHA}.tar.xz > export/SHA256SUMS.txt
+      - name: Upload source carrier
+        uses: actions/upload-artifact@v7
+        with:
+          name: locus64-source-${{ github.sha }}
+          path: export/*
+          if-no-files-found: error
+          retention-days: 7
